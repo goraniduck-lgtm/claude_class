@@ -22,6 +22,14 @@
 .art-dialog{border:0;background:transparent;padding:8px;max-width:min(820px,calc(100vw - 20px));width:100%;max-height:min(96dvh,900px);overflow:auto}.art-dialog::backdrop{background:#172944a8;backdrop-filter:blur(3px)}.art-content{background:#fff;border-radius:25px;padding:22px;box-shadow:0 18px 55px #17294442}.art-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.art-heading h2{margin:0;font-size:23px}.art-heading p{margin:5px 0 0;color:#708098;line-height:1.5;font-size:12px}.art-close{border:0;background:#eef2f8;width:38px;height:38px;border-radius:11px;font-size:27px;color:#63758b;line-height:1}.art-tabs{display:flex;gap:8px;margin:17px 0 13px}.art-tabs button{border:1px solid #dbe5f0;background:#f5f7fc;border-radius:11px;padding:10px 15px;color:#66768b;font-weight:900}.art-tabs button.chosen{background:#def7f1;border-color:#80d8cc;color:#078476}.art-work{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,.75fr);gap:18px;align-items:center}.art-board{min-height:250px;border-radius:18px;border:2px dashed #b9d8e2;background-color:#f7fbff;background-image:linear-gradient(#a6d8e32b 1px,transparent 1px),linear-gradient(90deg,#a6d8e32b 1px,transparent 1px);background-size:24px 24px;display:flex;align-items:center;justify-content:center;padding:12px}.art-board canvas{display:block;max-width:100%;width:auto;height:auto;max-height:min(39vh,355px);touch-action:none;cursor:crosshair;filter:drop-shadow(0 1px 0 #d2d9e9)}.art-explain strong{font-size:15px}.art-explain p{font-size:12px;line-height:1.6;color:#738198}.art-color-row{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.art-color-row button{width:33px;height:33px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 1px #d8dfeb;position:relative;padding:0}.art-color-row button.chosen{box-shadow:0 0 0 3px #7468c9}.art-tools{display:flex;flex-wrap:wrap;gap:7px}.art-tools button{border:1px solid #d9e2f0;border-radius:9px;background:#f3f6fb;color:#546983;padding:9px;font-size:12px;font-weight:800}.art-tools button.chosen{color:#0a7f76;background:#dff6f0;border-color:#9ee1d7}.art-explain .art-small{font-size:11px;margin-top:15px}.art-bottom{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;border-top:1px solid #edf0f7;padding-top:15px}.art-bottom button{min-height:44px;border:0;border-radius:12px;background:#eff2f8;color:#576982;padding:0 17px;font-weight:850}.art-bottom .art-save{background:#159f95;color:white}
 @media(max-width:750px){.music-panel .song-select{max-width:none}.song-name{flex-basis:100%;min-width:0}.art-dialog{max-height:96dvh}.art-content{padding:14px}.art-work{grid-template-columns:minmax(0,1fr) minmax(145px,.7fr);gap:11px}.art-board{min-height:195px;padding:6px}.art-heading h2{font-size:19px}.art-color-row button{width:29px;height:29px}.art-tabs{margin:12px 0}}
 @media(max-width:550px){.art-work{grid-template-columns:1fr;gap:9px}.art-board{min-height:180px}.art-board canvas{max-height:29vh}.art-explain p{margin:5px 0}.art-color-row{margin:9px 0}.art-heading p{font-size:11px}.art-bottom{margin-top:8px}.art-tabs button{font-size:12px;padding:8px 9px}}
+/* 모바일에서 캔버스의 길게 누르기, 선택, 브라우저 제스처를 최대한 제한합니다. */
+html,body{overscroll-behavior-x:none;overscroll-behavior-y:contain}
+.stage,.stage canvas,.mini-map canvas,.art-board canvas{
+ touch-action:none!important;overscroll-behavior:none;
+ -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
+ -webkit-tap-highlight-color:transparent;
+}
+.stage canvas,.mini-map canvas,.art-board canvas{-webkit-user-drag:none}
 </style>
 </head>
 <body>
@@ -76,7 +84,7 @@
     </section>
     <section class="panel"><h2>이렇게 즐겨 보세요 <span class="pill">자유 놀이</span></h2>
       <div class="steps"><p><b>1</b><span>감상곡을 고르고 음악을 들어 봐요.</span></p><p><b>2</b><span>라이더나 썰매를 꾸미고, 손가락으로 내리막길을 그려요.</span></p><p><b>3</b><span>음악을 듣거나 함께 달리면서 자유롭게 코스를 바꿔 봐요.</span></p></div>
-      <div class="sep"></div><p class="hint">높은 곳에서 아래로 멀리 떨어져도 바로 실패하지 않아요. 아래에 선을 만들어 다시 착지할 수 있어요.</p><p class="hint">높은 곳으로 올라가거나 아래로 내려가면 배경도 달라져요. 미니맵을 눌러 긴 코스를 빠르게 둘러보세요. 한 바퀴 돌고 싶다면 출발길부터 루프, 출구까지 한 번에 이어 그려 보세요. 루프 보조를 켜면 속력이 조금 부족해도 완주하기 쉬워요.</p><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
+      <div class="sep"></div><p class="hint">높은 곳에서 아래로 멀리 떨어져도 바로 실패하지 않아요. 아래에 선을 만들어 다시 착지할 수 있어요.</p><p class="hint">높은 곳으로 올라가거나 아래로 내려가면 배경도 달라져요. 미니맵을 눌러 긴 코스를 빠르게 둘러보세요. 선을 그리다가 화면 가장자리에 가까워지면 손가락을 떼지 않고도 화면이 자동으로 이동해요. 한 바퀴 돌고 싶다면 출발길부터 루프, 출구까지 한 번에 이어 그려 보세요. 루프 보조를 켜면 속력이 조금 부족해도 완주하기 쉬워요.</p><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
     </section>
   </aside>
 </div>
@@ -95,6 +103,7 @@
 const $=id=>document.getElementById(id);
 const canvas=$('canvas'),stage=$('stage'),ctx=canvas.getContext('2d');
 const BASE={x:94,y:228};
+// v2.5 tablet drawing stability and edge-auto-scroll. Keep old song/course storage keys unchanged.
 const SAMPLE=[
  [[32,320],[110,320],[230,320],[310,337],[410,374],[515,421]],
  [[515,421],[590,423],[645,404],[700,359],[765,315]],
@@ -169,18 +178,91 @@ function resetMusic(){musicTime=0;beatPlayed=-1;if(musicMode==='url'||musicMode=
 function refreshButtons(){$('playBtn').textContent=playing&&rideEnabled?'Ⅱ 함께 멈춤':'▶ 함께 재생';$('listenBtn').textContent=playing&&!rideEnabled?'Ⅱ 음악 멈춤':'♫ 음악만 듣기';}
 function stop(playbackReset=false){playing=false;audio.pause();refreshButtons();if(playbackReset){resetRider();resetMusic();}updateStatus();}
 function restart(){stop(true);camera.x=0;camera.y=-56;showMessage('출발 준비 완료!');}
-function setMode(m){mode=m;['Draw','Erase','Pan'].forEach(n=>{const b=$('tool'+n);const on=m===n.toLowerCase();b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);});stage.classList.toggle('is-pan',m==='pan');stage.classList.toggle('is-erase',m==='erase');updateStatus();}
+function setMode(m){if(pointer)return;mode=m;['Draw','Erase','Pan'].forEach(n=>{const b=$('tool'+n);const on=m===n.toLowerCase();b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);});stage.classList.toggle('is-pan',m==='pan');stage.classList.toggle('is-erase',m==='erase');updateStatus();}
 function updateStatus(){const text=death?'↻ 처음부터를 누르면 다시 탈 수 있어요':playing?(rideEnabled?'♪ 음악과 함께 달리는 중!':'♫ 음악을 들으며 자유롭게 그려 보세요'):mode==='draw'?'✎ 손가락으로 선을 이어 보세요':mode==='erase'?'⌫ 지우고 싶은 선을 쓸어 보세요':'✋ 화면을 드래그해 이동하세요';$('stageStatus').textContent=text;}
 function sizeCanvas(){minimapDirty=true;const r=stage.getBoundingClientRect();width=Math.max(100,r.width);height=Math.max(100,r.height);scale=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);}
 function w2s(x,y){return{x:(x-camera.x)*camera.zoom,y:(y-camera.y)*camera.zoom};}
 function s2w(x,y){return{x:x/camera.zoom+camera.x,y:y/camera.zoom+camera.y};}
 function eventPoint(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
-function setZoom(z){minimapDirty=true;z=clamp(z,.45,2.1);const mid=s2w(width/2,height/2);camera.zoom=z;camera.x=mid.x-width/(2*z);camera.y=mid.y-height/(2*z);$('zoomLabel').textContent=Math.round(100*z)+'%';}
+function setZoom(z){if(pointer)return;minimapDirty=true;z=clamp(z,.45,2.1);const mid=s2w(width/2,height/2);camera.zoom=z;camera.x=mid.x-width/(2*z);camera.y=mid.y-height/(2*z);$('zoomLabel').textContent=Math.round(100*z)+'%';}
 function nearest(line,x,y){let best=Infinity;for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i],dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;if(len2<.01)continue;const t=clamp(((x-a.x)*dx+(y-a.y)*dy)/len2,0,1);const d=Math.hypot(x-a.x-dx*t,y-a.y-dy*t);if(d<best)best=d;}return best;}
 function eraseAt(x,y){const idx=tracks.findIndex(line=>nearest(line,x,y)<19/camera.zoom);if(idx>=0){tracks.splice(idx,1);persist();return true;}return false;}
-function down(e){if(e.button!==undefined&&e.button!==0)return;if(pointer)return;e.preventDefault();canvas.setPointerCapture(e.pointerId);const p=eventPoint(e),v=s2w(p.x,p.y);pointer={id:e.pointerId,x:p.x,y:p.y,erased:false};if(mode==='draw'){checkpoint();preview=[v];}else if(mode==='erase'){checkpoint();pointer.erased=eraseAt(v.x,v.y);}}
-function move(e){if(!pointer||pointer.id!==e.pointerId)return;e.preventDefault();const p=eventPoint(e);if(mode==='draw'){const v=s2w(p.x,p.y),prev=preview[preview.length-1];if(Math.hypot(v.x-prev.x,v.y-prev.y)>=4/camera.zoom)preview.push(v);}else if(mode==='pan'){camera.x-=(p.x-pointer.x)/camera.zoom;camera.y-=(p.y-pointer.y)/camera.zoom;}else if(mode==='erase'){const v=s2w(p.x,p.y);eraseAt(v.x,v.y);}pointer.x=p.x;pointer.y=p.y;}
-function up(e){if(!pointer||pointer.id!==e.pointerId)return;e.preventDefault();if(mode==='draw'&&preview){if(preview.length===1){preview.push({x:preview[0].x+2,y:preview[0].y});}tracks.push(preview);persist();preview=null;}pointer=null;}
+// Only one pointer may create a stroke. Extra fingers must never change the active line.
+const AUTO_PAN={edge:82,maxSpeed:620,activationDistance:6};
+function safeStagePoint(e){
+ const p=eventPoint(e);
+ return {x:clamp(Number.isFinite(p.x)?p.x:0,0,width),y:clamp(Number.isFinite(p.y)?p.y:0,0,height)};
+}
+function appendDrawPoint(){
+ if(!pointer||!preview||mode!=='draw')return;
+ const world=s2w(pointer.x,pointer.y),last=preview[preview.length-1];
+ if(Math.hypot(world.x-last.x,world.y-last.y)>=4/camera.zoom)preview.push(world);
+}
+function down(e){
+ if(e.button!==undefined&&e.button!==0)return;
+ e.preventDefault();
+ if(pointer||miniPointer!==null||artPointer)return; // secondary touch or other active canvas
+ const p=safeStagePoint(e);
+ try{canvas.setPointerCapture(e.pointerId);}catch(err){return;}
+ pointer={id:e.pointerId,x:p.x,y:p.y,startX:p.x,startY:p.y,moved:false,erased:false};
+ if(mode==='draw'){checkpoint();preview=[s2w(p.x,p.y)];}
+ else if(mode==='erase'){checkpoint();const world=s2w(p.x,p.y);pointer.erased=eraseAt(world.x,world.y);}
+}
+function move(e){
+ if(!pointer||pointer.id!==e.pointerId)return;
+ e.preventDefault();
+ const p=safeStagePoint(e),oldX=pointer.x,oldY=pointer.y;
+ if(mode==='pan'){
+  camera.x-=(p.x-oldX)/camera.zoom;camera.y-=(p.y-oldY)/camera.zoom;
+ }else if(mode==='erase'){
+  const world=s2w(p.x,p.y);eraseAt(world.x,world.y);
+ }
+ pointer.x=p.x;pointer.y=p.y;
+ if(Math.hypot(p.x-pointer.startX,p.y-pointer.startY)>=AUTO_PAN.activationDistance)pointer.moved=true;
+ if(mode==='draw')appendDrawPoint();
+}
+function autoPanDrawing(dt){
+ if(!pointer||!pointer.moved||mode!=='draw'||!preview||dt<=0)return;
+ // The margin works before the finger reaches the physical screen edge, avoiding system back swipes.
+ const edgeX=Math.min(AUTO_PAN.edge,width*.23),edgeY=Math.min(AUTO_PAN.edge,height*.23);
+ function speed(pos,length,edge){
+  const a=pos<edge?-(edge-pos)/edge:pos>length-edge?(pos-(length-edge))/edge:0;
+  return Math.sign(a)*AUTO_PAN.maxSpeed*Math.abs(a)**2;
+ }
+ const vx=speed(pointer.x,width,edgeX),vy=speed(pointer.y,height,edgeY);
+ if(!vx&&!vy)return;
+ camera.x+=vx*dt/camera.zoom;camera.y+=vy*dt/camera.zoom;
+ // With the finger held still, newly exposed terrain becomes part of the same stroke.
+ appendDrawPoint();
+}
+function up(e){
+ if(!pointer||pointer.id!==e.pointerId)return;
+ if(e.cancelable)e.preventDefault();
+ if(e.type==='pointerup'){
+  const p=safeStagePoint(e);pointer.x=p.x;pointer.y=p.y;appendDrawPoint();
+ }
+ if(mode==='draw'&&preview){
+  if(preview.length===1)preview.push({x:preview[0].x+2,y:preview[0].y});
+  tracks.push(preview);persist();preview=null;
+ }
+ pointer=null;
+}
+function suppressCanvasGestures(target){
+ target.addEventListener('contextmenu',e=>e.preventDefault());
+ target.addEventListener('selectstart',e=>e.preventDefault());
+ target.addEventListener('dragstart',e=>e.preventDefault());
+ // Fallback for WebKit touch browsers even if touch-action is ignored.
+ for(const type of ['touchstart','touchmove'])target.addEventListener(type,e=>{if(e.cancelable)e.preventDefault();},{passive:false});
+}
+// A second finger on a toolbar or the minimap must not scroll or change the current stroke.
+document.addEventListener('pointerdown',e=>{
+ if((pointer&&e.pointerId!==pointer.id)||(artPointer&&e.pointerId!==artPointer.id)){
+  if(e.cancelable)e.preventDefault();e.stopImmediatePropagation();
+ }
+},true);
+document.addEventListener('touchstart',e=>{
+ if((pointer||artPointer)&&e.touches.length>1&&e.cancelable)e.preventDefault();
+},{passive:false,capture:true});
 function download(name,data,type){const b=new Blob([data],{type});const url=URL.createObjectURL(b),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function renderSongOptions(){
  const sel=$('songSelect'),keep=currentSong.id;sel.replaceChildren();
@@ -457,9 +539,9 @@ function jumpByMinimap(e){if(!miniProjection)return;const r=miniCanvas.getBoundi
  camera.x=wx-width/(2*camera.zoom);camera.y=wy-height/(2*camera.zoom);
  if(follow){follow=false;$('follow').checked=false;showMessage('미니맵으로 이동했어요. 라이더 따라가기는 잠시 껐어요.',2100);}
 }
-miniCanvas.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();miniPointer=e.pointerId;miniCanvas.setPointerCapture(e.pointerId);jumpByMinimap(e);});
+miniCanvas.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(pointer||artPointer||miniPointer!==null)return;miniPointer=e.pointerId;try{miniCanvas.setPointerCapture(e.pointerId);}catch(err){miniPointer=null;return;}jumpByMinimap(e);});
 miniCanvas.addEventListener('pointermove',e=>{if(miniPointer===e.pointerId){e.preventDefault();jumpByMinimap(e);}});
-miniCanvas.addEventListener('pointerup',()=>{miniPointer=null;});miniCanvas.addEventListener('pointercancel',()=>{miniPointer=null;});
+miniCanvas.addEventListener('pointerup',e=>{if(miniPointer===e.pointerId)miniPointer=null;});miniCanvas.addEventListener('pointercancel',e=>{if(miniPointer===e.pointerId)miniPointer=null;});miniCanvas.addEventListener('lostpointercapture',e=>{if(miniPointer===e.pointerId)miniPointer=null;});
 miniCanvas.addEventListener('keydown',e=>{if(!['Enter','Space'].includes(e.code))return;e.preventDefault();if(!miniProjection)return;const r=miniCanvas.getBoundingClientRect();jumpByMinimap({clientX:r.left+r.width/2,clientY:r.top+r.height/2});});
 function drawTrack(line,previewOnly=false){if(line.length<2)return;ctx.beginPath();ctx.moveTo(line[0].x,line[0].y);for(let i=1;i<line.length;i++)ctx.lineTo(line[i].x,line[i].y);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=previewOnly?'#e68a9a88':'#34486435';ctx.lineWidth=previewOnly?9:12;ctx.stroke();ctx.strokeStyle=previewOnly?'#fb8da4':'#394e78';ctx.lineWidth=previewOnly?5:7;ctx.stroke();ctx.strokeStyle=previewOnly?'#ffd6df':'#65d5c6';ctx.lineWidth=2;ctx.stroke();}
 function drawRider(p){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);ctx.lineCap='round';ctx.lineJoin='round';
@@ -480,7 +562,7 @@ function paint(){ctx.setTransform(scale,0,0,scale,0,0);drawBackground();ctx.save
  ctx.fillStyle='#16aa9c';roundedRect(BASE.x-32,286,4,35,2);ctx.fill();ctx.beginPath();ctx.moveTo(BASE.x-28,286);ctx.lineTo(BASE.x-5,293);ctx.lineTo(BASE.x-28,300);ctx.fill();
  for(const p of sparkles){ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle='#f0b15c';ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
  drawRider(rider);ctx.restore();drawMinimap();}
-function frame(t){if(!lastTime)lastTime=t;const dt=clamp((t-lastTime)/1000,0,.04);lastTime=t;now=t;if(playing){if(rideEnabled&&!death){const n=Math.ceil(dt/(1/120));for(let i=0;i<n;i++)simulate(dt/n);}handleMusic(dt);if(rideEnabled&&follow&&!pointer&&!death){const targetX=rider.x-width*.37/camera.zoom;const targetY=rider.y-height*.57/camera.zoom;camera.x+=(targetX-camera.x)*.075;camera.y+=(targetY-camera.y)*.075;}}
+function frame(t){if(!lastTime)lastTime=t;const dt=clamp((t-lastTime)/1000,0,.04);lastTime=t;now=t;autoPanDrawing(dt);if(playing){if(rideEnabled&&!death){const n=Math.ceil(dt/(1/120));for(let i=0;i<n;i++)simulate(dt/n);}handleMusic(dt);if(rideEnabled&&follow&&!pointer&&!death){const targetX=rider.x-width*.37/camera.zoom;const targetY=rider.y-height*.57/camera.zoom;camera.x+=(targetX-camera.x)*.075;camera.y+=(targetY-camera.y)*.075;}}
  if(shownMessage&&t>shownMessage){$('message').classList.remove('show');shownMessage=0;}paint();requestAnimationFrame(frame);}
 $('toolDraw').onclick=()=>setMode('draw');$('toolErase').onclick=()=>setMode('erase');$('toolPan').onclick=()=>setMode('pan');
 $('zoomIn').onclick=()=>setZoom(camera.zoom*1.2);$('zoomOut').onclick=()=>setZoom(camera.zoom/1.2);
@@ -512,10 +594,10 @@ function saveDraft(){draftArt[artPart]=artSnapshot();}
 function openPart(part){artLoadToken++;artPart=part;artHistory=[];const riderPart=part==='rider';artCanvas.width=riderPart?240:300;artCanvas.height=riderPart?280:130;artCanvas.setAttribute('aria-label',riderPart?'라이더를 그리는 공간':'썰매를 그리는 공간');$('artTabRider').classList.toggle('chosen',riderPart);$('artTabSled').classList.toggle('chosen',!riderPart);$('artGuideTitle').textContent=riderPart?'나만의 라이더를 그려요':'나만의 썰매를 그려요';$('artGuideText').textContent=riderPart?'사람, 동물, 상상 속 캐릭터도 좋아요. 머리와 몸을 크게 그리면 잘 보여요.':'왼쪽에서 오른쪽으로 달리는 썰매예요. 가로로 길쭉하게 그리면 좋아요.';const token=artLoadToken,url=draftArt[part];if(url){const img=new Image();img.onload=()=>{if(token===artLoadToken)ac2.drawImage(img,0,0,artCanvas.width,artCanvas.height);};img.src=url;}}
 function artPoint(e){const r=artCanvas.getBoundingClientRect();return{x:(e.clientX-r.left)*artCanvas.width/r.width,y:(e.clientY-r.top)*artCanvas.height/r.height};}
 function drawArtSegment(a,b){ac2.save();ac2.globalCompositeOperation=artEraser?'destination-out':'source-over';ac2.strokeStyle=artEraser?'#000':artColor;ac2.fillStyle=ac2.strokeStyle;ac2.lineWidth=artEraser?23:artPart==='rider'?10:11;ac2.lineCap='round';ac2.lineJoin='round';ac2.beginPath();ac2.moveTo(a.x,a.y);ac2.lineTo(b.x,b.y);ac2.stroke();ac2.restore();}
-artCanvas.onpointerdown=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(artPointer)return;artCanvas.setPointerCapture(e.pointerId);artHistory.push(artSnapshot());if(artHistory.length>25)artHistory.shift();artPointer={id:e.pointerId,pt:artPoint(e)};drawArtSegment(artPointer.pt,artPointer.pt);};
+artCanvas.onpointerdown=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(artPointer||pointer)return;try{artCanvas.setPointerCapture(e.pointerId);}catch(err){return;}artHistory.push(artSnapshot());if(artHistory.length>25)artHistory.shift();artPointer={id:e.pointerId,pt:artPoint(e)};drawArtSegment(artPointer.pt,artPointer.pt);};
 artCanvas.onpointermove=e=>{if(!artPointer||e.pointerId!==artPointer.id)return;e.preventDefault();const pt=artPoint(e);drawArtSegment(artPointer.pt,pt);artPointer.pt=pt;};
 function endArtStroke(e){if(!artPointer||e.pointerId!==artPointer.id)return;e.preventDefault();artPointer=null;}
-artCanvas.onpointerup=endArtStroke;artCanvas.onpointercancel=endArtStroke;
+artCanvas.onpointerup=endArtStroke;artCanvas.onpointercancel=endArtStroke;artCanvas.addEventListener('lostpointercapture',endArtStroke);
 $('artOpen').onclick=()=>{stop();draftArt={...art};openPart('rider');$('artDialog').showModal();};
 $('artTabRider').onclick=()=>{if(artPart==='rider')return;saveDraft();openPart('rider');};
 $('artTabSled').onclick=()=>{if(artPart==='sled')return;saveDraft();openPart('sled');};
@@ -526,7 +608,8 @@ $('artCancel').onclick=$('artClose').onclick=()=>$('artDialog').close();
 $('artApply').onclick=()=>{saveDraft();for(const part of ['rider','sled'])applyArt(part,draftArt[part]);persistArt();$('artDialog').close();showMessage('내가 그린 라이더와 썰매를 적용했어요!');};
 $('artDialog').onclose=()=>{artPointer=null;};
 updateArtTools();restoreArt();renderSongOptions();loadLibrary();
-canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);canvas.addEventListener('lostpointercapture',up);
+for(const surface of [stage,canvas,miniCanvas,artCanvas])suppressCanvasGestures(surface);
 canvas.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();setZoom(camera.zoom*(e.deltaY<0?1.12:1/1.12));}},{passive:false});
 window.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();toggle(true);}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();$('undoBtn').click();}});
 window.addEventListener('resize',sizeCanvas);new ResizeObserver(sizeCanvas).observe(stage);
