@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#142c45">
-<title>다각형 다리 작전 | 16단계 수학 퍼즐</title>
+<title>다각형 다리 작전 | 20단계 수학 물리 퍼즐</title>
 <style>
 :root{--ink:#20364e;--mute:#667c93;--line:#dce6ef;--mint:#109d7e;--orange:#bf792e;--navy:#142d47}
 *{box-sizing:border-box}html,body{margin:0}body{font-family:system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);background:radial-gradient(circle at 0% 0%,#e1e5ff 0,transparent 30%),radial-gradient(circle at 100% 10%,#d0f5e9 0,transparent 30%),#f0f5fa;-webkit-tap-highlight-color:transparent}button{font:inherit;cursor:pointer;border:0;font-weight:800;touch-action:manipulation}button:focus-visible,canvas:focus-visible{outline:3px solid #3e97e7;outline-offset:2px}button:disabled{opacity:.42;cursor:default}.app{max-width:1230px;margin:0 auto;padding:15px 15px 28px}.heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.brand{display:flex;align-items:center;gap:12px}.logo{display:grid;place-items:center;background:linear-gradient(135deg,#685bcb,#2c97bd);height:54px;width:54px;border-radius:16px;color:white;font-size:29px;font-weight:900;box-shadow:0 8px 20px #565db53d}h1{margin:0;line-height:1.15;font-size:clamp(22px,2.4vw,30px);letter-spacing:-.7px}header p{margin:5px 0 0;font-size:12px;color:var(--mute);font-weight:700}.award{background:white;border:1px solid #dfebef;border-radius:99px;padding:10px 14px;color:#60758f;font-size:12px;font-weight:850}.award b{color:#087d6a}.card{background:white;border:1px solid var(--line);border-radius:22px;box-shadow:0 14px 38px #4d637b16;padding:16px}.stages{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:15px}.stage{border:1.5px solid #d8e4ef;border-radius:13px;min-width:0;background:#f3f7fb;text-align:left;min-height:58px;padding:9px 10px;color:#4c637e;transition:background .15s,border .15s,transform .15s}.stage .number{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#dde9f4;border-radius:7px;margin-right:5px;font-size:11px}.stage .name{font-size:13px}.stage small{display:block;font-size:10px;margin-top:4px;font-weight:700;color:#7d91a5;white-space:nowrap}.stage.active{border-color:#24a789;background:#e8f9f1;color:#116c59}.stage.active .number,.stage.done .number{color:white;background:#11a182}.stage:active{transform:translateY(1px)}.mission{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}.mission h2{font-size:19px;letter-spacing:-.5px;margin:0 0 4px}.mission p{margin:0;font-size:13px;color:#60748a;line-height:1.55;font-weight:680}.subject{border-radius:9px;background:#e8f7f2;color:#16816b;padding:6px 9px;font-size:11px;font-weight:850;white-space:nowrap}.condition{display:flex;align-items:center;gap:12px;border:2px solid #f0d19e;border-radius:17px;padding:12px 14px;margin-bottom:12px;background:linear-gradient(90deg,#fff3e0,#fffaf4);transition:background .2s,border-color .2s,box-shadow .2s}.condition.ready{border-color:#39bb95;background:linear-gradient(90deg,#def7eb,#f0fff9);box-shadow:0 0 0 3px #43bd9422}.sigil{flex:0 0 57px;width:57px;height:57px;display:grid;place-items:center;border-radius:14px;background:#fff2dc;color:#b57a36;border:1px solid #eed8af;font-size:30px;font-weight:950;transition:background .2s,color .2s}.ready .sigil{background:#c6f6e0;color:#118766}.condition.trigger .sigil{animation:snap .5s ease-out}.condition.trigger .status{animation:snap .5s ease-out}@keyframes snap{0%{transform:scale(.91)}48%{transform:scale(1.12)}100%{transform:scale(1)}}.condition-copy{flex:1;min-width:0}.condition-copy small{display:block;color:#9a6d35;font-size:11px;font-weight:850}.condition-copy strong{display:block;color:#754822;font-size:clamp(17px,2vw,23px);margin:2px 0;letter-spacing:-.3px}.condition-copy p{color:#977447;font-size:11px;line-height:1.4;margin:0;font-weight:750}.ready .condition-copy small,.ready .condition-copy p{color:#287963}.ready .condition-copy strong{color:#087258}.status{border-radius:12px;color:white;background:#ac783f;text-align:center;font-weight:950;font-size:13px;padding:11px 12px;min-width:174px;box-shadow:0 4px 0 #815c32}.ready .status{background:#159779;box-shadow:0 4px 0 #0e705c}.viewport{background:#183952;overflow:hidden;border-radius:16px;position:relative}.viewport canvas{width:100%;height:auto;aspect-ratio:1100 / 560;display:block;touch-action:none;user-select:none}.hud{position:absolute;top:10px;left:10px;display:flex;gap:6px;pointer-events:none;flex-wrap:wrap}.hud span{font-size:12px;background:#0d263bdf;border:1px solid #b0d5e04b;border-radius:9px;color:#f2ffff;padding:8px 9px;font-weight:850}.hud b{color:#ffe2a7}.toast{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);background:#0e2b42e3;color:#e7f6ff;max-width:94%;width:max-content;white-space:normal;text-align:center;border:1px solid #b9dbe846;border-radius:15px;padding:7px 12px;font-size:12px;font-weight:770;pointer-events:none}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:11px}.stat{background:#f4f7fa;border-radius:11px;padding:10px 12px;border:1px solid var(--line)}.stat small{display:block;font-size:11px;color:#718398;font-weight:800;margin-bottom:4px}.stat b{display:block;font-size:12px;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stat.good{background:#e6f9f0;border-color:#ace5d0}.stat.good b{color:#12816a}.stat.bad{background:#fff2e8;border-color:#eed3b5}.stat.bad b{color:#a6662d}.controls{display:flex;gap:9px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:13px}.group{display:flex;gap:7px;flex-wrap:wrap}.btn{border-radius:11px;padding:11px 13px;min-height:45px;font-size:13px}.btn:active:not(:disabled){transform:translateY(2px)}.btn.soft{background:#eef3fa;color:#46617b;border:1px solid #dbe6f0}.btn.hint{background:#e0f7f1;color:#087a62;border:1px solid #b9dfd4}.btn.stop{background:#ffdde0;color:#ac3341;border:1px solid #f1abb4}.btn.retry{background:#e4ebfa;color:#3e5f95;border:1px solid #cbd8ee}.btn.go{background:#ffce79;color:#3d3a26;box-shadow:0 4px 0 #d7a653}.feedback{margin-top:12px;background:#f0f6fd;border:1px solid #dce8f6;border-radius:12px;padding:12px 15px;display:flex;align-items:flex-start;gap:10px}.bubble{flex:none;display:grid;place-items:center;width:25px;height:25px;background:#dbe9fa;color:#4168a0;border-radius:8px;font-weight:900}.feedback p{margin:0;font-size:13px;line-height:1.6;color:#4c617b;font-weight:700}.feedback b{color:#284967}.quiz{display:none;margin-top:12px;border-radius:14px;background:#e9f8f1;border:1px solid #afdfcc;padding:13px 15px}.quiz.show{display:block}.quiz h3{margin:0 0 5px;font-size:17px}.quiz p{margin:0 0 10px;font-size:13px;font-weight:730;color:#45677b}.answers{display:flex;gap:7px;flex-wrap:wrap}.answers button{min-height:42px;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:780;background:white;border:1px solid #a7d4c4;color:#365871;text-align:left}.answers button.correct{background:#138f76;color:white;border-color:#138f76}.answers button.wrong{background:#ffe1e1;color:#af4642;border-color:#e9b3b2}.quiz-outcome{margin-top:9px!important;font-weight:900!important}.next{display:none;margin-top:9px;background:#ffcc73;color:#3b4536;border-radius:10px;padding:10px 13px;font-size:13px}.next.show{display:inline-block}.bottom{margin:12px 2px 0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:11px;color:#8190a0;font-weight:730}.info{margin-top:12px;padding:12px 14px;background:#f9fcfe;border:1px solid #dfe9ee;border-radius:12px;font-size:12px;color:#54697f;line-height:1.65}.info summary{cursor:pointer;font-weight:900;color:#415875}.info p{margin:8px 0 0}
@@ -36,19 +36,36 @@
 @media(max-width:780px){.stage{min-height:34px}.mission h2{font-size:16px}}
 @media(max-width:510px){.stages{grid-template-columns:repeat(8,minmax(0,1fr));gap:3px}.stage{min-height:32px;padding:4px 1px}.stage .number{width:21px;height:21px;font-size:10px}.device-tray{top:7px;right:7px;gap:3px}.device-token{width:28px;height:28px;font-size:17px}.btn{font-size:11px;padding:9px 6px}.intro-panel{padding:12px}.intro-panel h3{font-size:17px}.intro-panel p{font-size:12px}}
 
-/* 챕터 2 — 숫자 버튼은 1~8 / 9~16 두 줄로 표시합니다. */
+/* 20 stages — first two rows of 8, final row of 4; grouped visually by chapter. */
 .stages{grid-template-columns:repeat(8,minmax(0,1fr));row-gap:6px}
 .stage:nth-child(n+9){background:#eef3fc;border-color:#d0dcef}
 .stage:nth-child(n+9).active{background:#e7f9f2;border-color:#24a789}
 .stage:nth-child(n+9).done{background:#e7f6ef;border-color:#a8dcca}
 .device-token.combo{font-size:13px}
 @media(max-width:510px){.stages{grid-template-columns:repeat(8,minmax(0,1fr));row-gap:5px}.stage{min-height:34px}}
+
+/* Chapter navigation: only the current chapter's numbers are visible */
+.chapter-tabs{display:flex;gap:5px;margin-bottom:6px}
+.chapter-tabs button{flex:1;min-height:34px;padding:7px 5px;border-radius:9px;background:#edf3f8;border:1px solid #dbe5ee;color:#6c7d8d;font-size:12px}
+.chapter-tabs button.active{background:#dff7ee;color:#10765d;border:1px solid #5ec6a5}
+.stage[hidden]{display:none!important}
+.chapter-tabs button:focus-visible{outline:3px solid #3e97e7}
+@media(max-width:510px){.chapter-tabs button{font-size:10px;padding:6px 2px;min-height:31px}}
+/* Chapter 3: simultaneous independent geometry machines */
+.stage:nth-child(n+17){background:#f0f0fb;border-color:#d7d4f0}
+.stage:nth-child(n+17).active{background:#eaf9f1;border-color:#24a789}
+.stage:nth-child(n+17).done{background:#e7f6ef;border-color:#a8dcca}
 </style>
 </head>
 <body>
 <main class="app">
-<header class="heading"><div class="brand"><div class="logo" aria-hidden="true">▱</div><div><h1>다각형 다리 작전</h1><p>도형의 성질로 장치를 작동시키는 수학 물리 퍼즐</p></div></div><div class="award">학습 기록 <b id="total">0 / 16</b>개 완료</div></header>
+<header class="heading"><div class="brand"><div class="logo" aria-hidden="true">▱</div><div><h1>다각형 다리 작전</h1><p>도형의 성질로 장치를 작동시키는 수학 물리 퍼즐</p></div></div><div class="award">학습 기록 <b id="total">0 / 20</b>개 완료</div></header>
 <section class="card">
+<nav class="chapter-tabs" aria-label="챕터 선택">
+<button id="chapter-1" type="button">1 · 장치 배우기</button>
+<button id="chapter-2" type="button">2 · 응용</button>
+<button id="chapter-3" type="button">3 · 복합</button>
+</nav>
 <nav class="stages" id="stage-nav" aria-label="스테이지 선택"></nav>
 <div class="mission"><div><h2 id="mission-title"></h2><p id="mission-detail"></p></div><span class="subject" id="subject"></span></div>
 <div class="condition" id="condition" role="status" aria-live="polite"><div class="sigil" id="sigil" aria-hidden="true"></div><div class="condition-copy"><small>장치 작동 원리</small><strong id="condition-title"></strong><p id="condition-tip"></p></div><div class="status" id="condition-status"></div></div>
@@ -90,12 +107,17 @@ const levelSettings=[
   {name:'정사각형 방패',title:'13 · 정사각형 방패',desc:'노란 점을 움직여 보호막을 켜세요.',modes:[6],intro:6},
   {name:'회전하는 방패',title:'14 · 회전하는 방패',desc:'새로 배운 장치와 익숙한 연결기를 활용하세요.',modes:[6,1]},
   {name:'혼합 회로',title:'15 · 혼합 회로',desc:'같은 도형의 두 조건을 맞춘 뒤, 열쇠와 톱니도 켜세요.',modes:[4,2,5]},
-  {name:'챕터 2 동력실',title:'16 · 챕터 2 동력실',desc:'모든 동력을 연결하고 구슬을 목적지까지 보내세요.',modes:[4,5,6,3],chapterEnd:true}
+  {name:'챕터 2 동력실',title:'16 · 챕터 2 동력실',desc:'모든 동력을 연결하고 구슬을 목적지까지 보내세요.',modes:[4,5,6,3],chapterEnd:true},
+  {name:'쌍둥이 장치',title:'17 · 쌍둥이 장치',desc:'서로 다른 두 도형을 조작해 양쪽 장치를 함께 켜세요.',modes:[0,1],simultaneous:true},
+  {name:'두 개의 결정',title:'18 · 두 개의 결정',desc:'왼쪽 톱니와 오른쪽 방패를 동시에 작동시키세요.',modes:[5,6],simultaneous:true},
+  {name:'이어지는 에너지',title:'19 · 이어지는 에너지',desc:'다리 잠금과 삼각 열쇠를 함께 작동시키세요.',modes:[0,2],simultaneous:true},
+  {name:'챕터 3 동력실',title:'20 · 챕터 3 동력실',desc:'한 화면의 세 장치를 모두 켜 구슬을 이동시키세요.',modes:[0,1,6],simultaneous:true,chapterEnd:true}
 ];
-stages.splice(0,stages.length,...levelSettings.map((p,i)=>{const base=catalog[p.modes[0]]||catalog[0];return {...base,...p,short:String(i+1),note:p.modes.length>1?'이미 배운 수학 조건을 단계별 기계장치에 적용하는 복합 퍼즐입니다. 장치의 작동 규칙은 가상의 게임 규칙이며 실제 다리의 보편적인 안정성 조건은 아닙니다.':base.note}}));
+stages.splice(0,stages.length,...levelSettings.map((p,i)=>{const base=catalog[p.modes[0]]||catalog[0];return {...base,...p,short:String(i+1),note:p.simultaneous?'한 장면의 서로 다른 도형을 각각 조작해 모든 장치를 작동시키는 복합 문제입니다. 각 장치는 수학적 조건을 엄밀히 판정해 게임 속 다리를 열고 닫지만, 실제 다리의 안전성을 일반화하는 규칙은 아닙니다.':p.modes.length>1?'이미 배운 수학 조건을 단계별 기계장치에 적용하는 복합 퍼즐입니다. 장치의 작동 규칙은 가상의 게임 규칙이며 실제 다리의 보편적인 안정성 조건은 아닙니다.':base.note}}));
 const mode=()=>stages[current].modes[part];
+const isConcurrent=()=>Boolean(stages[current].simultaneous);
 const isFinalPart=()=>part===stages[current].modes.length-1;
-const completeModule=()=>isFinalPart()&&isReady();
+const completeModule=()=>isConcurrent()?isReady():isFinalPart()&&isReady();
 const ui={nav:$('stage-nav'),total:$('total'),title:$('mission-title'),detail:$('mission-detail'),subject:$('subject'),condition:$('condition'),condTitle:$('condition-title'),condTip:$('condition-tip'),condStatus:$('condition-status'),sigil:$('sigil'),stageNum:$('stage-num'),attempt:$('attempt'),progress:$('progress'),toast:$('toast'),shape:$('shape'),math:$('math'),mathCard:$('math-card'),latch:$('latch'),lockCard:$('lock-card'),reset:$('reset'),hint:$('hint'),inspect:$('inspect'),stop:$('stop'),retry:$('retry'),start:$('start'),feedback:$('feedback'),quiz:$('quiz'),quizPrompt:$('quiz-prompt'),quizTitle:$('quiz-title'),answers:$('answers'),outcome:$('quiz-outcome'),next:$('next'),note:$('teacher-note')};
 const tray=$('device-tray'),introScreen=$('intro-screen'),introName=$('intro-name'),introIcon=$('intro-icon'),introExplain=$('intro-explain'),nextDevice=$('next-device');
 const deviceIcons=['∥','∟','△','✧','∥∟','◇','□'];
@@ -103,7 +125,7 @@ const tutorialNames=['평행 잠금장치','직각 연결기','정삼각형 열�
 const tutorialText=['마주 보는 두 변을 평행하게 하면 잠금장치가 닫혀요.','두 변이 직각으로 만나면 꺾인 연결기가 체결돼요.','세 변의 길이가 같아지면 삼각형 열쇠가 작동해요.','오각형에서 이웃하지 않은 두 꼭짓점을 연결해 에너지를 충전해요.','한 사각형에서 평행과 직각을 동시에 맞추면 두 표시등이 켜집니다.','네 변의 길이가 모두 같아지면 마름모 톱니가 돌아갑니다.','네 변의 길이가 같고 네 각이 모두 직각이면 방패가 켜집니다.'];
 let introduced=new Set();try{introduced=new Set(JSON.parse(localStorage.getItem('polygon-intros')||sessionStorage.getItem('polygon-intros')||'[]'))}catch{}
 const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-let current=0,part=0,attempts=Array(16).fill(0),completed=Array(16).fill(false),phase='edit',hint=false,drag=null,hover=null,geom=null,ball=null,trail=[],elapsed=0,bridgeFall=0,frameLast=0,readyLast=null,lockPulse=0,visualLock=0,selected=null,flash=0,sparks=[],sceneToast='';
+let current=0,part=0,attempts=Array(20).fill(0),completed=Array(20).fill(false),phase='edit',hint=false,drag=null,hover=null,geom=null,ball=null,trail=[],elapsed=0,bridgeFall=0,frameLast=0,readyLast=null,lockPulse=0,visualLock=0,selected=null,flash=0,sparks=[],sceneToast='',machinePulse=[],lastMachineReady=[];
 const A=LEFT,B=RIGHT,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const copy=p=>({x:p.x,y:p.y}),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),dot=(u,v)=>u.x*v.x+u.y*v.y,vec=(a,b)=>({x:b.x-a.x,y:b.y-a.y}),cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
 const vlen=v=>Math.hypot(v.x,v.y),norm=v=>{const k=vlen(v)||1;return{x:v.x/k,y:v.y/k}};
@@ -112,7 +134,29 @@ const Q0={x:480,y:338},Q1={x:610,y:338};
 const pent=Array.from({length:5},(_,i)=>({x:550+102*Math.cos((-90+i*72)*Math.PI/180),y:404+102*Math.sin((-90+i*72)*Math.PI/180)}));
 const diagonalKeys=()=>{const pairs=[];for(let i=0;i<5;i++)for(let j=i+1;j<5;j++)if((j-i)!==1&&(j-i)!==4)pairs.push(`${i}-${j}`);return pairs};
 const allDiagonals=diagonalKeys();
+function makeMachine(m,i,count){
+  const width=count===3?112:150;
+  const center=count===3?[390,544,699][i]:[415,660][i];
+  const y=count===3?359:353;
+  const a={x:center-width/2,y}, b={x:center+width/2,y:y+([0,1].includes(m)?12:0)};
+  if(m===0)return{mode:m,a,b,d:{x:a.x+17,y:y+98},c:{x:b.x-17,y:y+122},center,width};
+  if(m===1)return{mode:m,a,b,d:{x:a.x+33,y:y+111},c:{x:b.x-9,y:y+128},center,width};
+  if(m===2)return{mode:m,a,b,p:{x:center+26,y:y+width*.67},center,width};
+  if(m===5)return{mode:m,a,b,d:{x:a.x+23,y:y+width*.69},center,width};
+  if(m===6)return{mode:m,a,b,d:{x:a.x+25,y:y+width*.72},center,width};
+  throw Error('Unsupported simultaneous module '+m);
+}
+function machineReady(g){
+  const m=g.mode,base=dist(g.a,g.b),epsilon=.008;
+  if(m===0){const u=vec(g.a,g.b),v=vec(g.d,g.c);return vlen(v)>40&&Math.abs(u.x*v.y-u.y*v.x)/(vlen(u)*vlen(v))<epsilon&&g.d.y>g.a.y+35&&g.c.y>g.b.y+35}
+  if(m===1){const u=vec(g.a,g.b),v=vec(g.a,g.d);return vlen(v)>35&&Math.abs(dot(u,v))/(vlen(u)*vlen(v))<epsilon&&g.d.y>g.a.y+35}
+  if(m===2){return Math.abs(dist(g.a,g.p)-base)<2&&Math.abs(dist(g.b,g.p)-base)<2&&g.p.y>g.a.y+35}
+  if(m===5){return Math.abs(dist(g.a,g.d)-base)<2.5&&g.d.y>g.a.y+35}
+  if(m===6){const v=vec(g.a,g.d),u=vec(g.a,g.b);return Math.abs(dist(g.a,g.d)-base)<2.5&&vlen(v)>35&&Math.abs(dot(v,u))/(vlen(v)*vlen(u))<epsilon&&g.d.y>g.a.y+35}
+  return false;
+}
 function newGeometry(){
+  if(isConcurrent())return{modules:stages[current].modes.map((m,i)=>makeMachine(m,i,stages[current].modes.length))};
  const m=mode();
  if(m===0)return current===1||current===11?{D:{x:371,y:447},C:{x:702,y:480}}:{D:{x:327,y:425},C:{x:766,y:462}};
  if(m===1)return{D:{x:362,y:434},C:{x:765,y:478}};
@@ -137,6 +181,7 @@ function square(){
  return len>0&&Math.abs(dot(u,v)/(vlen(u)*len))<.015&&Math.abs(len-vlen(u))<2.5&&geom.D.y>Q0.y+30;
 }
 function isReady(){
+ if(isConcurrent())return geom.modules.every(machineReady);
  if(mode()===0)return parallel();
  if(mode()===1)return rightAngle();
  if(mode()===2)return eqTriangle();
@@ -160,10 +205,15 @@ let toastSeq=0;function toast(s){sceneToast=s;ui.toast.textContent=s;ui.toast.cl
 function clearQuiz(){ui.quiz.classList.remove('show');ui.outcome.textContent='';ui.next.classList.remove('show')}
 function displayModules(){
  const mods=stages[current].modes;
+ if(isConcurrent()){
+   tray.innerHTML=geom.modules.map((g,i)=>'<span class="device-token '+(g.mode===4?'combo ':'')+(machineReady(g)?'done':'active')+'" title="장치 '+(i+1)+'">'+(machineReady(g)?'✓':deviceIcons[g.mode])+'</span>').join('');
+   nextDevice.hidden=true;return;
+ }
  tray.innerHTML=mods.map((m,i)=>'<span class="device-token '+(m===4?'combo ':'')+(i<part?'done':i===part?'active':'')+'" title="장치 '+(i+1)+'">'+(i<part?'✓':deviceIcons[m])+'</span>').join('');
  nextDevice.hidden=!(phase==='edit'&&!isFinalPart()&&isReady());
 }
 function advanceModule(){
+ if(isConcurrent())return;
  if(phase!=='edit'||isFinalPart()||!isReady())return;
  part++;geom=newGeometry();readyLast=null;visualLock=0;hint=false;selected=null;drag=null;
  initBall();clearQuiz();ui.feedback.parentElement.classList.remove('visible');
@@ -179,6 +229,13 @@ $('intro-ok').addEventListener('click',()=>{const m=stages[current].intro;introd
 nextDevice.addEventListener('click',advanceModule);
 function refresh({announce=true}={}){
   const good=isReady();
+  if(isConcurrent()){
+    const currentReady=geom.modules.map(machineReady);
+    currentReady.forEach((v,i)=>{
+      if(lastMachineReady[i]!==undefined&&lastMachineReady[i]!==v&&v)machinePulse[i]=performance.now();
+    });
+    lastMachineReady=currentReady;
+  }
   if(readyLast!==null && readyLast!==good && announce){
     if(good){lockPulse=performance.now();ui.condition.classList.remove('trigger');void ui.condition.offsetWidth;ui.condition.classList.add('trigger');ui.feedback.parentElement.classList.remove('visible');toast('');}
     else if(phase==='edit'){ui.condition.classList.remove('trigger');toast('장치가 다시 열렸어요.');}
@@ -190,11 +247,18 @@ function refresh({announce=true}={}){
   ui.attempt.textContent=attempts[current];ui.hint.textContent=hint?'단서 숨기기':'단서 보기';ui.hint.setAttribute('aria-pressed',String(hint));
   ui.start.disabled=phase==='running';ui.stop.disabled=phase!=='running';ui.retry.disabled=attempts[current]===0;ui.reset.disabled=phase==='running';ui.hint.disabled=phase==='running';
   ui.start.textContent=phase==='won'?'▶ 한 번 더 실험':phase==='failed'?'▶ 다시 출발!':'▶ 구슬 출발!';
-  ui.total.textContent=`${completed.filter(Boolean).length} / ${stages.length}`;displayModules();if(!isFinalPart())ui.start.disabled=true;
-  for(let i=0;i<stages.length;i++){const b=ui.nav.children[i];if(!b)continue;b.classList.toggle('active',i===current);b.classList.toggle('done',completed[i]);b.querySelector('.number').textContent=completed[i]?'✓':String(i+1);b.setAttribute('aria-current',i===current?'step':'false')}
+  ui.total.textContent=`${completed.filter(Boolean).length} / ${stages.length}`;displayModules();if(!isConcurrent()&&!isFinalPart())ui.start.disabled=true;
+  for(let i=0;i<stages.length;i++){const b=ui.nav.children[i];if(!b)continue;b.classList.toggle('active',i===current);b.classList.toggle('done',completed[i]);b.querySelector('.number').textContent=completed[i]?'✓':String(i+1);b.setAttribute('aria-current',i===current?'step':'false')}refreshChapterNav()
 }
+const chapterButtons=[$('chapter-1'),$('chapter-2'),$('chapter-3')];
+function refreshChapterNav(){
+ const chapter=current<8?0:current<16?1:2;
+ chapterButtons.forEach((b,i)=>{b.classList.toggle('active',chapter===i);b.setAttribute('aria-pressed',String(chapter===i))});
+ [...ui.nav.children].forEach((b,i)=>{b.hidden=(i<chapter*8||i>=Math.min((chapter+1)*8,stages.length))});
+}
+chapterButtons.forEach((b,i)=>b.addEventListener('click',()=>loadStage(i*8)));
 function buildNav(){ui.nav.innerHTML='';stages.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='stage';b.title=s.name;b.innerHTML=`<span class="number">${i+1}</span><span class="name">${s.name}</span><small>${s.subject}</small>`;b.addEventListener('click',()=>loadStage(i));ui.nav.append(b)})}
-function loadStage(n){current=n;part=0;geom=newGeometry();phase='edit';hint=false;drag=null;hover=null;selected=null;readyLast=null;visualLock=0;lockPulse=-10000;sparks=[];initBall();clearQuiz();
+function loadStage(n){current=n;part=0;geom=newGeometry();machinePulse=[];lastMachineReady=[];phase='edit';hint=false;drag=null;hover=null;selected=null;readyLast=null;visualLock=0;lockPulse=-10000;sparks=[];initBall();clearQuiz();
   const s=stages[n];ui.title.textContent=s.title;ui.detail.textContent=s.desc;ui.subject.textContent='';ui.condTitle.textContent='';ui.condTip.textContent='';ui.sigil.textContent=s.icon;ui.stageNum.textContent=String(n+1).padStart(2,'0');ui.note.textContent=s.note;cv.setAttribute('aria-label',mode()===3?'오각형 꼭짓점 중 이웃하지 않은 두 점을 차례로 선택해 대각선을 연결하세요':'노란 점을 끌어 도형의 성질을 완성하세요');
   toast('');ui.feedback.parentElement.classList.remove('visible');ui.condition.classList.remove('trigger');refresh({announce:false});showIntro();
 }
@@ -205,8 +269,8 @@ function inspect(){const ready=isReady();let s='';if(current===0)s=ready?'윗변
   feedback(ready?'조건 충족!':'조금 더 관찰해요.',s);toast(s);refresh({announce:false});
 }
 function stop(){if(phase!=='running')return;phase='edit';initBall();clearQuiz();feedback('실험을 즉시 중단했어요.','구슬이 움직이거나 공중에 있어도 바로 멈춥니다. 만든 도형은 유지되므로 수정하거나 즉시 재도전할 수 있습니다.');toast('중단 완료 · 도형 수정 또는 즉시 재도전');refresh({announce:false})}
-function reset(){if(phase==='running')stop();part=0;geom=newGeometry();phase='edit';selected=null;hint=false;sparks=[];initBall();clearQuiz();readyLast=null;refresh({announce:false});feedback('처음 도형으로 되돌렸어요.','조건을 다시 찾아 보세요. 기존의 도전 횟수와 완료 기록은 유지됩니다.');toast('도형 초기화 · 처음부터 다시 설계해 보세요.')}
-function begin(){if(!isFinalPart())return;geom=geom||newGeometry();phase='running';sparks=[];initBall();clearQuiz();ball.vx=255;attempts[current]++;const ready=completeModule();feedback('구슬 실험 시작!',ready?'장치가 모두 켜져 다리를 고정했습니다. 구슬의 움직임을 살펴보세요.':'수학 조건을 만족하지 않아 장치가 다리를 붙잡지 못합니다. 움직이는 중에도 중단·재도전을 할 수 있어요.');toast(ready?'연결 성공! 구슬이 다리를 건너고 있어요.':'장치가 열려 있어요. 다리는 구슬을 지탱하지 못합니다.');refresh({announce:false})}
+function reset(){if(phase==='running')stop();part=0;geom=newGeometry();machinePulse=[];lastMachineReady=[];phase='edit';selected=null;hint=false;sparks=[];initBall();clearQuiz();readyLast=null;refresh({announce:false});feedback('처음 도형으로 되돌렸어요.','조건을 다시 찾아 보세요. 기존의 도전 횟수와 완료 기록은 유지됩니다.');toast('도형 초기화 · 처음부터 다시 설계해 보세요.')}
+function begin(){if(!isConcurrent()&&!isFinalPart())return;geom=geom||newGeometry();phase='running';sparks=[];initBall();clearQuiz();ball.vx=255;attempts[current]++;const ready=completeModule();feedback('구슬 실험 시작!',ready?'장치가 모두 켜져 다리를 고정했습니다. 구슬의 움직임을 살펴보세요.':'수학 조건을 만족하지 않아 장치가 다리를 붙잡지 못합니다. 움직이는 중에도 중단·재도전을 할 수 있어요.');toast(ready?'연결 성공! 구슬이 다리를 건너고 있어요.':'장치가 열려 있어요. 다리는 구슬을 지탱하지 못합니다.');refresh({announce:false})}
 function retry(){begin()}
 function fail(reason){if(phase!=='running')return;phase='failed';feedback('구슬 이동 실패:',reason+' [중단·수정]을 기다릴 필요 없이 도형을 수정한 뒤 다시 출발하거나 [즉시 재도전]을 누르세요.');toast('실패 · 공이 멈추기를 기다리지 않고 다시 시도하세요.');refresh({announce:false})}
 
@@ -218,7 +282,7 @@ function win(){
  ui.quizTitle.textContent=stages[current].chapterEnd?'챕터 완성!':'스테이지 성공!';
  ui.quizPrompt.textContent=stages[current].chapterEnd?'배운 장치의 원리를 확인해 보세요.':'다음 스테이지에도 익숙한 장치가 나올 수 있어요.';
  ui.next.classList.add('show');ui.next.textContent=current===stages.length-1?'처음부터 다시 플레이':'다음 스테이지 ▶';
- if(stages[current].chapterEnd)startChapterQuiz(0,current===7?1:2);
+ if(stages[current].chapterEnd)startChapterQuiz(0,current===7?1:current===15?2:3);
  toast('목적지 도착!');ui.feedback.parentElement.classList.remove('visible');
  for(let i=0;i<36;i++){const speed=40+(i%10)*17;sparks.push({x:895+(i*3)%120,y:295+(i*13)%110,vx:(i%2?1:-1)*speed,vy:-speed,t:0,life:1.3,color:['#ffcf81','#70f1c8','#c7b4ff','#fff0bc'][i%4]})}
  refresh({announce:false});
@@ -231,7 +295,13 @@ function startChapterQuiz(index,chapter){
   {question:'정사각형을 설명한 내용으로 알맞은 것은?',answers:['① 네 변의 길이가 같고 네 각이 직각','② 네 변 중 두 변만 같음','③ 모든 각이 예각'],right:0,explain:'정사각형은 네 변이 같고 네 각이 모두 직각입니다.'},
   {question:'정사각형과 마름모의 관계는?',answers:['① 공통 성질이 없다','② 정사각형도 마름모의 한 종류','③ 마름모에는 변이 5개'],right:1,explain:'정사각형은 마름모와 직사각형의 성질을 모두 지닙니다.'}
  ];
- const pool=chapter===1?catalog:extra;
+ const extra3=[
+  {question:'서로 다른 도형 두 개가 같은 다리를 작동시키려면?',answers:['① 각각의 장치 조건을 모두 만족해야 함','② 한 장치만 작동하면 됨','③ 도형을 겹치면 됨'],right:0,explain:'서로 다른 도형에 주어진 조건이 모두 성립해야 다리 전체가 연결됩니다.'},
+  {question:'마주 보는 두 변이 평행인지만 확인할 때 쓰는 장치는?',answers:['① 대각선 발전기','② 평행 잠금장치','③ 정삼각형 열쇠'],right:1,explain:'평행 잠금장치는 마주 보는 두 변이 평행할 때 작동합니다.'},
+  {question:'정사각형 방패가 작동하려면?',answers:['① 네 변이 같고 네 각이 직각','② 네 변만 달라도 됨','③ 꼭짓점 세 개만 필요'],right:0,explain:'정사각형은 네 변이 모두 같고 네 각이 모두 직각입니다.'},
+  {question:'한 장치가 작동하지 않았다면 어떤 행동이 적절할까요?',answers:['① 성공으로 간주','② 화면을 무조건 재시작','③ 해당 도형의 변과 각을 다시 관찰하고 수정'],right:2,explain:'각 장치의 성질을 살펴보고 그 도형을 수정하면 됩니다.'}
+ ];
+ const pool=chapter===1?catalog:chapter===2?extra:extra3;
  const item=pool[index];ui.quizTitle.textContent='챕터 '+chapter+' · 수학 탐구';
  ui.quizPrompt.textContent=(index+1)+' / '+pool.length+' · '+item.question;
  ui.answers.innerHTML='';ui.next.classList.remove('show');
@@ -294,6 +364,12 @@ function clampDevice(point,ts){const q=visualLock;cx.save();cx.translate(point.x
   cx.shadowBlur=q*18;cx.shadowColor='#2af3be';circle(0,-44,14,q>.7?'#33edbf':'#eda964');cx.shadowBlur=0;text(q>.7?'✓':'×',0,-37,18,'#124c46',950);cx.restore()
 }
 function drawConditionBadge(ts){const good=isReady();
+ if(isConcurrent()){
+  const count=geom.modules.filter(machineReady).length;
+  roundRect(390,161,320,52,14,good?'#0e745fe8':'#4b5870e9',good?'#8cffd5':'#a3bdd7');
+  text(good?'✓ 모든 장치 작동':`장치 ${count} / ${geom.modules.length} 작동`,550,194,21,'#fff7e9',900);
+  return;
+ }
  if(mode()===4){const bits=conditionBits();
   for(let i=0;i<2;i++){const x=421+i*133;roundRect(x,155,125,60,11,bits[i]?'#0d876fe8':'#5f4f37e8',bits[i]?'#81ffcf':'#dfbb7a',2);text((bits[i]?'✓ ':'○ ')+(i===0?'∥':'∟'),x+63,194,25,'#fff',900)}
  }else{
@@ -302,7 +378,65 @@ function drawConditionBadge(ts){const good=isReady();
  }
  const age=(ts-lockPulse)/1000;if(good&&age>0&&age<1.2&&!reduce){cx.save();cx.globalAlpha=1-age/1.2;cx.strokeStyle='#8affd8';cx.lineWidth=4;cx.strokeRect(385-age*11,156-age*7,330+age*22,62+age*14);cx.restore()}
 }
-function stageShapes(ts){const good=isReady(),running=phase==='running',faint=running&&!good,offset=faint?bridgeFall:0;
+function drawConcurrentMachines(ts){
+ const list=geom.modules;
+ list.forEach((g,i)=>{
+  const good=machineReady(g),m=g.mode;
+  const x=g.center-g.width/2-18,frameY=310,frameW=g.width+36;
+  cx.save();
+  roundRect(x,frameY,frameW,215,13,good?'#195d5482':'#203b5391',good?'#5ff5bd':'#7194a6',good?2.5:1.5);
+  if(good){
+    cx.shadowColor='#42f3bc';cx.shadowBlur=10;
+    circle(g.center,330,15,'#24c39e','#aaffd9',2);
+    cx.shadowBlur=0;
+  }else circle(g.center,330,15,'#c18c52','#ffe0a1',2);
+  text(deviceIcons[m],g.center,338,m===0?18:21,good?'#153f37':'#294257',900);
+  text(String(i+1),x+14,327,12,'#e2f8f3',900);
+  cx.restore();
+  const fill=good?'#54d7ae89':'#d8b88699',stroke=good?'#a9ffde':'#ffe3af';
+  cx.save();
+  cx.shadowColor=good?'#47ffca':'transparent';cx.shadowBlur=good?17:0;
+  if(m===0||m===1){
+   path([g.a,g.b,g.c,g.d],fill,stroke,4);
+   cx.shadowBlur=0;
+   if(m===0){
+    parallelArrows(g.a,g.b,good?'#57ffe0':'#e7d3a4',-12);
+    parallelArrows(g.d,g.c,good?'#57ffe0':'#e7d3a4',12);
+    if(hint&&!good){const slope=(g.b.y-g.a.y)/(g.b.x-g.a.x);const y=g.d.y+slope*(g.c.x-g.d.x);line(g.d,{x:g.c.x,y},'#86fbd7',2,[5,5])}
+   }else{
+    circle(g.a.x,g.a.y,20,null,good?'#8affe1':'#ffe3ac',3);
+    const u=norm(vec(g.a,g.b)),v=norm(vec(g.a,g.d));const angle=Math.round(Math.acos(clamp(dot(u,v),-1,1))*180/Math.PI);
+    if(good)text('90°',g.a.x+27,g.a.y+32,13,'#c1fff1',850);
+    if(hint&&!good){const target=g.a.x-(g.b.y-g.a.y)/(g.b.x-g.a.x)*(g.d.y-g.a.y);line(g.a,{x:target,y:g.d.y},'#86fbd7',2,[5,5])}
+   }
+  }else if(m===2){
+   path([g.a,g.b,g.p],fill,stroke,4);
+   if(good){[[g.a,g.b],[g.b,g.p],[g.p,g.a]].forEach(([a,b])=>{const mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2};circle(mid.x,mid.y,3,'#9bfff0')})}
+   if(hint&&!good){const y=g.a.y+g.width*Math.sqrt(3)/2;circle(g.center,y,9,null,'#86fbd7',2)}
+  }else if(m===5||m===6){
+   const c={x:g.b.x+g.d.x-g.a.x,y:g.d.y};
+   path([g.a,g.b,c,g.d],fill,stroke,4);
+   if(m===6){circle(g.a.x,g.a.y,18,null,good?'#74ffe2':'#d8b886',2);
+    if(good){line({x:g.a.x+10,y:g.a.y},{x:g.a.x+10,y:g.a.y+10},'#b5ffe7',2);line({x:g.a.x+10,y:g.a.y+10},{x:g.a.x,y:g.a.y+10},'#b5ffe7',2)}
+   }
+   if(hint&&!good){const target={x:g.a.x,y:g.a.y+g.width};circle(target.x,target.y,8,null,'#86fbd7',2)}
+  }
+  cx.shadowBlur=0;
+  cx.restore();
+  if(phase!=='running'){
+   if(m===0){handle(g.d,'',hover===i+':d'||drag===i+':d');handle(g.c,'',hover===i+':c'||drag===i+':c')}
+   else if(m===1||m===5||m===6)handle(g.d,'',hover===i+':d'||drag===i+':d');
+   else if(m===2)handle(g.p,'',hover===i+':p'||drag===i+':p');
+  }
+  const pulseAge=(ts-(machinePulse[i]||-10000))/1000;
+  if(good&&pulseAge>=0&&pulseAge<.9&&!reduce){
+   cx.save();cx.globalAlpha=Math.max(0,1-pulseAge/.9);
+   circle(g.center,330,17+pulseAge*30,null,'#aaffdc',3);
+   cx.restore();
+  }
+ });
+}
+function stageShapes(ts){if(isConcurrent()){drawConcurrentMachines(ts);return}const good=isReady(),running=phase==='running',faint=running&&!good,offset=faint?bridgeFall:0;
   if(mode()===0||mode()===1){const P=[A,B,geom.C,geom.D];cx.save();cx.translate(0,offset);
     path(P,good?'#91e8cf94':'#efc9949e',good?'#aaffdc':'#ffe5b0',4);line(A,B,'#f3fffd',4);
     if(mode()===0){parallelArrows(A,B,good?'#57ffe0':'#f2f2d1',-20);parallelArrows(geom.D,geom.C,good?'#54f7cf':'#ffcd8a',20);
@@ -365,8 +499,57 @@ function drawSparks(dt){if(!sparks.length)return;cx.save();for(let i=sparks.leng
 function render(ts,dt){cx.clearRect(0,0,W,H);bg(ts);land(0,LEFT.y,LEFT.x,true);land(RIGHT.x,RIGHT.y,W-RIGHT.x,false);groundBeam(ts);stageShapes(ts);clampDevice(A,ts);clampDevice(B,ts);drawConditionBadge(ts);drawBall();drawSparks(dt)}
 function tick(ts){if(!frameLast)frameLast=ts;const dt=clamp((ts-frameLast)/1000,0,.034);frameLast=ts;const goal=isReady()?1:0;visualLock=reduce?goal:visualLock+(goal-visualLock)*Math.min(1,dt*8);if(phase==='running')physicsStep(dt);render(ts,dt);requestAnimationFrame(tick)}
 function stagePoint(event){const r=cv.getBoundingClientRect();return{x:(event.clientX-r.left)*W/r.width,y:(event.clientY-r.top)*H/r.height}}
-function closest(p){let choices=[];if(mode()===0||mode()===4)choices=[['D',geom.D],['C',geom.C]];if(mode()===1)choices=[['D',geom.D]];if(mode()===2)choices=[['P',geom.P]];if(mode()===5||mode()===6)choices=[['D',geom.D]];if(mode()===3)choices=pent.map((v,i)=>[String(i),v]);let candidate=null,md=Infinity;for(const [id,v] of choices){const d=dist(p,v);if(d<md){candidate=id;md=d}}return md<(mode()===3?47:54)?candidate:null}
-function editPoint(pos){if(!drag)return;const val={x:Math.round(pos.x),y:Math.round(pos.y)};
+function closest(p){
+ if(isConcurrent()){
+   let best=null,distance=Infinity;
+   geom.modules.forEach((g,i)=>{
+     const choices=g.mode===0?[['d',g.d],['c',g.c]]:g.mode===2?[['p',g.p]]:[['d',g.d]];
+     for(const [key,point]of choices){const d=dist(p,point);if(d<distance){distance=d;best=i+':'+key}}
+   });
+   return distance<42?best:null;
+ }
+ let choices=[];if(mode()===0||mode()===4)choices=[['D',geom.D],['C',geom.C]];if(mode()===1)choices=[['D',geom.D]];if(mode()===2)choices=[['P',geom.P]];if(mode()===5||mode()===6)choices=[['D',geom.D]];if(mode()===3)choices=pent.map((v,i)=>[String(i),v]);let candidate=null,md=Infinity;for(const [id,v] of choices){const d=dist(p,v);if(d<md){candidate=id;md=d}}return md<(mode()===3?47:54)?candidate:null}
+function editPoint(pos){
+ if(!drag)return;
+ if(isConcurrent()){
+   const [rawIndex,key]=drag.split(':'),g=geom.modules[Number(rawIndex)];
+   if(!g)return;
+   const m=g.mode,top=g.a.y;
+   const point={x:Math.round(pos.x),y:Math.round(pos.y)};
+   point.y=clamp(point.y,top+39,Math.min(519,top+g.width+23));
+   if(m===0){
+     if(key==='d'){point.x=clamp(point.x,g.a.x-34,g.a.x+47);g.d=point}
+     if(key==='c'){
+       point.x=clamp(point.x,g.b.x-55,g.b.x+18);
+       const y=g.d.y+(g.b.y-g.a.y)/(g.b.x-g.a.x)*(point.x-g.d.x);
+       if(Math.abs(point.y-y)<15)point.y=y;
+       g.c=point;
+     }
+   }else if(m===1){
+     point.x=clamp(point.x,g.a.x-48,g.a.x+57);
+     const x=g.a.x-(g.b.y-g.a.y)/(g.b.x-g.a.x)*(point.y-g.a.y);
+     if(Math.abs(point.x-x)<16)point.x=x;
+     g.d=point;
+   }else if(m===2){
+     point.x=clamp(point.x,g.a.x-18,g.b.x+18);
+     const target={x:g.center,y:g.a.y+g.width*Math.sqrt(3)/2};
+     if(dist(point,target)<20){point.x=target.x;point.y=target.y}
+     g.p=point;
+   }else if(m===5){
+     point.x=clamp(point.x,g.a.x-16,g.a.x+g.width*.62);
+     const d=dist(point,g.a);
+     if(Math.abs(d-g.width)<16&&d>0){point.x=g.a.x+(point.x-g.a.x)*g.width/d;point.y=g.a.y+(point.y-g.a.y)*g.width/d}
+     g.d=point;
+   }else if(m===6){
+     point.x=clamp(point.x,g.a.x-20,g.a.x+g.width*.65);
+     const target={x:g.a.x,y:g.a.y+g.width};
+     if(dist(point,target)<20){point.x=target.x;point.y=target.y}
+     g.d=point;
+   }
+   if(phase==='won'||phase==='failed'){phase='edit';initBall();clearQuiz()}
+   refresh();return;
+ }
+ const val={x:Math.round(pos.x),y:Math.round(pos.y)};
   if(mode()===0){if(drag==='D'){val.x=clamp(val.x,255,480);val.y=clamp(val.y,355,504);const sy=geom.C.y-(B.y-A.y)/(B.x-A.x)*(geom.C.x-val.x);if(Math.abs(val.y-sy)<13)val.y=sy;geom.D=val}else{val.x=clamp(val.x,615,850);val.y=clamp(val.y,420,520);const sy=geom.D.y+(B.y-A.y)/(B.x-A.x)*(val.x-geom.D.x);if(Math.abs(val.y-sy)<13)val.y=sy;geom.C=val}}
   if(mode()===1){val.x=clamp(val.x,240,450);val.y=clamp(val.y,370,509);const sx=A.x-(B.y-A.y)/(B.x-A.x)*(val.y-A.y);if(Math.abs(val.x-sx)<14)val.x=sx;geom.D=val}
   if(mode()===2){val.x=clamp(val.x,480,625);val.y=clamp(val.y,391,503);if(Math.abs(val.x-equil.x)<13&&Math.abs(val.y-equil.y)<13){val.x=equil.x;val.y=equil.y}geom.P=val}
