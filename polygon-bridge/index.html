@@ -44,6 +44,13 @@
 .device-token.combo{font-size:13px}
 @media(max-width:510px){.stages{grid-template-columns:repeat(8,minmax(0,1fr));row-gap:5px}.stage{min-height:34px}}
 
+/* Chapter navigation: only the current chapter's numbers are visible */
+.chapter-tabs{display:flex;gap:5px;margin-bottom:6px}
+.chapter-tabs button{flex:1;min-height:34px;padding:7px 5px;border-radius:9px;background:#edf3f8;border:1px solid #dbe5ee;color:#6c7d8d;font-size:12px}
+.chapter-tabs button.active{background:#dff7ee;color:#10765d;border:1px solid #5ec6a5}
+.stage[hidden]{display:none!important}
+.chapter-tabs button:focus-visible{outline:3px solid #3e97e7}
+@media(max-width:510px){.chapter-tabs button{font-size:10px;padding:6px 2px;min-height:31px}}
 /* Chapter 3: simultaneous independent geometry machines */
 .stage:nth-child(n+17){background:#f0f0fb;border-color:#d7d4f0}
 .stage:nth-child(n+17).active{background:#eaf9f1;border-color:#24a789}
@@ -54,6 +61,11 @@
 <main class="app">
 <header class="heading"><div class="brand"><div class="logo" aria-hidden="true">▱</div><div><h1>다각형 다리 작전</h1><p>도형의 성질로 장치를 작동시키는 수학 물리 퍼즐</p></div></div><div class="award">학습 기록 <b id="total">0 / 20</b>개 완료</div></header>
 <section class="card">
+<nav class="chapter-tabs" aria-label="챕터 선택">
+<button id="chapter-1" type="button">1 · 장치 배우기</button>
+<button id="chapter-2" type="button">2 · 응용</button>
+<button id="chapter-3" type="button">3 · 복합</button>
+</nav>
 <nav class="stages" id="stage-nav" aria-label="스테이지 선택"></nav>
 <div class="mission"><div><h2 id="mission-title"></h2><p id="mission-detail"></p></div><span class="subject" id="subject"></span></div>
 <div class="condition" id="condition" role="status" aria-live="polite"><div class="sigil" id="sigil" aria-hidden="true"></div><div class="condition-copy"><small>장치 작동 원리</small><strong id="condition-title"></strong><p id="condition-tip"></p></div><div class="status" id="condition-status"></div></div>
@@ -101,7 +113,7 @@ const levelSettings=[
   {name:'이어지는 에너지',title:'19 · 이어지는 에너지',desc:'다리 잠금과 삼각 열쇠를 함께 작동시키세요.',modes:[0,2],simultaneous:true},
   {name:'챕터 3 동력실',title:'20 · 챕터 3 동력실',desc:'한 화면의 세 장치를 모두 켜 구슬을 이동시키세요.',modes:[0,1,6],simultaneous:true,chapterEnd:true}
 ];
-stages.splice(0,stages.length,...levelSettings.map((p,i)=>{const base=catalog[p.modes[0]]||catalog[0];return {...base,...p,short:String(i+1),note:p.modes.length>1?'이미 배운 수학 조건을 단계별 기계장치에 적용하는 복합 퍼즐입니다. 장치의 작동 규칙은 가상의 게임 규칙이며 실제 다리의 보편적인 안정성 조건은 아닙니다.':base.note}}));
+stages.splice(0,stages.length,...levelSettings.map((p,i)=>{const base=catalog[p.modes[0]]||catalog[0];return {...base,...p,short:String(i+1),note:p.simultaneous?'한 장면의 서로 다른 도형을 각각 조작해 모든 장치를 작동시키는 복합 문제입니다. 각 장치는 수학적 조건을 엄밀히 판정해 게임 속 다리를 열고 닫지만, 실제 다리의 안전성을 일반화하는 규칙은 아닙니다.':p.modes.length>1?'이미 배운 수학 조건을 단계별 기계장치에 적용하는 복합 퍼즐입니다. 장치의 작동 규칙은 가상의 게임 규칙이며 실제 다리의 보편적인 안정성 조건은 아닙니다.':base.note}}));
 const mode=()=>stages[current].modes[part];
 const isConcurrent=()=>Boolean(stages[current].simultaneous);
 const isFinalPart=()=>part===stages[current].modes.length-1;
@@ -236,8 +248,15 @@ function refresh({announce=true}={}){
   ui.start.disabled=phase==='running';ui.stop.disabled=phase!=='running';ui.retry.disabled=attempts[current]===0;ui.reset.disabled=phase==='running';ui.hint.disabled=phase==='running';
   ui.start.textContent=phase==='won'?'▶ 한 번 더 실험':phase==='failed'?'▶ 다시 출발!':'▶ 구슬 출발!';
   ui.total.textContent=`${completed.filter(Boolean).length} / ${stages.length}`;displayModules();if(!isConcurrent()&&!isFinalPart())ui.start.disabled=true;
-  for(let i=0;i<stages.length;i++){const b=ui.nav.children[i];if(!b)continue;b.classList.toggle('active',i===current);b.classList.toggle('done',completed[i]);b.querySelector('.number').textContent=completed[i]?'✓':String(i+1);b.setAttribute('aria-current',i===current?'step':'false')}
+  for(let i=0;i<stages.length;i++){const b=ui.nav.children[i];if(!b)continue;b.classList.toggle('active',i===current);b.classList.toggle('done',completed[i]);b.querySelector('.number').textContent=completed[i]?'✓':String(i+1);b.setAttribute('aria-current',i===current?'step':'false')}refreshChapterNav()
 }
+const chapterButtons=[$('chapter-1'),$('chapter-2'),$('chapter-3')];
+function refreshChapterNav(){
+ const chapter=current<8?0:current<16?1:2;
+ chapterButtons.forEach((b,i)=>{b.classList.toggle('active',chapter===i);b.setAttribute('aria-pressed',String(chapter===i))});
+ [...ui.nav.children].forEach((b,i)=>{b.hidden=(i<chapter*8||i>=Math.min((chapter+1)*8,stages.length))});
+}
+chapterButtons.forEach((b,i)=>b.addEventListener('click',()=>loadStage(i*8)));
 function buildNav(){ui.nav.innerHTML='';stages.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='stage';b.title=s.name;b.innerHTML=`<span class="number">${i+1}</span><span class="name">${s.name}</span><small>${s.subject}</small>`;b.addEventListener('click',()=>loadStage(i));ui.nav.append(b)})}
 function loadStage(n){current=n;part=0;geom=newGeometry();machinePulse=[];lastMachineReady=[];phase='edit';hint=false;drag=null;hover=null;selected=null;readyLast=null;visualLock=0;lockPulse=-10000;sparks=[];initBall();clearQuiz();
   const s=stages[n];ui.title.textContent=s.title;ui.detail.textContent=s.desc;ui.subject.textContent='';ui.condTitle.textContent='';ui.condTip.textContent='';ui.sigil.textContent=s.icon;ui.stageNum.textContent=String(n+1).padStart(2,'0');ui.note.textContent=s.note;cv.setAttribute('aria-label',mode()===3?'오각형 꼭짓점 중 이웃하지 않은 두 점을 차례로 선택해 대각선을 연결하세요':'노란 점을 끌어 도형의 성질을 완성하세요');
