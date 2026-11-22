@@ -56,7 +56,7 @@
     </div>
   </section>
   <aside class="side">
-    <section class="panel"><h2>나의 코스</h2>
+    <section class="panel"><h2>나의 코스</h2><p class="hint">♫ 곡마다 코스가 자동 저장돼요. 곡을 바꾸면 해당 곡의 코스를 불러옵니다.</p>
       <button type="button" class="pbtn" id="sampleBtn"><span class="ic">⤴</span> 예시 코스 불러오기</button>
       <button type="button" class="pbtn" id="loopSampleBtn"><span class="ic">↻</span> 한 바퀴 루프 예시</button>
       <button type="button" class="pbtn" id="pushBtn"><span class="ic">➜</span> 라이더 살짝 밀어주기</button>
@@ -76,7 +76,7 @@
     </section>
     <section class="panel"><h2>이렇게 즐겨 보세요 <span class="pill">자유 놀이</span></h2>
       <div class="steps"><p><b>1</b><span>감상곡을 고르고 음악을 들어 봐요.</span></p><p><b>2</b><span>라이더나 썰매를 꾸미고, 손가락으로 내리막길을 그려요.</span></p><p><b>3</b><span>음악을 듣거나 함께 달리면서 자유롭게 코스를 바꿔 봐요.</span></p></div>
-      <div class="sep"></div><p class="hint">높은 곳으로 올라가거나 아래로 내려가면 배경도 달라져요. 미니맵을 눌러 긴 코스를 빠르게 둘러보세요. 한 바퀴 돌고 싶다면 출발길부터 루프, 출구까지 한 번에 이어 그려 보세요. 루프 보조를 켜면 속력이 조금 부족해도 완주하기 쉬워요.</p><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
+      <div class="sep"></div><p class="hint">높은 곳에서 아래로 멀리 떨어져도 바로 실패하지 않아요. 아래에 선을 만들어 다시 착지할 수 있어요.</p><p class="hint">높은 곳으로 올라가거나 아래로 내려가면 배경도 달라져요. 미니맵을 눌러 긴 코스를 빠르게 둘러보세요. 한 바퀴 돌고 싶다면 출발길부터 루프, 출구까지 한 번에 이어 그려 보세요. 루프 보조를 켜면 속력이 조금 부족해도 완주하기 쉬워요.</p><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
     </section>
   </aside>
 </div>
@@ -101,7 +101,11 @@ const SAMPLE=[
  [[905,419],[1010,414],[1150,384],[1270,386],[1370,432]],
  [[1420,429],[1490,371],[1545,318],[1635,316],[1750,369]]
 ];
+// v2.3까지 사용한 단일 코스 키는 최초 실행 때 '산들바람 산책' 코스로 이전합니다.
 const STORAGE='melodyRider_courses_v1';
+const COURSE_STORAGE_PREFIX='melodyRider_songCourse_v1:';
+const SELECTED_SONG_STORAGE='melodyRider_selectedSong_v1';
+let activeCourseKey='builtin:breeze',storageWarningShown=false;
 let tracks=[],history=[],mode='draw',camera={x:0,y:-56,zoom:1},follow=true,grid=false;
 let width=800,height=500,scale=1,pointer=null,preview=null,playing=false,rideEnabled=true,lastTime=0,now=0,shownMessage=0,death=false,loopAssist=true;
 const miniCanvas=$('miniCanvas'),miniCtx=miniCanvas.getContext('2d');let minimapDirty=true,miniBounds=null,miniProjection=null,miniPointer=null;const miniLayer=document.createElement('canvas');
@@ -123,9 +127,43 @@ function showMessage(txt,ms=1700){$('message').textContent=txt;$('message').clas
 function sample(){return SAMPLE.map(line=>line.map(p=>({x:p[0],y:p[1]})));}
 function snap(){return tracks.map(line=>line.map(p=>({x:p.x,y:p.y})));}
 function checkpoint(){history.push(snap());if(history.length>40)history.shift();}
-function persist(){minimapDirty=true;try{localStorage.setItem(STORAGE,JSON.stringify(tracks));}catch(e){}}
+function songCourseKey(song){
+ if(song.kind==='builtin')return 'builtin:'+song.id;
+ if(song.kind==='none')return 'silent';
+ if(song.kind==='file')return 'file:'+(selectedFile?.name||'unknown')+':'+(selectedFile?.size||0)+':'+(selectedFile?.lastModified||0);
+ // 교사가 곡 목록의 순서를 바꿔도 같은 음원은 같은 코스를 불러옵니다.
+ return 'teacher:'+song.src;
+}
+function courseStorageKey(key){return COURSE_STORAGE_PREFIX+encodeURIComponent(key);}
+function persist(){
+ minimapDirty=true;
+ try{
+  const serialized=JSON.stringify(tracks);
+  localStorage.setItem(courseStorageKey(activeCourseKey),serialized);
+  // 이전 버전에서 저장한 작품을 가능한 한 보존하도록 기본곡 키도 갱신합니다.
+  if(activeCourseKey==='builtin:breeze')localStorage.setItem(STORAGE,serialized);
+  storageWarningShown=false;
+ }catch(e){
+  if(!storageWarningShown){showMessage('저장 공간이 부족해요. 코스 파일로 따로 저장해 주세요',3000);storageWarningShown=true;}
+ }
+}
+function restoreCourse(key,allowLegacy=false){
+ let saved=null;
+ try{
+  const raw=localStorage.getItem(courseStorageKey(key));
+  if(raw!==null)saved=validateTrack(JSON.parse(raw));
+  if(saved===null&&allowLegacy){
+   const legacy=localStorage.getItem(STORAGE);
+   if(legacy!==null)saved=validateTrack(JSON.parse(legacy));
+   if(saved!==null){tracks=saved;persist();}
+  }
+ }catch(e){saved=null;}
+ tracks=saved!==null?saved:(allowLegacy?sample():[]);
+ history=[];minimapDirty=true;
+ return saved!==null;
+}
 function validateTrack(data){if(!Array.isArray(data)||data.length>500)return null;const out=[];for(const line of data){if(!Array.isArray(line)||line.length>15000) return null;const newLine=[];for(const p of line){if(typeof p?.x!=='number'||typeof p?.y!=='number'||!Number.isFinite(p.x)||!Number.isFinite(p.y)||Math.abs(p.x)>1e7||Math.abs(p.y)>1e7)return null;newLine.push({x:p.x,y:p.y});}if(newLine.length>1)out.push(newLine);}return out;}
-try{const stored=JSON.parse(localStorage.getItem(STORAGE));tracks=validateTrack(stored)||sample();}catch(e){tracks=sample();}
+restoreCourse(activeCourseKey,true);
 function resetRider(){rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,track:null,s:0,railSpeed:0,side:1,boosted:new Set(),r:12};death=false;sparkles=[];}
 function resetMusic(){musicTime=0;beatPlayed=-1;if(musicMode==='url'||musicMode==='file'){try{audio.currentTime=0;}catch(e){}}updateTime();}
 function refreshButtons(){$('playBtn').textContent=playing&&rideEnabled?'Ⅱ 함께 멈춤':'▶ 함께 재생';$('listenBtn').textContent=playing&&!rideEnabled?'Ⅱ 음악 멈춤':'♫ 음악만 듣기';}
@@ -152,16 +190,33 @@ function renderSongOptions(){
  sel.value=keep;$('songName').textContent=currentSong.description||currentSong.title;musicDuration=musicMode==='builtin'?currentSong.length:musicMode==='none'?0:Number.isFinite(audio.duration)?audio.duration:0;updateTime();
 }
 function chooseMusic(id){
- stop(true);const song=id==='local'?{id:'local',kind:'file',title:selectedFile?.name||'내 음악',description:'내 기기의 음악 파일'}:id==='silent'?{id:'silent',kind:'none',title:'무음',description:'음악 없이 자유롭게 코스를 만들어요'}:songs.find(s=>s.id===id);
- if(!song)return;currentSong=song;musicMode=song.kind==='none'?'none':song.kind==='builtin'?'builtin':song.kind==='file'?'file':'url';
+ const song=id==='local'?selectedFile?{id:'local',kind:'file',title:selectedFile.name,description:'내 기기의 음악 파일'}:null:id==='silent'?{id:'silent',kind:'none',title:'무음',description:'음악 없이 자유롭게 코스를 만들어요'}:songs.find(s=>s.id===id);
+ if(!song)return;
+ // 다른 곡으로 이동할 때 현재 코스를 저장하고 다음 곡의 저장본으로 완전히 교체합니다.
+ persist();stop(true);
+ const nextKey=songCourseKey(song),changed=nextKey!==activeCourseKey;
+ currentSong=song;activeCourseKey=nextKey;
+ musicMode=song.kind==='none'?'none':song.kind==='builtin'?'builtin':song.kind==='file'?'file':'url';
+ if(changed){const restored=restoreCourse(activeCourseKey);showMessage(restored?'이 곡에 저장한 코스를 불러왔어요':'새 감상곡이에요. 이 곡의 코스를 그려 보세요',2100);}
+ camera.x=0;camera.y=-56;
  if(musicMode==='url'){audio.src=song.src;audio.load();}else if(musicMode==='file'){audio.src=musicFileUrl;audio.load();}else{audio.removeAttribute('src');audio.load();}
  renderSongOptions();
+ try{if(musicMode==='file')localStorage.removeItem(SELECTED_SONG_STORAGE);else localStorage.setItem(SELECTED_SONG_STORAGE,activeCourseKey);}catch(e){}
 }
 async function loadLibrary(){
  try{const response=await fetch('./music-library.json',{cache:'no-store'});if(!response.ok)throw Error();const data=await response.json();const entries=Array.isArray(data)?data:Array.isArray(data.songs)?data.songs:[];
   const clean=entries.slice(0,70).map((s,i)=>{if(!s||typeof s.title!=='string'||typeof s.src!=='string')return null;const title=s.title.trim().slice(0,80),src=s.src.trim();if(!title||!src||/^(javascript|data|blob|file):/i.test(src)||src.startsWith('//'))return null;try{const u=new URL(src,location.href);if(!['http:','https:'].includes(u.protocol))return null;}catch(e){return null;}return{id:'teacher-'+i,kind:'url',title,src,description:typeof s.description==='string'?s.description.slice(0,140):'선생님이 등록한 감상곡'};}).filter(Boolean);
   songs=[...BUILTINS,...clean];renderSongOptions();
  }catch(e){/* file://에서는 외부 JSON을 읽을 수 없으므로 기본 3곡만 표시 */}
+ // 새로고침해도 마지막 감상곡을 복원합니다. 보안상 로컬 음원 파일은 다시 골라야 합니다.
+ try{
+  const savedKey=localStorage.getItem(SELECTED_SONG_STORAGE);
+  if(savedKey&&savedKey!==activeCourseKey){
+   const options=[...songs,{id:'silent',kind:'none'}];
+   const found=options.find(song=>songCourseKey(song)===savedKey);
+   if(found)chooseMusic(found.id);
+  }
+ }catch(e){}
 }
 function fmt(s){if(!Number.isFinite(s))return'0:00';s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 function updateTime(){const pos=musicMode==='file'||musicMode==='url'?audio.currentTime:musicMode==='builtin'?musicTime:0;const dur=musicDuration;const val=dur>0?Math.round((pos/dur)*1000):0;$('seek').value=clamp(val,0,1000);$('time').textContent=fmt(pos)+' / '+fmt(dur);$('seek').disabled=musicMode==='none'||dur<=0;}
@@ -316,7 +371,7 @@ function simulate(dt){
    p.angle=turnAngle(p.angle,Math.atan2(p.vy,p.vx),.045);
   }
  }
- if(p.y>1800||Math.abs(p.x)>200000){death=true;showMessage('앗, 떨어졌어요! ↻ 처음부터를 눌러 보세요',2600);updateStatus();}
+ // 낙하 높이나 수평 이동 거리 때문에 자동 실패 처리하지 않습니다. 아래 선로에 언제든 다시 착지할 수 있습니다.
  for(const s of sparkles){s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;}sparkles=sparkles.filter(s=>s.life>0).slice(-80);
 }
 function nudgeRider(){
@@ -435,7 +490,7 @@ $('sampleBtn').onclick=()=>{checkpoint();tracks=sample();persist();restart();sho
 $('loopSampleBtn').onclick=()=>{checkpoint();tracks=loopCourse();persist();restart();showMessage('루프 코스! 함께 재생을 누르고 한 바퀴 돌아 보세요',2800);};
 $('pushBtn').onclick=nudgeRider;
 $('clearBtn').onclick=()=>{checkpoint();tracks=[];persist();restart();showMessage('빈 화면! 새로운 길을 그려 보세요');};
-$('saveBtn').onclick=()=>{download('나의-멜로디-라이더-작품.json',JSON.stringify({app:'melody-rider',version:2,tracks,art},null,2),'application/json');showMessage('코스와 내가 그린 그림을 저장했어요');};
+$('saveBtn').onclick=()=>{download('나의-멜로디-라이더-작품.json',JSON.stringify({app:'melody-rider',version:3,songTitle:currentSong.title,tracks,art},null,2),'application/json');showMessage('코스와 내가 그린 그림을 저장했어요');};
 $('loadBtn').onclick=()=>$('courseInput').click();$('courseInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const parsed=validateTrack(Array.isArray(obj)?obj:obj.tracks);if(!parsed)throw new Error();checkpoint();tracks=parsed;persist();if(obj.art&&typeof obj.art==='object'){for(const part of ['rider','sled']){const url=obj.art[part];if(url===null||typeof url==='string'&&url.startsWith('data:image/png;base64,')&&url.length<1000000)applyArt(part,url);}persistArt();}restart();showMessage('나의 작품을 불러왔어요');}catch(e){showMessage('올바른 코스 파일이 아니에요');}e.target.value='';};
 $('follow').onchange=e=>follow=e.target.checked;$('showGrid').onchange=e=>grid=e.target.checked;$('loopAssist').onchange=e=>{loopAssist=e.target.checked;showMessage(loopAssist?'루프 보조가 켜졌어요':'루프 보조를 끄고 추가 추진 없이 달려요');};
 $('songSelect').onchange=e=>chooseMusic(e.target.value);
