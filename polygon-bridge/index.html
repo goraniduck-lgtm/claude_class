@@ -276,7 +276,13 @@ function startChapterQuiz(index,chapter){
   {question:'정사각형을 설명한 내용으로 알맞은 것은?',answers:['① 네 변의 길이가 같고 네 각이 직각','② 네 변 중 두 변만 같음','③ 모든 각이 예각'],right:0,explain:'정사각형은 네 변이 같고 네 각이 모두 직각입니다.'},
   {question:'정사각형과 마름모의 관계는?',answers:['① 공통 성질이 없다','② 정사각형도 마름모의 한 종류','③ 마름모에는 변이 5개'],right:1,explain:'정사각형은 마름모와 직사각형의 성질을 모두 지닙니다.'}
  ];
- const pool=chapter===1?catalog:extra;
+ const extra3=[
+  {question:'서로 다른 도형 두 개가 같은 다리를 작동시키려면?',answers:['① 각각의 장치 조건을 모두 만족해야 함','② 한 장치만 작동하면 됨','③ 도형을 겹치면 됨'],right:0,explain:'서로 다른 도형에 주어진 조건이 모두 성립해야 다리 전체가 연결됩니다.'},
+  {question:'마주 보는 두 변이 평행인지만 확인할 때 쓰는 장치는?',answers:['① 대각선 발전기','② 평행 잠금장치','③ 정삼각형 열쇠'],right:1,explain:'평행 잠금장치는 마주 보는 두 변이 평행할 때 작동합니다.'},
+  {question:'정사각형 방패가 작동하려면?',answers:['① 네 변이 같고 네 각이 직각','② 네 변만 달라도 됨','③ 꼭짓점 세 개만 필요'],right:0,explain:'정사각형은 네 변이 모두 같고 네 각이 모두 직각입니다.'},
+  {question:'한 장치가 작동하지 않았다면 어떤 행동이 적절할까요?',answers:['① 성공으로 간주','② 화면을 무조건 재시작','③ 해당 도형의 변과 각을 다시 관찰하고 수정'],right:2,explain:'각 장치의 성질을 살펴보고 그 도형을 수정하면 됩니다.'}
+ ];
+ const pool=chapter===1?catalog:chapter===2?extra:extra3;
  const item=pool[index];ui.quizTitle.textContent='챕터 '+chapter+' · 수학 탐구';
  ui.quizPrompt.textContent=(index+1)+' / '+pool.length+' · '+item.question;
  ui.answers.innerHTML='';ui.next.classList.remove('show');
@@ -339,6 +345,12 @@ function clampDevice(point,ts){const q=visualLock;cx.save();cx.translate(point.x
   cx.shadowBlur=q*18;cx.shadowColor='#2af3be';circle(0,-44,14,q>.7?'#33edbf':'#eda964');cx.shadowBlur=0;text(q>.7?'✓':'×',0,-37,18,'#124c46',950);cx.restore()
 }
 function drawConditionBadge(ts){const good=isReady();
+ if(isConcurrent()){
+  const count=geom.modules.filter(machineReady).length;
+  roundRect(390,161,320,52,14,good?'#0e745fe8':'#4b5870e9',good?'#8cffd5':'#a3bdd7');
+  text(good?'✓ 모든 장치 작동':`장치 ${count} / ${geom.modules.length} 작동`,550,194,21,'#fff7e9',900);
+  return;
+ }
  if(mode()===4){const bits=conditionBits();
   for(let i=0;i<2;i++){const x=421+i*133;roundRect(x,155,125,60,11,bits[i]?'#0d876fe8':'#5f4f37e8',bits[i]?'#81ffcf':'#dfbb7a',2);text((bits[i]?'✓ ':'○ ')+(i===0?'∥':'∟'),x+63,194,25,'#fff',900)}
  }else{
@@ -347,7 +359,65 @@ function drawConditionBadge(ts){const good=isReady();
  }
  const age=(ts-lockPulse)/1000;if(good&&age>0&&age<1.2&&!reduce){cx.save();cx.globalAlpha=1-age/1.2;cx.strokeStyle='#8affd8';cx.lineWidth=4;cx.strokeRect(385-age*11,156-age*7,330+age*22,62+age*14);cx.restore()}
 }
-function stageShapes(ts){const good=isReady(),running=phase==='running',faint=running&&!good,offset=faint?bridgeFall:0;
+function drawConcurrentMachines(ts){
+ const list=geom.modules;
+ list.forEach((g,i)=>{
+  const good=machineReady(g),m=g.mode;
+  const x=g.center-g.width/2-18,frameY=310,frameW=g.width+36;
+  cx.save();
+  roundRect(x,frameY,frameW,215,13,good?'#195d5482':'#203b5391',good?'#5ff5bd':'#7194a6',good?2.5:1.5);
+  if(good){
+    cx.shadowColor='#42f3bc';cx.shadowBlur=10;
+    circle(g.center,330,15,'#24c39e','#aaffd9',2);
+    cx.shadowBlur=0;
+  }else circle(g.center,330,15,'#c18c52','#ffe0a1',2);
+  text(deviceIcons[m],g.center,338,m===0?18:21,good?'#153f37':'#294257',900);
+  text(String(i+1),x+14,327,12,'#e2f8f3',900);
+  cx.restore();
+  const fill=good?'#54d7ae89':'#d8b88699',stroke=good?'#a9ffde':'#ffe3af';
+  cx.save();
+  cx.shadowColor=good?'#47ffca':'transparent';cx.shadowBlur=good?17:0;
+  if(m===0||m===1){
+   path([g.a,g.b,g.c,g.d],fill,stroke,4);
+   cx.shadowBlur=0;
+   if(m===0){
+    parallelArrows(g.a,g.b,good?'#57ffe0':'#e7d3a4',-12);
+    parallelArrows(g.d,g.c,good?'#57ffe0':'#e7d3a4',12);
+    if(hint&&!good){const slope=(g.b.y-g.a.y)/(g.b.x-g.a.x);const y=g.d.y+slope*(g.c.x-g.d.x);line(g.d,{x:g.c.x,y},'#86fbd7',2,[5,5])}
+   }else{
+    circle(g.a.x,g.a.y,20,null,good?'#8affe1':'#ffe3ac',3);
+    const u=norm(vec(g.a,g.b)),v=norm(vec(g.a,g.d));const angle=Math.round(Math.acos(clamp(dot(u,v),-1,1))*180/Math.PI);
+    if(good)text('90°',g.a.x+27,g.a.y+32,13,'#c1fff1',850);
+    if(hint&&!good){const target=g.a.x-(g.b.y-g.a.y)/(g.b.x-g.a.x)*(g.d.y-g.a.y);line(g.a,{x:target,y:g.d.y},'#86fbd7',2,[5,5])}
+   }
+  }else if(m===2){
+   path([g.a,g.b,g.p],fill,stroke,4);
+   if(good){[[g.a,g.b],[g.b,g.p],[g.p,g.a]].forEach(([a,b])=>{const mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2};circle(mid.x,mid.y,3,'#9bfff0')})}
+   if(hint&&!good){const y=g.a.y+g.width*Math.sqrt(3)/2;circle(g.center,y,9,null,'#86fbd7',2)}
+  }else if(m===5||m===6){
+   const c={x:g.b.x+g.d.x-g.a.x,y:g.d.y};
+   path([g.a,g.b,c,g.d],fill,stroke,4);
+   if(m===6){circle(g.a.x,g.a.y,18,null,good?'#74ffe2':'#d8b886',2);
+    if(good){line({x:g.a.x+10,y:g.a.y},{x:g.a.x+10,y:g.a.y+10},'#b5ffe7',2);line({x:g.a.x+10,y:g.a.y+10},{x:g.a.x,y:g.a.y+10},'#b5ffe7',2)}
+   }
+   if(hint&&!good){const target={x:g.a.x,y:g.a.y+g.width};circle(target.x,target.y,8,null,'#86fbd7',2)}
+  }
+  cx.shadowBlur=0;
+  cx.restore();
+  if(phase!=='running'){
+   if(m===0){handle(g.d,'',hover===i+':d'||drag===i+':d');handle(g.c,'',hover===i+':c'||drag===i+':c')}
+   else if(m===1||m===5||m===6)handle(g.d,'',hover===i+':d'||drag===i+':d');
+   else if(m===2)handle(g.p,'',hover===i+':p'||drag===i+':p');
+  }
+  const pulseAge=(ts-(machinePulse[i]||-10000))/1000;
+  if(good&&pulseAge>=0&&pulseAge<.9&&!reduce){
+   cx.save();cx.globalAlpha=Math.max(0,1-pulseAge/.9);
+   circle(g.center,330,17+pulseAge*30,null,'#aaffdc',3);
+   cx.restore();
+  }
+ });
+}
+function stageShapes(ts){if(isConcurrent()){drawConcurrentMachines(ts);return}const good=isReady(),running=phase==='running',faint=running&&!good,offset=faint?bridgeFall:0;
   if(mode()===0||mode()===1){const P=[A,B,geom.C,geom.D];cx.save();cx.translate(0,offset);
     path(P,good?'#91e8cf94':'#efc9949e',good?'#aaffdc':'#ffe5b0',4);line(A,B,'#f3fffd',4);
     if(mode()===0){parallelArrows(A,B,good?'#57ffe0':'#f2f2d1',-20);parallelArrows(geom.D,geom.C,good?'#54f7cf':'#ffcd8a',20);
@@ -410,8 +480,57 @@ function drawSparks(dt){if(!sparks.length)return;cx.save();for(let i=sparks.leng
 function render(ts,dt){cx.clearRect(0,0,W,H);bg(ts);land(0,LEFT.y,LEFT.x,true);land(RIGHT.x,RIGHT.y,W-RIGHT.x,false);groundBeam(ts);stageShapes(ts);clampDevice(A,ts);clampDevice(B,ts);drawConditionBadge(ts);drawBall();drawSparks(dt)}
 function tick(ts){if(!frameLast)frameLast=ts;const dt=clamp((ts-frameLast)/1000,0,.034);frameLast=ts;const goal=isReady()?1:0;visualLock=reduce?goal:visualLock+(goal-visualLock)*Math.min(1,dt*8);if(phase==='running')physicsStep(dt);render(ts,dt);requestAnimationFrame(tick)}
 function stagePoint(event){const r=cv.getBoundingClientRect();return{x:(event.clientX-r.left)*W/r.width,y:(event.clientY-r.top)*H/r.height}}
-function closest(p){let choices=[];if(mode()===0||mode()===4)choices=[['D',geom.D],['C',geom.C]];if(mode()===1)choices=[['D',geom.D]];if(mode()===2)choices=[['P',geom.P]];if(mode()===5||mode()===6)choices=[['D',geom.D]];if(mode()===3)choices=pent.map((v,i)=>[String(i),v]);let candidate=null,md=Infinity;for(const [id,v] of choices){const d=dist(p,v);if(d<md){candidate=id;md=d}}return md<(mode()===3?47:54)?candidate:null}
-function editPoint(pos){if(!drag)return;const val={x:Math.round(pos.x),y:Math.round(pos.y)};
+function closest(p){
+ if(isConcurrent()){
+   let best=null,distance=Infinity;
+   geom.modules.forEach((g,i)=>{
+     const choices=g.mode===0?[['d',g.d],['c',g.c]]:g.mode===2?[['p',g.p]]:[['d',g.d]];
+     for(const [key,point]of choices){const d=dist(p,point);if(d<distance){distance=d;best=i+':'+key}}
+   });
+   return distance<42?best:null;
+ }
+ let choices=[];if(mode()===0||mode()===4)choices=[['D',geom.D],['C',geom.C]];if(mode()===1)choices=[['D',geom.D]];if(mode()===2)choices=[['P',geom.P]];if(mode()===5||mode()===6)choices=[['D',geom.D]];if(mode()===3)choices=pent.map((v,i)=>[String(i),v]);let candidate=null,md=Infinity;for(const [id,v] of choices){const d=dist(p,v);if(d<md){candidate=id;md=d}}return md<(mode()===3?47:54)?candidate:null}
+function editPoint(pos){
+ if(!drag)return;
+ if(isConcurrent()){
+   const [rawIndex,key]=drag.split(':'),g=geom.modules[Number(rawIndex)];
+   if(!g)return;
+   const m=g.mode,top=g.a.y;
+   const point={x:Math.round(pos.x),y:Math.round(pos.y)};
+   point.y=clamp(point.y,top+39,Math.min(519,top+g.width+23));
+   if(m===0){
+     if(key==='d'){point.x=clamp(point.x,g.a.x-34,g.a.x+47);g.d=point}
+     if(key==='c'){
+       point.x=clamp(point.x,g.b.x-55,g.b.x+18);
+       const y=g.d.y+(g.b.y-g.a.y)/(g.b.x-g.a.x)*(point.x-g.d.x);
+       if(Math.abs(point.y-y)<15)point.y=y;
+       g.c=point;
+     }
+   }else if(m===1){
+     point.x=clamp(point.x,g.a.x-48,g.a.x+57);
+     const x=g.a.x-(g.b.y-g.a.y)/(g.b.x-g.a.x)*(point.y-g.a.y);
+     if(Math.abs(point.x-x)<16)point.x=x;
+     g.d=point;
+   }else if(m===2){
+     point.x=clamp(point.x,g.a.x-18,g.b.x+18);
+     const target={x:g.center,y:g.a.y+g.width*Math.sqrt(3)/2};
+     if(dist(point,target)<20){point.x=target.x;point.y=target.y}
+     g.p=point;
+   }else if(m===5){
+     point.x=clamp(point.x,g.a.x-16,g.a.x+g.width*.62);
+     const d=dist(point,g.a);
+     if(Math.abs(d-g.width)<16&&d>0){point.x=g.a.x+(point.x-g.a.x)*g.width/d;point.y=g.a.y+(point.y-g.a.y)*g.width/d}
+     g.d=point;
+   }else if(m===6){
+     point.x=clamp(point.x,g.a.x-20,g.a.x+g.width*.65);
+     const target={x:g.a.x,y:g.a.y+g.width};
+     if(dist(point,target)<20){point.x=target.x;point.y=target.y}
+     g.d=point;
+   }
+   if(phase==='won'||phase==='failed'){phase='edit';initBall();clearQuiz()}
+   refresh();return;
+ }
+ const val={x:Math.round(pos.x),y:Math.round(pos.y)};
   if(mode()===0){if(drag==='D'){val.x=clamp(val.x,255,480);val.y=clamp(val.y,355,504);const sy=geom.C.y-(B.y-A.y)/(B.x-A.x)*(geom.C.x-val.x);if(Math.abs(val.y-sy)<13)val.y=sy;geom.D=val}else{val.x=clamp(val.x,615,850);val.y=clamp(val.y,420,520);const sy=geom.D.y+(B.y-A.y)/(B.x-A.x)*(val.x-geom.D.x);if(Math.abs(val.y-sy)<13)val.y=sy;geom.C=val}}
   if(mode()===1){val.x=clamp(val.x,240,450);val.y=clamp(val.y,370,509);const sx=A.x-(B.y-A.y)/(B.x-A.x)*(val.y-A.y);if(Math.abs(val.x-sx)<14)val.x=sx;geom.D=val}
   if(mode()===2){val.x=clamp(val.x,480,625);val.y=clamp(val.y,391,503);if(Math.abs(val.x-equil.x)<13&&Math.abs(val.y-equil.y)<13){val.x=equil.x;val.y=equil.y}geom.P=val}
