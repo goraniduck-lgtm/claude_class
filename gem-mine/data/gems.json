@@ -1,0 +1,34 @@
+{
+  "_note": "보석 종류. value = 변의 수 × 10, 정다각형이면 × 1.5. floor = 처음 나오는 층. maxCells = 보석 칸 최대 수",
+  "kinds": [
+    { "id": "tri",      "name": "삼각형",     "sides": 3, "regular": false, "value": 30,  "floor": 1 },
+    { "id": "tri_reg",  "name": "정삼각형",   "sides": 3, "regular": true,  "value": 45,  "floor": 2 },
+    { "id": "trap",     "name": "사다리꼴",   "sides": 4, "regular": false, "value": 40,  "floor": 1 },
+    { "id": "para",     "name": "평행사변형", "sides": 4, "regular": false, "value": 40,  "floor": 1 },
+    { "id": "rect",     "name": "직사각형",   "sides": 4, "regular": false, "value": 40,  "floor": 1 },
+    { "id": "rhom",     "name": "마름모",     "sides": 4, "regular": false, "value": 40,  "floor": 2 },
+    { "id": "sq",       "name": "정사각형",   "sides": 4, "regular": true,  "value": 60,  "floor": 1 },
+    { "id": "pent",     "name": "오각형",     "sides": 5, "regular": false, "value": 50,  "floor": 2 },
+    { "id": "pent_reg", "name": "정오각형",   "sides": 5, "regular": true,  "value": 75,  "floor": 2 },
+    { "id": "hex",      "name": "육각형",     "sides": 6, "regular": false, "value": 60,  "floor": 2 },
+    { "id": "hex_reg",  "name": "정육각형",   "sides": 6, "regular": true,  "value": 90,  "floor": 2 },
+    { "id": "hept",     "name": "칠각형",     "sides": 7, "regular": false, "value": 70,  "floor": 3, "maxCells": 12 },
+    { "id": "oct",      "name": "팔각형",     "sides": 8, "regular": false, "value": 80,  "floor": 3, "maxCells": 12 },
+    { "id": "oct_reg",  "name": "정팔각형",   "sides": 8, "regular": true,  "value": 120, "floor": 3, "maxCells": 12 }
+  ],
+  "fakes": [
+    { "id": "f_circle", "name": "둥근 원석",   "value": 10 },
+    { "id": "f_semi",   "name": "반달 원석",   "value": 10 },
+    { "id": "f_drop",   "name": "물방울 원석", "value": 10 }
+  ],
+  "super": { "id": "super", "name": "슈퍼 보석", "value": 500, "sidesChoices": [5, 6, 8] },
+  "materials": [
+    { "id": "ruby",     "name": "루비",       "light": "#ff8a9a", "base": "#e0243f", "dark": "#7a0a1e" },
+    { "id": "amber",    "name": "호박",       "light": "#ffd08a", "base": "#f08a1c", "dark": "#8a4006" },
+    { "id": "topaz",    "name": "토파즈",     "light": "#fff3a0", "base": "#f2c518", "dark": "#8f6c00" },
+    { "id": "emerald",  "name": "에메랄드",   "light": "#9cf5c0", "base": "#16b866", "dark": "#05592d" },
+    { "id": "sapphire", "name": "사파이어",   "light": "#9cc8ff", "base": "#2367e8", "dark": "#0b2a78" },
+    { "id": "amethyst", "name": "자수정",     "light": "#e0b0ff", "base": "#9b3fe0", "dark": "#4a1580" },
+    { "id": "diamond",  "name": "다이아몬드", "light": "#ffffff", "base": "#cfeef7", "dark": "#6aa9bd" }
+  ]
+}

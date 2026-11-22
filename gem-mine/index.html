@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>다각형 보석 광산</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="viewport">
+  <div id="stage" aria-label="다각형 보석 광산 게임 화면">
+    <canvas id="bg" width="1280" height="800" aria-hidden="true"></canvas>
+
+    <header id="topbar">
+      <div class="tb-left">
+        <div id="stageLabel" class="stage-label">지하 1층 · 1-1</div>
+        <div class="gauge" id="gauge" role="progressbar" aria-label="목표 가치">
+          <div class="gauge-fill" id="gaugeFill"></div>
+          <span class="gauge-text" id="gaugeText">0 / 90</span>
+        </div>
+      </div>
+      <div class="tb-rail"><canvas id="rail" width="760" height="84" aria-label="남은 시간"></canvas><span id="timeText" class="time-text">3:00</span></div>
+      <div class="tb-right">
+        <button id="soundBtn" class="icon-btn" aria-label="효과음 켜고 끄기" title="효과음">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundWaves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </button>
+        <button id="pauseBtn" class="icon-btn" aria-label="일시 정지" title="일시 정지">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section id="panel" aria-live="polite">
+      <header class="ph"><h2 id="pTitle">문제</h2><span id="pChip" class="chip"></span></header>
+      <div id="pBody"></div>
+      <footer class="pf"><button id="skipBtn" class="ghost-btn">건너뛰기</button><span class="sample">YBM 4-2 6단원 다각형 바탕</span></footer>
+    </section>
+
+    <div id="boardBox"><div id="boardShake"><canvas id="board" aria-label="광산 타일판"></canvas></div>
+      <div id="rockWarn" class="rock-warn hidden" role="alert"><svg viewBox="0 0 40 40" class="rw-icon" aria-hidden="true"><path d="M6 28 L10 14 L20 7 L31 10 L36 22 L30 33 L14 35 Z" fill="#8a8f96" stroke="#2a2a2e" stroke-width="3" stroke-linejoin="round"/></svg><span class="rw-text"></span><span class="rw-bar"><i></i></span></div>
+    </div>
+
+    <section id="tray">
+      <div class="tray-head"><span>이번 스테이지에서 캔 보석</span><span id="leftInfo" class="left-info"></span></div>
+      <div id="trayGems" class="tray-gems"></div>
+      <p id="hint" class="hint">문제를 풀어 곡괭이를 모으고, 타일을 눌러 부숴요.</p>
+      <div id="itemBar" class="item-bar hidden" aria-live="polite"></div>
+    </section>
+
+    <aside id="side">
+      <div class="pick-box" id="pickBox" aria-label="곡괭이 수">
+        <svg viewBox="0 0 48 48" aria-hidden="true" class="pick-icon"><use href="#pickaxe"/></svg>
+        <span id="pickCount">5</span>
+      </div>
+      <div class="miner-wrap">
+        <div id="comboTag" class="combo-tag"></div>
+        <canvas id="miner" width="200" height="270" aria-hidden="true"></canvas>
+        <div id="oppPanel" class="opp-panel hidden" aria-live="polite">
+          <div class="opp-head"><span class="opp-tag">상대</span><b class="opp-name">상대</b></div>
+          <div class="opp-score"></div>
+          <canvas width="184" height="138" aria-label="상대 판 (부서진 칸만 보여요)"></canvas>
+          <div class="opp-state"></div>
+        </div>
+      </div>
+      <button id="swapBtn" class="wood-btn">판 바꾸기<small>곡괭이 3개</small></button>
+      <div class="item-bag" id="itemBag" aria-label="아이템 가방">
+        <div class="bag-head">아이템<span id="drillInfo" class="drill-info"></span></div>
+        <div class="slots" id="itemSlots"></div>
+      </div>
+    </aside>
+
+    <div id="fx" aria-hidden="true"></div>
+    <div id="overlay" class="overlay hidden"></div>
+  </div>
+  <div id="rotateHint" class="rotate-hint">태블릿을 가로로 돌리면 더 크게 보여요</div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="pickaxe" viewBox="0 0 48 48">
+      <path d="M10 41 L31 16" stroke="#8a5a2b" stroke-width="5" stroke-linecap="round"/>
+      <path d="M10 41 L31 16" stroke="#c48a4a" stroke-width="2" stroke-linecap="round"/>
+      <path d="M17 9 Q30 4 43 15 Q36 12 30 13 L33 18 L28 22 L24 17 Q20 12 17 9Z" fill="#c9d3dc" stroke="#3a3f46" stroke-width="2" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

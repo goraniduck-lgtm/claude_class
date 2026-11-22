@@ -1,0 +1,333 @@
+{
+  "_note": "이미지 목록. 49장 중 46장 연결됨 (대결 아이콘 item.dust·steal·shield는 아직 코드 그림). src를 null로 바꾸면 그 그림만 코드로 그린 임시 그림으로 돌아간다.",
+  "version": 1,
+  "images": {
+    "bg.main": {
+      "src": "bg/mine_bg.jpg",
+      "w": 1920,
+      "h": 1200
+    },
+    "board.floor": {
+      "src": "board/floor_dirt.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "tile.dirt": {
+      "src": "board/tile_dirt.png",
+      "w": 128,
+      "h": 128
+    },
+    "tile.stone": {
+      "src": "board/tile_stone.png",
+      "w": 128,
+      "h": 128
+    },
+    "tile.rock": {
+      "src": "board/tile_rock.png",
+      "w": 128,
+      "h": 128
+    },
+    "tile.chest": {
+      "src": "board/tile_chest.png",
+      "w": 128,
+      "h": 128
+    },
+    "tile.crack1": {
+      "src": "board/crack_1.png",
+      "w": 128,
+      "h": 128
+    },
+    "tile.crack2": {
+      "src": "board/crack_2.png",
+      "w": 128,
+      "h": 128
+    },
+    "frame.wood": {
+      "src": "board/frame_wood.png",
+      "w": 340,
+      "h": 340,
+      "slice": 60
+    },
+    "gem.tex.ruby": {
+      "src": "gems/tex_ruby.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "gem.tex.amber": {
+      "src": "gems/tex_amber.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "gem.tex.topaz": {
+      "src": "gems/tex_topaz.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "gem.tex.emerald": {
+      "src": "gems/tex_emerald.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "gem.tex.sapphire": {
+      "src": "gems/tex_sapphire.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "gem.tex.amethyst": {
+      "src": "gems/tex_amethyst.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "gem.tex.diamond": {
+      "src": "gems/tex_diamond.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "gem.tex.super": {
+      "src": "gems/tex_super.jpg",
+      "w": 512,
+      "h": 512
+    },
+    "junk.skull": {
+      "src": "junk/skull.png",
+      "w": 192,
+      "h": 192
+    },
+    "junk.bone": {
+      "src": "junk/bone.png",
+      "w": 192,
+      "h": 192
+    },
+    "junk.boot": {
+      "src": "junk/boot.png",
+      "w": 192,
+      "h": 192
+    },
+    "junk.can": {
+      "src": "junk/can.png",
+      "w": 192,
+      "h": 192
+    },
+    "junk.fish": {
+      "src": "junk/fish.png",
+      "w": 192,
+      "h": 192
+    },
+    "junk.bottle": {
+      "src": "junk/bottle.png",
+      "w": 192,
+      "h": 192
+    },
+    "junk.gear": {
+      "src": "junk/gear.png",
+      "w": 192,
+      "h": 192
+    },
+    "junk.sock": {
+      "src": "junk/sock.png",
+      "w": 192,
+      "h": 192
+    },
+    "miner.body": {
+      "src": "miner/body.png",
+      "w": 256,
+      "h": 320,
+      "attach": [
+        112,
+        158
+      ],
+      "feet": [
+        125,
+        306
+      ]
+    },
+    "miner.arm.lv0": {
+      "src": "miner/arm_wood.png",
+      "w": 256,
+      "h": 128,
+      "pivot": [
+        22,
+        70
+      ],
+      "flipY": true
+    },
+    "miner.arm.lv1": {
+      "src": "miner/arm_iron.png",
+      "w": 256,
+      "h": 128,
+      "pivot": [
+        22,
+        72
+      ],
+      "flipY": true
+    },
+    "miner.arm.lv2": {
+      "src": "miner/arm_fire.png",
+      "w": 256,
+      "h": 128,
+      "pivot": [
+        24,
+        74
+      ],
+      "flipY": true
+    },
+    "miner.arm.lv3": {
+      "src": "miner/arm_gold.png",
+      "w": 256,
+      "h": 128,
+      "pivot": [
+        44,
+        76
+      ],
+      "flipY": true,
+      "rot": 0.6
+    },
+    "cart.body": {
+      "src": "cart/cart.png",
+      "w": 160,
+      "h": 112
+    },
+    "cart.miner_mini": {
+      "src": "cart/miner_mini.png",
+      "w": 96,
+      "h": 96
+    },
+    "cart.exit": {
+      "src": "cart/exit_tunnel.png",
+      "w": 192,
+      "h": 128
+    },
+    "cart.rail": {
+      "src": "cart/rail.png",
+      "w": 97,
+      "h": 19
+    },
+    "cart.elevator": {
+      "src": "cart/elevator.png",
+      "w": 256,
+      "h": 256
+    },
+    "item.row": {
+      "src": "items/dyn_row.png",
+      "w": 128,
+      "h": 128
+    },
+    "item.col": {
+      "src": "items/dyn_col.png",
+      "w": 128,
+      "h": 128
+    },
+    "item.bomb": {
+      "src": "items/bomb.png",
+      "w": 128,
+      "h": 128
+    },
+    "item.radar": {
+      "src": "items/radar.png",
+      "w": 128,
+      "h": 128
+    },
+    "item.hourglass": {
+      "src": "items/hourglass.png",
+      "w": 128,
+      "h": 128
+    },
+    "item.drill": {
+      "src": "items/drill.png",
+      "w": 128,
+      "h": 128
+    },
+    "item.dust": {
+      "src": null,
+      "w": 128,
+      "h": 128
+    },
+    "item.steal": {
+      "src": null,
+      "w": 128,
+      "h": 128
+    },
+    "item.shield": {
+      "src": null,
+      "w": 128,
+      "h": 128
+    },
+    "ui.map": {
+      "src": "ui/mine_map.jpg",
+      "w": 1600,
+      "h": 1000,
+      "rows": [
+        0.255,
+        0.42,
+        0.59,
+        0.76
+      ],
+      "cols": [
+        0.49,
+        0.655,
+        0.81
+      ],
+      "labelX": 0.315
+    },
+    "ui.codex": {
+      "src": "ui/codex_book.jpg",
+      "w": 1600,
+      "h": 1000
+    },
+    "ending.home": {
+      "src": "ending/homecoming.jpg",
+      "w": 1600,
+      "h": 1000
+    },
+    "ending.fake": {
+      "src": "ending/fake.jpg",
+      "w": 1600,
+      "h": 1000
+    },
+    "ending.again": {
+      "src": "ending/again.jpg",
+      "w": 1600,
+      "h": 1000
+    }
+  },
+  "sounds": {},
+  "files": {
+    "_note": "src를 채울 때 쓸 파일 경로 (문서의 목록 표와 같다)",
+    "bg.main": "bg/mine_bg.png",
+    "board.floor": "board/floor_dirt.png",
+    "tile.dirt": "board/tile_dirt.png",
+    "tile.stone": "board/tile_stone.png",
+    "tile.rock": "board/tile_rock.png",
+    "tile.chest": "board/tile_chest.png",
+    "tile.crack1": "board/crack_1.png",
+    "tile.crack2": "board/crack_2.png",
+    "frame.wood": "board/frame_wood.png",
+    "gem.tex.*": "gems/tex_<재질>.png",
+    "gem.tex.super": "gems/tex_super.png",
+    "junk.*": "junk/<이름>.png",
+    "miner.body": "miner/body.png",
+    "miner.arm.lv0": "miner/arm_wood.png",
+    "miner.arm.lv1": "miner/arm_iron.png",
+    "miner.arm.lv2": "miner/arm_fire.png",
+    "miner.arm.lv3": "miner/arm_gold.png",
+    "cart.body": "cart/cart.png",
+    "cart.miner_mini": "cart/miner_mini.png",
+    "cart.exit": "cart/exit_tunnel.png",
+    "cart.rail": "cart/rail.png",
+    "cart.elevator": "cart/elevator.png",
+    "item.row": "items/dyn_row.png",
+    "item.col": "items/dyn_col.png",
+    "item.bomb": "items/bomb.png",
+    "item.radar": "items/radar.png",
+    "item.hourglass": "items/hourglass.png",
+    "item.drill": "items/drill.png",
+    "ui.map": "ui/mine_map.png",
+    "ui.codex": "ui/codex_book.png",
+    "ending.home": "ending/homecoming.png",
+    "ending.fake": "ending/fake.png",
+    "ending.again": "ending/again.png",
+    "item.dust": "items/dust.png",
+    "item.steal": "items/steal.png",
+    "item.shield": "items/shield.png"
+  }
+}
