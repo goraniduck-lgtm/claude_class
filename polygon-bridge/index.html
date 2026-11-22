@@ -11,6 +11,23 @@
 @media(max-width:780px){.app{padding:9px 8px 19px}.card{padding:10px;border-radius:15px}.logo{width:43px;height:43px;border-radius:12px;font-size:25px}.stages{gap:5px}.stage{min-height:61px;padding:7px}.stage .name{font-size:11px}.stage small{font-size:9px}.stage .number{margin-right:2px}.condition{padding:9px;gap:8px}.sigil{width:45px;height:45px;flex-basis:45px;font-size:25px}.condition-copy strong{font-size:16px}.status{min-width:130px;font-size:11px;padding:9px 7px}.mission h2{font-size:16px}.mission p{font-size:12px}.hud{top:5px;left:5px;gap:4px}.hud span{font-size:10px;padding:5px 6px}.toast{font-size:10px;padding:5px 7px;bottom:5px}.btn{padding:10px;font-size:12px}.controls{justify-content:center}.stat{padding:8px}.stat b{font-size:11px}.stat small{font-size:10px}}
 @media(max-width:510px){.stages{grid-template-columns:1fr 1fr}.stage{min-height:46px}.stage small{margin-top:1px}.condition{flex-wrap:wrap}.status{width:100%;min-width:0;padding:7px}.group{width:100%}.group .btn{flex:1}.controls{gap:7px}.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1 / -1}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* 탐구 모드: 발견 전에는 조건을 공개하지 않고, 조작 영역에 집중합니다. */
+.heading{margin-bottom:9px}.heading header p,.heading p{display:none}
+.app{max-width:1160px}.card{padding:12px}.stages{margin-bottom:10px}.stage{min-height:44px;padding:8px 11px}.stage small{display:none}.mission{margin-bottom:9px}.mission h2{font-size:19px;margin:0 0 2px}.mission p{font-size:12px}
+.subject,.stats{display:none!important}
+.condition{display:none;margin:0 0 9px;padding:8px 11px;gap:9px;border-width:1px;box-shadow:none}
+.condition.discovered{display:flex}.condition .sigil{flex-basis:39px;width:39px;height:39px;font-size:23px;border-radius:10px}
+.condition-copy small{font-size:10px}.condition-copy strong{font-size:16px;margin:1px 0}.condition-copy p{display:none}
+.condition .status{min-width:98px;padding:8px;font-size:12px;box-shadow:none}
+.hud span:last-child{display:none}
+.toast{opacity:0;transition:opacity .2s ease}.toast.visible{opacity:1}
+.feedback{display:none;padding:9px 11px;margin-top:9px}.feedback.visible{display:flex}
+.controls{margin-top:9px}.btn{min-height:43px}
+#stop:disabled,#retry:disabled,#start:disabled,#reset:disabled,#hint:disabled{display:none}
+.bottom{margin-top:8px}
+@media(max-width:780px){.stage{min-height:43px}.condition{padding:8px}.condition .status{min-width:90px}.mission h2{font-size:16px}}
+@media(max-width:510px){.stages{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.stage{padding:6px 3px;text-align:center;min-height:39px}.stage .name{font-size:10px}.stage .number{display:none}.mission p{font-size:11px}.condition.discovered{flex-wrap:nowrap}.condition .status{width:auto}.controls{gap:6px}.group{width:auto;flex:1;justify-content:center}.group .btn{flex:1;min-width:0}.btn{font-size:11px;padding:9px 6px}}
 </style>
 </head>
 <body>
@@ -18,15 +35,15 @@
 <header class="heading"><div class="brand"><div class="logo" aria-hidden="true">▱</div><div><h1>다각형 다리 작전</h1><p>도형의 성질로 장치를 작동시키는 수학 물리 퍼즐</p></div></div><div class="award">학습 기록 <b id="total">0 / 4</b>개 완료</div></header>
 <section class="card">
 <nav class="stages" id="stage-nav" aria-label="스테이지 선택"></nav>
-<div class="mission"><div><h2 id="mission-title"></h2><p id="mission-detail"></p></div><span class="subject" id="subject"></span></div>
-<div class="condition" id="condition" role="status" aria-live="polite"><div class="sigil" id="sigil" aria-hidden="true"></div><div class="condition-copy"><small>이번 스테이지의 필수 수학 조건</small><strong id="condition-title"></strong><p id="condition-tip"></p></div><div class="status" id="condition-status"></div></div>
-<div class="viewport"><canvas id="game" width="1100" height="560" tabindex="0" aria-label="도형 꼭짓점을 움직이거나 연결해 수학 퍼즐을 풀어보세요"></canvas><div class="hud"><span>STAGE <b id="stage-num">01</b></span><span>도전 <b id="attempt">0</b>회</span><span>이동 <b id="progress">0%</b></span></div><div id="toast" class="toast"></div></div>
-<div class="stats"><div class="stat"><small>도형</small><b id="shape"></b></div><div class="stat" id="math-card"><small>수학 조건</small><b id="math"></b></div><div class="stat" id="lock-card"><small>기계장치</small><b id="latch"></b></div></div>
-<div class="controls"><div class="group"><button id="reset" class="btn soft">↶ 처음 도형</button><button id="hint" class="btn hint" aria-pressed="false">힌트 보기</button><button id="inspect" class="btn soft">도형 검사</button></div><div class="group"><button id="stop" class="btn stop" disabled>■ 중단·수정</button><button id="retry" class="btn retry" disabled>↻ 즉시 재도전</button><button id="start" class="btn go">▶ 구슬 출발!</button></div></div>
+ {name:'잠금 다리',short:'1',icon:'∥',title:'미션 1 · 잠금 다리',desc:'노란 꼭짓점 두 개를 움직여 양쪽 잠금장치를 닫아 보세요.',subject:'사각형 탐구',math:'윗변 ∥ 아랫변',tip:'마주 보는 두 변이 같은 방향으로 나란하면 장치가 체결돼요.',note:'게임 속 특수 잠금장치는 마주 보는 두 변이 평행할 때만 작동합니다. 실제 모든 다리가 평행한 변을 가져야 안정적인 것은 아닙니다.',question:'이번 다리가 고정된 수학적인 이유는 무엇인가요?',answers:['① 변이 4개라서','② 마주 보는 두 변이 평행해서','③ 다리의 색깔이 초록색이라서'],right:1,explain:'윗변과 아랫변이 나란한 방향이 되어 잠금장치가 작동했어요.'},
+ {name:'회전 연결기',short:'2',icon:'∟',title:'미션 2 · 연결기를 닫아라',desc:'왼쪽 아래 노란 꼭짓점을 움직여 기계의 연결기를 맞물리게 하세요.',subject:'사각형 탐구',math:'두 변이 직각으로 만남',tip:'왼쪽 위 꼭짓점에서 만나는 두 변이 직각일 때 체결돼요.',note:'특별히 설계한 ㄱ자 연결기이므로 정확히 직각인 경우에만 체결됩니다. 일반적인 다리의 연결부가 반드시 직각이어야 하는 것은 아닙니다.',question:'이번 연결기를 작동시킨 조건은 무엇인가요?',answers:['① 두 변의 길이가 다름','② 사각형의 넓이가 큼','③ 두 변이 직각으로 만남'],right:2,explain:'서로 만나는 두 변이 직각을 이루었기 때문에 연결기가 맞물렸어요.'},
+ {name:'삼각 열쇠',short:'3',icon:'△',title:'미션 3 · 삼각 열쇠',desc:'삼각형의 노란 꼭짓점을 움직여 열쇠를 작동시켜 보세요.',subject:'삼각형 탐구',math:'세 변의 길이가 모두 같음',tip:'세 변이 같아져 정삼각형 열쇠가 되면 장치가 켜져요.',note:'정삼각형은 세 변의 길이가 같고 세 각의 크기도 같습니다. 화면은 세 변의 길이를 확인하고, 성립하면 정삼각형으로 판정합니다. 열쇠와 다리의 결합은 게임의 가상 장치입니다.',question:'정삼각형의 성질로 알맞은 것은?',answers:['① 세 변의 길이가 모두 같음','② 꼭짓점이 4개임','③ 변 두 개만 같음'],right:0,explain:'정삼각형은 세 변의 길이가 모두 같고 세 각의 크기도 모두 같아요.'},
+ {name:'에너지 발전기',short:'4',icon:'✧',title:'미션 4 · 발전기를 켜라',desc:'오각형의 꼭짓점 두 개를 차례로 눌러 에너지 선을 연결해 보세요.',subject:'오각형 탐구',math:'오각형의 대각선 5개',tip:'이웃하지 않은 두 꼭짓점을 잇는 선분을 모두 연결하면 충전돼요.',note:'대각선은 다각형에서 이웃하지 않은 두 꼭짓점을 이은 선분입니다. 오각형에는 중복 없이 5개의 대각선이 있습니다. 대각선 발전기는 게임 속 가상 장치입니다.',question:'오각형의 대각선은 무엇을 이은 선분일까요?',answers:['① 이웃한 두 꼭짓점','② 이웃하지 않은 두 꼭짓점','③ 다각형의 한 변과 평행한 선'],right:1,explain:'대각선은 이웃하지 않은 두 꼭짓점을 잇는 선분이에요.'}
+<div class="controls"><div class="group"><button id="reset" class="btn soft">↶ 처음 도형</button><button id="hint" class="btn hint" aria-pressed="false">단서 보기</button></div><div class="group"><button id="stop" class="btn stop" disabled>■ 중단·수정</button><button id="retry" class="btn retry" disabled>↻ 즉시 재도전</button><button id="start" class="btn go">▶ 구슬 출발!</button></div></div>
 <div class="feedback" aria-live="polite"><div class="bubble">i</div><p id="feedback"></p></div>
 <div class="quiz" id="quiz"><h3 id="quiz-title">도착 성공! 수학 확인</h3><p id="quiz-prompt"></p><div class="answers" id="answers"></div><p class="quiz-outcome" id="quiz-outcome"></p><button class="next" id="next">다음 스테이지 ▶</button></div>
 <details class="info"><summary>교사용 설계 설명 · 게임 속 장치와 실제 물리 구분</summary><p id="teacher-note"></p></details>
-<div class="bottom"><span>손가락·마우스로 노란 점을 드래그 / 4단계는 꼭짓점을 차례로 터치</span><span>진행 중에도 중단·즉시 재도전 · 가로 화면 권장 · 오프라인 동작</span></div>
+<div class="bottom"><span>노란 꼭짓점을 움직여 장치를 켜 보세요. 공이 움직이는 중에도 중단·재도전할 수 있습니다.</span></div>
 </section>
 </main>
 <script>
@@ -42,7 +59,7 @@ const stages=[
 ];
 const ui={nav:$('stage-nav'),total:$('total'),title:$('mission-title'),detail:$('mission-detail'),subject:$('subject'),condition:$('condition'),condTitle:$('condition-title'),condTip:$('condition-tip'),condStatus:$('condition-status'),sigil:$('sigil'),stageNum:$('stage-num'),attempt:$('attempt'),progress:$('progress'),toast:$('toast'),shape:$('shape'),math:$('math'),mathCard:$('math-card'),latch:$('latch'),lockCard:$('lock-card'),reset:$('reset'),hint:$('hint'),inspect:$('inspect'),stop:$('stop'),retry:$('retry'),start:$('start'),feedback:$('feedback'),quiz:$('quiz'),quizPrompt:$('quiz-prompt'),quizTitle:$('quiz-title'),answers:$('answers'),outcome:$('quiz-outcome'),next:$('next'),note:$('teacher-note')};
 const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-let current=0,attempts=[0,0,0,0],completed=[false,false,false,false],phase='edit',hint=false,drag=null,hover=null,geom=null,ball=null,trail=[],elapsed=0,bridgeFall=0,frameLast=0,readyLast=null,lockPulse=0,visualLock=0,selected=null,flash=0,sparks=[],sceneToast='';
+let current=0,attempts=[0,0,0,0],completed=[false,false,false,false],discovered=[false,false,false,false],phase='edit',hint=false,drag=null,hover=null,geom=null,ball=null,trail=[],elapsed=0,bridgeFall=0,frameLast=0,readyLast=null,lockPulse=0,visualLock=0,selected=null,flash=0,sparks=[],sceneToast='';
 const A=LEFT,B=RIGHT,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const copy=p=>({x:p.x,y:p.y}),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),dot=(u,v)=>u.x*v.x+u.y*v.y,vec=(a,b)=>({x:b.x-a.x,y:b.y-a.y}),cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
 const vlen=v=>Math.hypot(v.x,v.y),norm=v=>{const k=vlen(v)||1;return{x:v.x/k,y:v.y/k}};
@@ -60,33 +77,34 @@ function isReady(){if(current===0)return parallel();if(current===1)return rightA
 function shapeName(){return['사각형 · 점 4개','사각형 · 점 4개','삼각형 · 점 3개','오각형 · 점 5개'][current]}
 function mathStatus(){if(current===0)return isReady()?'윗변 ∥ 아랫변':'평행한 방향을 찾아요';if(current===1)return isReady()?'직각(90°) 확인!':'90° 각도를 찾아요';if(current===2)return isReady()?'정삼각형 완성!':'세 변의 길이를 비교해요';return `대각선 ${geom.edges.size} / 5개 연결`}
 function statusText(){if(isReady())return ['양쪽 잠금 체결!','ㄱ자 힌지 체결!','정삼각형 열쇠 완성!','대각선 발전기 충전!'][current];if(current===3)return `대각선 ${geom.edges.size} / 5`;return ['평행 조건 미달','직각 조건 미달','변 길이 조건 미달'][current]}
-function feedback(title,detail){ui.feedback.innerHTML=`<b>${title}</b> ${detail}`}
-function toast(s){sceneToast=s;ui.toast.textContent=s}
+function feedback(title,detail){ui.feedback.innerHTML=`<b>${title}</b> ${detail}`;ui.feedback.parentElement.classList.add('visible')}
+let toastSequence=0;function toast(s){sceneToast=s;ui.toast.textContent=s;ui.toast.classList.toggle('visible',!!s);const id=++toastSequence;if(s)setTimeout(()=>{if(id===toastSequence){ui.toast.classList.remove('visible');ui.toast.textContent=''}},2600)}
 function clearQuiz(){ui.quiz.classList.remove('show');ui.outcome.textContent='';ui.next.classList.remove('show')}
 function refresh({announce=true}={}){
   const good=isReady();
+  if(good)discovered[current]=true;
+  ui.condition.classList.toggle('discovered',discovered[current]);
+  ui.condTitle.textContent=discovered[current]?stages[current].math:'아직 발견하지 못한 원리';
+  ui.condTip.textContent=discovered[current]?stages[current].tip:'';
+  ui.sigil.textContent=discovered[current]?stages[current].icon:'?';
   if(readyLast!==null && readyLast!==good && announce){
-    if(good){lockPulse=performance.now();ui.condition.classList.remove('trigger');void ui.condition.offsetWidth;ui.condition.classList.add('trigger');feedback('찰칵! 수학 조건 달성!','장치가 활성화됐어요. 이제 구슬을 출발시켜 결과를 확인해 보세요.');toast('조건 달성! 초록색 장치가 작동합니다.');}
-    else if(phase==='edit'){ui.condition.classList.remove('trigger');feedback('장치가 다시 해제됐어요.','수학적 조건이 달라졌어요. 꼭짓점이나 연결한 선분을 다시 확인하세요.');toast('조건 미달: 장치를 다시 맞춰 보세요.');}
+    if(good){lockPulse=performance.now();ui.condition.classList.remove('trigger');void ui.condition.offsetWidth;ui.condition.classList.add('trigger');ui.feedback.parentElement.classList.remove('visible');toast('');}
+    else if(phase==='edit'){ui.condition.classList.remove('trigger');toast('장치가 열렸어요. 다시 조절해 보세요.');}
   }
   readyLast=good;
   ui.condition.classList.toggle('ready',good);ui.condStatus.textContent=statusText();
   ui.shape.textContent=shapeName();ui.math.textContent=mathStatus();ui.latch.textContent=good?'장치 작동 · 다리 고정':'장치 대기 · 다리 불안정';
   for(const [el,okay] of [[ui.mathCard,good],[ui.lockCard,good]]){el.classList.toggle('good',okay);el.classList.toggle('bad',!okay)}
-  ui.attempt.textContent=attempts[current];ui.hint.textContent=hint?'힌트 숨기기':'힌트 보기';ui.hint.setAttribute('aria-pressed',String(hint));
-  ui.start.disabled=phase==='running';ui.stop.disabled=phase!=='running';ui.retry.disabled=attempts[current]===0;ui.reset.disabled=phase==='running';ui.inspect.disabled=phase==='running';ui.hint.disabled=phase==='running';
+  ui.attempt.textContent=attempts[current];ui.hint.textContent=hint?'단서 숨기기':'단서 보기';ui.hint.setAttribute('aria-pressed',String(hint));
+  ui.start.disabled=phase==='running';ui.stop.disabled=phase!=='running';ui.retry.disabled=attempts[current]===0;ui.reset.disabled=phase==='running';ui.hint.disabled=phase==='running';
   ui.start.textContent=phase==='won'?'▶ 한 번 더 실험':phase==='failed'?'▶ 다시 출발!':'▶ 구슬 출발!';
   ui.total.textContent=`${completed.filter(Boolean).length} / 4`;
   for(let i=0;i<4;i++){const b=ui.nav.children[i];if(!b)continue;b.classList.toggle('active',i===current);b.classList.toggle('done',completed[i]);b.querySelector('.number').textContent=completed[i]?'✓':String(i+1);b.setAttribute('aria-current',i===current?'step':'false')}
 }
-function buildNav(){ui.nav.innerHTML='';stages.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='stage';b.innerHTML=`<span class="number">${i+1}</span><span class="name">${s.name}</span><small>${s.subject}</small>`;b.addEventListener('click',()=>loadStage(i));ui.nav.append(b)})}
+function buildNav(){ui.nav.innerHTML='';stages.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='stage';b.innerHTML=`<span class="number">${i+1}</span><span class="name">${s.name}</span>`;b.addEventListener('click',()=>loadStage(i));ui.nav.append(b)})}
 function loadStage(n){current=n;geom=newGeometry();phase='edit';hint=false;drag=null;hover=null;selected=null;readyLast=null;visualLock=0;lockPulse=-10000;sparks=[];initBall();clearQuiz();
-  const s=stages[n];ui.title.textContent=s.title;ui.detail.textContent=s.desc;ui.subject.textContent=s.subject;ui.condTitle.textContent=s.math;ui.condTip.textContent=s.tip;ui.sigil.textContent=s.icon;ui.stageNum.textContent=String(n+1).padStart(2,'0');ui.note.textContent=s.note;cv.setAttribute('aria-label',n===3?'오각형 꼭짓점 중 이웃하지 않은 두 점을 차례로 선택해 대각선을 연결하세요':'노란 점을 끌어 도형의 성질을 완성하세요');
-  if(n===0)toast('아래쪽 노란 점 두 개를 끌어 윗변과 아랫변을 평행하게 만드세요.');
-  if(n===1)toast('왼쪽 아래 노란 점을 이동해 윗변과 왼쪽 변이 직각이 되게 하세요.');
-  if(n===2)toast('삼각형의 노란 점을 움직여 세 변의 길이를 같게 만드세요.');
-  if(n===3)toast('오각형의 노란 꼭짓점 두 개를 차례로 터치해 대각선을 그리세요.');
-  feedback('탐구 시작:',s.tip+' 먼저 장치가 작동하는 조건을 찾아보세요.');ui.condition.classList.remove('trigger');refresh({announce:false});
+  const s=stages[n];ui.title.textContent=s.title;ui.detail.textContent=s.desc;ui.subject.textContent='';ui.condTitle.textContent='';ui.condTip.textContent='';ui.sigil.textContent='?';ui.stageNum.textContent=String(n+1).padStart(2,'0');ui.note.textContent=s.note;cv.setAttribute('aria-label',n===3?'오각형의 꼭짓점 두 개를 차례로 골라 선을 연결해 보세요':'노란 점을 끌어 도형의 성질을 완성하세요');
+  toast('');ui.feedback.parentElement.classList.remove('visible');ui.condition.classList.remove('trigger');refresh({announce:false});
 }
 function inspect(){const ready=isReady();let s='';if(current===0)s=ready?'윗변과 아랫변이 평행합니다. 평행 잠금이 체결됐어요.':'윗변과 아랫변이 평행하지 않아요. 두 변의 기울어진 방향을 비교하세요.';
   if(current===1)s=ready?'왼쪽 위 꼭짓점에서 두 변이 직각을 이루고 있어요.':'왼쪽 위에서 만나는 두 변의 각을 살펴보세요. 직각이 되어야 합니다.';
@@ -151,7 +169,7 @@ function clampDevice(point,ts){const q=visualLock;cx.save();cx.translate(point.x
   for(const side of [-1,1]){const x=side*(29-17*q);roundRect(x-7,-22,14,37,4,q>.7?'#6ef8c7':'#ecc28a','#26485b');roundRect(x-9,-26,18,8,3,q>.7?'#e8fff1':'#fff1ca')}
   cx.shadowBlur=q*18;cx.shadowColor='#2af3be';circle(0,-44,14,q>.7?'#33edbf':'#eda964');cx.shadowBlur=0;text(q>.7?'✓':'×',0,-37,18,'#124c46',950);cx.restore()
 }
-function drawConditionBadge(ts){const good=isReady();roundRect(390,161,320,52,14,good?'#0e6a58e8':'#5e492ce5',good?'#8cffd5':'#e5b77e');text(good?'✓ 조건 충족 · 장치 작동':current===3?`대각선 ${geom.edges.size} / 5 연결`:'○ 조건을 찾아보세요',550,194,21,'#fff7e9',900);
+function drawConditionBadge(ts){const good=isReady();roundRect(390,161,320,52,14,good?'#0e6a58e8':'#5e492ce5',good?'#8cffd5':'#e5b77e');text(good?'✓ 장치 작동!':current===3?`에너지 충전  ${Math.round(geom.edges.size/5*100)}%`:'○ 잠금장치 대기 중',550,194,21,'#fff7e9',900);
  const age=(ts-lockPulse)/1000;if(good&&age>0&&age<1.2&&!reduce){cx.save();cx.globalAlpha=1-age/1.2;cx.strokeStyle='#8affd8';cx.lineWidth=4;cx.strokeRect(385-age*11,156-age*7,330+age*22,62+age*14);cx.restore()}
 }
 function stageShapes(ts){const good=isReady(),running=phase==='running',faint=running&&!good,offset=faint?bridgeFall:0;
@@ -172,7 +190,7 @@ function stageShapes(ts){const good=isReady(),running=phase==='running',faint=ru
     if(hint&&phase!=='running'){circle(equil.x,equil.y,14,'#6ff3ce44','#a6ffe9',2);line(a,equil,'#aaffdf',2,[5,7]);line(b,equil,'#aaffdf',2,[5,7])}
     cx.save();cx.shadowBlur=good?22*visualLock:0;cx.shadowColor='#8dffd1';path([a,b,p],good?'#77dfbead':'#e4c07e99',good?'#a0ffe0':'#ffdf9b',5);cx.shadowBlur=0;
     [a,b,p].forEach((v,i)=>{circle(v.x,v.y,i===2?17:13,i===2?'#f8cf72':'#c6e4e3','#a27849',3);if(i<2)text(i===0?'①':'②',v.x,v.y-22,15,'#edfdf0')});
-    const es=[[a,b],[b,p],[p,a]];es.forEach(([u,v],i)=>{const n=norm(vec(u,v)),m={x:(u.x+v.x)/2,y:(u.y+v.y)/2};line({x:m.x-n.y*9,y:m.y+n.x*9},{x:m.x+n.y*9,y:m.y-n.x*9},good?'#4cffcd':'#fff2da',4);if(hint||good){const pos=[{x:550,y:345},{x:646,y:441},{x:454,y:441}][i];text(`${Math.round(dist(u,v))}`,pos.x,pos.y,17,good?'#ecfff4':'#fff4d7',900)}});
+    const es=[[a,b],[b,p],[p,a]];es.forEach(([u,v],i)=>{const n=norm(vec(u,v)),m={x:(u.x+v.x)/2,y:(u.y+v.y)/2};if(good)line({x:m.x-n.y*9,y:m.y+n.x*9},{x:m.x+n.y*9,y:m.y-n.x*9},'#4cffcd',4);if(hint||good){const pos=[{x:550,y:345},{x:646,y:441},{x:454,y:441}][i];text(`${Math.round(dist(u,v))}`,pos.x,pos.y,17,good?'#ecfff4':'#fff4d7',900)}});
     if(phase!=='running')handle(p,'③',hover==='P'||drag==='P');cx.restore();
     if(good){roundRect(446,243,208,35,11,'#0d735b','#71ffcf');text('정삼각형 열쇠 ✓',550,266,17,'#eafff6',900);if(!reduce){const z=(ts*.0014)%1;circle(550,370+104*(1-z),5+z*5,'#edfff5bb');circle(550,370+104*(1-z),11+z*8,null,'#7cffe1',2)}}
   }
@@ -207,7 +225,7 @@ function selectVertex(id){if(id===null){toast('오각형의 노란 꼭짓점 하
 cv.addEventListener('pointerdown',e=>{if(phase==='running')return;const p=stagePoint(e),id=closest(p);if(current===3){selectVertex(id);e.preventDefault();return}if(id!==null){drag=id;cv.setPointerCapture(e.pointerId);editPoint(p);e.preventDefault()}else toast('노란 꼭짓점을 직접 잡고 움직여 보세요.')});
 cv.addEventListener('pointermove',e=>{const p=stagePoint(e);if(drag){editPoint(p);e.preventDefault()}else{hover=closest(p);cv.style.cursor=hover!==null?'grab':'default'}});
 function release(e){drag=null;if(cv.hasPointerCapture(e.pointerId))cv.releasePointerCapture(e.pointerId)}cv.addEventListener('pointerup',release);cv.addEventListener('pointercancel',release);cv.addEventListener('lostpointercapture',()=>{drag=null});
-ui.reset.addEventListener('click',reset);ui.inspect.addEventListener('click',inspect);ui.stop.addEventListener('click',stop);ui.start.addEventListener('click',begin);ui.retry.addEventListener('click',retry);ui.hint.addEventListener('click',()=>{hint=!hint;refresh({announce:false});if(hint){const messages=['초록 점선은 윗변과 평행한 방향을 보여줘요.','초록 점선 방향으로 왼쪽 옆변을 옮기면 직각을 만들 수 있어요.','점선으로 보이는 꼭짓점 위치를 비교하고 세 변을 같게 해 보세요.','점 하나를 선택하면 그 점과 대각선으로 이어지는 점들이 표시돼요.'];feedback('힌트를 켰어요.',messages[current]);toast(messages[current])}else toast('힌트를 숨겼어요. 이번에는 직접 발견해 보세요.')});
+ui.reset.addEventListener('click',reset);ui.stop.addEventListener('click',stop);ui.start.addEventListener('click',begin);ui.retry.addEventListener('click',retry);ui.hint.addEventListener('click',()=>{hint=!hint;refresh({announce:false});if(hint){const messages=['초록 점선은 윗변과 평행한 방향을 보여줘요.','초록 점선 방향으로 왼쪽 옆변을 옮기면 직각을 만들 수 있어요.','점선으로 보이는 꼭짓점 위치를 비교하고 세 변을 같게 해 보세요.','점 하나를 선택하면 그 점과 대각선으로 이어지는 점들이 표시돼요.'];feedback('힌트를 켰어요.',messages[current]);toast(messages[current])}else toast('힌트를 숨겼어요. 이번에는 직접 발견해 보세요.')});
 ui.next.addEventListener('click',()=>loadStage(current<3?current+1:0));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&phase==='running')stop();if(e.key==='r'&&phase==='running')retry()});
 // Local test interface; this runs entirely inside the browser and sends no data.
 window.__mathLabTest={state:()=>({stage:current,phase,ready:isReady(),geom:current===3?{edges:[...geom.edges]}:JSON.parse(JSON.stringify(geom)),attempt:attempts[current],completed:[...completed],ball:{...ball},elapsed,selected}),setStage:loadStage,drag:(name,x,y)=>{drag=name;editPoint({x,y});drag=null},connect:(i,j)=>{selectVertex(String(i));selectVertex(String(j))},begin,stop,retry,advance:(seconds)=>{const n=Math.ceil(seconds/.012);for(let i=0;i<n&&phase==='running';i++)physicsStep(.012)},check:inspect};
