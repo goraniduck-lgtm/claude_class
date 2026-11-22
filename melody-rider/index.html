@@ -10,7 +10,10 @@
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:var(--ink)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,input:focus-visible{outline:3px solid #74cfc5;outline-offset:2px}
 .shell{max-width:1500px;padding:18px clamp(12px,2.2vw,30px) 26px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px}.logo{height:48px;width:48px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(145deg,#53cfbe,#54a7e5);box-shadow:0 6px 13px #93d8d36b}.logo svg{width:34px;height:34px}.brand h1{font-size:clamp(22px,2.3vw,30px);margin:0;letter-spacing:-1px;line-height:1.15}.brand small{display:block;font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.3px;margin-top:5px}.teacher-tip{font-size:12px;color:#6c7891;background:#eaf0fb;border-radius:50px;padding:9px 14px;font-weight:700}
 .music-panel{display:flex;align-items:center;flex-wrap:wrap;gap:12px;background:var(--paper);border:1px solid var(--stroke);border-radius:20px;padding:12px 16px;box-shadow:var(--shadow);margin-bottom:14px}.music-label{font-size:13px;font-weight:800;white-space:nowrap}.music-picks{display:flex;background:#f0f3f9;border-radius:12px;padding:4px;gap:3px}.music-picks button{border:0;border-radius:10px;background:transparent;color:#65748a;padding:8px 12px;font-weight:800;font-size:13px}.music-picks button.selected{color:#fff;background:#776ce0;box-shadow:0 3px 10px #b8b1ef}.song-name{font-size:12px;color:#5a6580;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}.volume{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--sub);font-weight:700}.volume input{accent-color:#8b7de8;width:90px}.hide{display:none!important}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 265px;align-items:start;gap:14px}.stage-card{position:relative;background:#fff;border:1px solid var(--stroke);border-radius:23px;box-shadow:var(--shadow);overflow:hidden}.canvas-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:11px 12px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--stroke);min-height:64px}.tool{border:1px solid transparent;background:#f1f4f9;color:#586782;font-size:13px;font-weight:800;border-radius:12px;min-height:41px;padding:0 12px;display:flex;gap:7px;align-items:center;justify-content:center;white-space:nowrap}.tool.active{background:#ddf7f3;color:#097c73;border-color:#a1e5db}.tool.warn{color:#ae6060;background:#fff4f1}.tool .ic{font-size:17px}.toolbar-spacer{flex:1}.zoom-lbl{font-size:12px;color:var(--sub);font-weight:800;min-width:38px;text-align:center}.stage{position:relative;height:clamp(355px,61vh,690px);background:linear-gradient(180deg,#edfbff,#f7fbff 63%,#fffdfa);overflow:hidden;touch-action:none;user-select:none}.stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}.stage.is-pan canvas{cursor:grab}.stage.is-erase canvas{cursor:cell}.stage-overlay{position:absolute;left:16px;top:14px;pointer-events:none;background:#ffffffcc;color:#687994;font-size:12px;font-weight:800;padding:9px 12px;border:1px solid #e7edf7;border-radius:30px;backdrop-filter:blur(7px);box-shadow:0 2px 8px #d7e5f255}.message{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);background:#26364be8;border-radius:16px;padding:13px 20px;color:#fff;font-weight:800;text-align:center;max-width:80%;font-size:14px;pointer-events:none;opacity:0;transition:opacity .3s}.message.show{opacity:1}.playbar{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-top:1px solid var(--stroke)}.play{background:linear-gradient(135deg,#19b7a9,#12a095);border:0;min-height:49px;color:#fff;border-radius:15px;padding:0 22px;font-weight:900;font-size:16px;box-shadow:0 5px 12px #9cddd3}.restart{background:#edf5fb;border:0;color:#447398;border-radius:13px;padding:0 13px;min-height:47px;font-weight:800;font-size:13px}.timeline{min-width:80px;flex:1;display:flex;align-items:center;gap:8px}.timeline input{width:100%;accent-color:#8b7de8}.time{font-size:12px;color:#66738c;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:800}.timeline label{font-size:12px;color:var(--sub);white-space:nowrap;font-weight:800}.side{display:flex;flex-direction:column;gap:14px}.panel{background:#fff;border:1px solid var(--stroke);border-radius:21px;padding:18px;box-shadow:var(--shadow)}.panel h2{font-size:15px;margin:0 0 15px;letter-spacing:-.2px}.panel .sep{height:1px;background:#edf0f6;margin:13px 0}.pbtn{width:100%;display:flex;align-items:center;gap:9px;text-align:left;border:1px solid #e9edf6;background:#f7f9fc;border-radius:12px;padding:11px 12px;color:#475a78;font-weight:800;font-size:13px;margin-top:8px}.pbtn .ic{font-size:18px;width:23px;text-align:center}.pbtn:hover,.tool:hover{filter:brightness(.98)}.pbtn.danger{background:#fff8f7;color:#bb6470;border-color:#f7e6e3}.check{display:flex;align-items:center;gap:9px;color:#62718b;font-size:12px;font-weight:750;margin-top:13px;cursor:pointer}.check input{accent-color:var(--mint);width:17px;height:17px}.hint{color:#6f7d95;line-height:1.65;font-size:13px;margin:0}.steps{display:grid;gap:12px}.steps p{display:flex;gap:8px;margin:0;color:#52637d;font-size:12px;line-height:1.5;font-weight:700}.steps b{height:22px;width:22px;border-radius:8px;display:inline-grid;place-items:center;flex-shrink:0;background:#f0eefd;color:#8174d8;font-size:12px}.footer{margin-top:14px;text-align:center;color:#8290a3;font-size:12px;line-height:1.5}.pill{background:#fff2dd;color:#936b28;padding:3px 8px;border-radius:8px;font-weight:900;font-size:11px}.simple{border:0;background:transparent;color:#4e88ac;font-weight:800;font-size:12px;padding:4px}.mobile-only{display:none}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 265px;align-items:start;gap:14px}.stage-card{position:relative;background:#fff;border:1px solid var(--stroke);border-radius:23px;box-shadow:var(--shadow);overflow:hidden}.canvas-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:11px 12px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--stroke);min-height:64px}.tool{border:1px solid transparent;background:#f1f4f9;color:#586782;font-size:13px;font-weight:800;border-radius:12px;min-height:41px;padding:0 12px;display:flex;gap:7px;align-items:center;justify-content:center;white-space:nowrap}.tool.active{background:#ddf7f3;color:#097c73;border-color:#a1e5db}.tool.warn{color:#ae6060;background:#fff4f1}.tool .ic{font-size:17px}.toolbar-spacer{flex:1}.zoom-lbl{font-size:12px;color:var(--sub);font-weight:800;min-width:38px;text-align:center}.stage{position:relative;height:clamp(355px,61vh,690px);background:linear-gradient(180deg,#edfbff,#f7fbff 63%,#fffdfa);overflow:hidden;touch-action:none;user-select:none}.stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}.stage.is-pan canvas{cursor:grab}.stage.is-erase canvas{cursor:cell}
+.mini-map{position:absolute;top:12px;right:12px;z-index:4;width:204px;padding:10px 10px 9px;background:rgba(255,255,255,.89);border:1px solid #dce6f0;border-radius:16px;box-shadow:0 5px 20px #344e7040;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.mini-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;font-size:11px;font-weight:900;color:#526884}.mini-head small{font-size:10px;color:#8190a5;font-weight:700}.mini-map canvas{display:block;width:100%;height:116px;touch-action:none;cursor:crosshair;background:#f7fbff;border:1px solid #d4e4ef;border-radius:9px}.mini-map:focus-within{outline:2px solid #67b8d1;outline-offset:2px}
+@media(max-width:750px){.mini-map{width:164px;top:9px;right:9px;padding:8px;border-radius:12px}.mini-map canvas{height:97px}.mini-head{font-size:10px;margin-bottom:5px}.mini-head small{font-size:9px}}
+@media(max-width:450px){.mini-map{width:138px;top:7px;right:7px;padding:6px}.mini-map canvas{height:83px}.mini-head small{font-size:8px}}.stage-overlay{position:absolute;left:16px;top:14px;pointer-events:none;background:#ffffffcc;color:#687994;font-size:12px;font-weight:800;padding:9px 12px;border:1px solid #e7edf7;border-radius:30px;backdrop-filter:blur(7px);box-shadow:0 2px 8px #d7e5f255}.message{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);background:#26364be8;border-radius:16px;padding:13px 20px;color:#fff;font-weight:800;text-align:center;max-width:80%;font-size:14px;pointer-events:none;opacity:0;transition:opacity .3s}.message.show{opacity:1}.playbar{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-top:1px solid var(--stroke)}.play{background:linear-gradient(135deg,#19b7a9,#12a095);border:0;min-height:49px;color:#fff;border-radius:15px;padding:0 22px;font-weight:900;font-size:16px;box-shadow:0 5px 12px #9cddd3}.restart{background:#edf5fb;border:0;color:#447398;border-radius:13px;padding:0 13px;min-height:47px;font-weight:800;font-size:13px}.timeline{min-width:80px;flex:1;display:flex;align-items:center;gap:8px}.timeline input{width:100%;accent-color:#8b7de8}.time{font-size:12px;color:#66738c;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:800}.timeline label{font-size:12px;color:var(--sub);white-space:nowrap;font-weight:800}.side{display:flex;flex-direction:column;gap:14px}.panel{background:#fff;border:1px solid var(--stroke);border-radius:21px;padding:18px;box-shadow:var(--shadow)}.panel h2{font-size:15px;margin:0 0 15px;letter-spacing:-.2px}.panel .sep{height:1px;background:#edf0f6;margin:13px 0}.pbtn{width:100%;display:flex;align-items:center;gap:9px;text-align:left;border:1px solid #e9edf6;background:#f7f9fc;border-radius:12px;padding:11px 12px;color:#475a78;font-weight:800;font-size:13px;margin-top:8px}.pbtn .ic{font-size:18px;width:23px;text-align:center}.pbtn:hover,.tool:hover{filter:brightness(.98)}.pbtn.danger{background:#fff8f7;color:#bb6470;border-color:#f7e6e3}.check{display:flex;align-items:center;gap:9px;color:#62718b;font-size:12px;font-weight:750;margin-top:13px;cursor:pointer}.check input{accent-color:var(--mint);width:17px;height:17px}.hint{color:#6f7d95;line-height:1.65;font-size:13px;margin:0}.steps{display:grid;gap:12px}.steps p{display:flex;gap:8px;margin:0;color:#52637d;font-size:12px;line-height:1.5;font-weight:700}.steps b{height:22px;width:22px;border-radius:8px;display:inline-grid;place-items:center;flex-shrink:0;background:#f0eefd;color:#8174d8;font-size:12px}.footer{margin-top:14px;text-align:center;color:#8290a3;font-size:12px;line-height:1.5}.pill{background:#fff2dd;color:#936b28;padding:3px 8px;border-radius:8px;font-weight:900;font-size:11px}.simple{border:0;background:transparent;color:#4e88ac;font-weight:800;font-size:12px;padding:4px}.mobile-only{display:none}
 @media(max-width:1050px){.layout{grid-template-columns:minmax(0,1fr) 220px}.panel{padding:14px}.tool{padding:0 9px}.teacher-tip{display:none}.canvas-toolbar{gap:5px}}
 @media(max-width:750px){.shell{padding:10px 10px 20px}.top{margin:5px 4px 12px}.brand h1{font-size:22px}.logo{height:42px;width:42px;border-radius:14px}.layout{display:flex;flex-direction:column}.side{display:grid;grid-template-columns:1fr 1fr}.stage{height:55vh;min-height:350px;max-height:580px}.canvas-toolbar{padding:9px;min-height:unset}.tool{min-height:40px;font-size:12px;padding:0 9px}.tool .ic{font-size:15px}.zoom-lbl{display:none}.playbar{padding:9px;gap:6px}.play{min-height:45px;padding:0 14px;font-size:14px}.restart{min-height:45px;padding:0 9px}.timeline label{display:none}.time{font-size:11px}.music-panel{padding:10px;gap:9px}.music-label{display:none}.music-picks button{padding:8px;font-size:12px}.volume{display:none}.song-name{flex-basis:100%}.footer{margin-top:10px}}
 @media(max-width:450px){.side{grid-template-columns:1fr}.stage{height:52vh}.canvas-toolbar{flex-wrap:nowrap;overflow-x:auto}.toolbar-spacer{display:none}.playbar{flex-wrap:wrap}.timeline{order:3;flex-basis:100%;padding:0 3px}.stage-overlay{font-size:10px;left:8px;top:8px}.brand small{font-size:10px}}
@@ -44,7 +47,7 @@
       <span class="toolbar-spacer"></span>
       <button type="button" class="tool" id="zoomOut" aria-label="화면 축소">−</button><span class="zoom-lbl" id="zoomLabel">100%</span><button type="button" class="tool" id="zoomIn" aria-label="화면 확대">＋</button>
     </div>
-    <div class="stage" id="stage"><canvas id="canvas" aria-label="터치 또는 마우스로 선을 그리는 공간"></canvas><span class="stage-overlay" id="stageStatus">✎ 선을 그려 길을 이어 보세요</span><div class="message" id="message" aria-live="polite"></div></div>
+    <div class="stage" id="stage"><canvas id="canvas" aria-label="터치 또는 마우스로 선을 그리는 공간"></canvas><span class="stage-overlay" id="stageStatus">✎ 선을 그려 길을 이어 보세요</span><div class="mini-map" aria-label="전체 코스 미니맵"><div class="mini-head"><span>◈ 미니맵</span><small>눌러서 화면 이동</small></div><canvas id="miniCanvas" aria-label="미니맵에서 이동할 곳을 선택하세요" tabindex="0" role="button"></canvas></div><div class="message" id="message" aria-live="polite"></div></div>
     <div class="playbar">
       <button type="button" class="play" id="playBtn">▶ 함께 재생</button>
       <button type="button" class="restart" id="listenBtn">♫ 음악만 듣기</button>
@@ -73,7 +76,7 @@
     </section>
     <section class="panel"><h2>이렇게 즐겨 보세요 <span class="pill">자유 놀이</span></h2>
       <div class="steps"><p><b>1</b><span>감상곡을 고르고 음악을 들어 봐요.</span></p><p><b>2</b><span>라이더나 썰매를 꾸미고, 손가락으로 내리막길을 그려요.</span></p><p><b>3</b><span>음악을 듣거나 함께 달리면서 자유롭게 코스를 바꿔 봐요.</span></p></div>
-      <div class="sep"></div><p class="hint">한 바퀴 돌고 싶다면 출발길부터 루프, 출구까지 한 번에 이어 그려 보세요. 루프 보조를 켜면 속력이 조금 부족해도 완주하기 쉬워요.</p><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
+      <div class="sep"></div><p class="hint">높은 곳으로 올라가거나 아래로 내려가면 배경도 달라져요. 미니맵을 눌러 긴 코스를 빠르게 둘러보세요. 한 바퀴 돌고 싶다면 출발길부터 루프, 출구까지 한 번에 이어 그려 보세요. 루프 보조를 켜면 속력이 조금 부족해도 완주하기 쉬워요.</p><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
     </section>
   </aside>
 </div>
@@ -101,6 +104,7 @@ const SAMPLE=[
 const STORAGE='melodyRider_courses_v1';
 let tracks=[],history=[],mode='draw',camera={x:0,y:-56,zoom:1},follow=true,grid=false;
 let width=800,height=500,scale=1,pointer=null,preview=null,playing=false,rideEnabled=true,lastTime=0,now=0,shownMessage=0,death=false,loopAssist=true;
+const miniCanvas=$('miniCanvas'),miniCtx=miniCanvas.getContext('2d');let minimapDirty=true,miniBounds=null,miniProjection=null,miniPointer=null;const miniLayer=document.createElement('canvas');
 // 자유 감상용 주행 설정: 적은 구름저항과 부드러운 코너 통과.
 const PHYSICS={gravity:970,startSpeed:290,rollingFriction:.003,airDrag:.008,maxSpeed:1100};
 let rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,track:null,s:0,railSpeed:0,side:1,boosted:new Set(),r:12},sparkles=[];
@@ -119,7 +123,7 @@ function showMessage(txt,ms=1700){$('message').textContent=txt;$('message').clas
 function sample(){return SAMPLE.map(line=>line.map(p=>({x:p[0],y:p[1]})));}
 function snap(){return tracks.map(line=>line.map(p=>({x:p.x,y:p.y})));}
 function checkpoint(){history.push(snap());if(history.length>40)history.shift();}
-function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(tracks));}catch(e){}}
+function persist(){minimapDirty=true;try{localStorage.setItem(STORAGE,JSON.stringify(tracks));}catch(e){}}
 function validateTrack(data){if(!Array.isArray(data)||data.length>500)return null;const out=[];for(const line of data){if(!Array.isArray(line)||line.length>15000) return null;const newLine=[];for(const p of line){if(typeof p?.x!=='number'||typeof p?.y!=='number'||!Number.isFinite(p.x)||!Number.isFinite(p.y)||Math.abs(p.x)>1e7||Math.abs(p.y)>1e7)return null;newLine.push({x:p.x,y:p.y});}if(newLine.length>1)out.push(newLine);}return out;}
 try{const stored=JSON.parse(localStorage.getItem(STORAGE));tracks=validateTrack(stored)||sample();}catch(e){tracks=sample();}
 function resetRider(){rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,track:null,s:0,railSpeed:0,side:1,boosted:new Set(),r:12};death=false;sparkles=[];}
@@ -129,11 +133,11 @@ function stop(playbackReset=false){playing=false;audio.pause();refreshButtons();
 function restart(){stop(true);camera.x=0;camera.y=-56;showMessage('출발 준비 완료!');}
 function setMode(m){mode=m;['Draw','Erase','Pan'].forEach(n=>{const b=$('tool'+n);const on=m===n.toLowerCase();b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);});stage.classList.toggle('is-pan',m==='pan');stage.classList.toggle('is-erase',m==='erase');updateStatus();}
 function updateStatus(){const text=death?'↻ 처음부터를 누르면 다시 탈 수 있어요':playing?(rideEnabled?'♪ 음악과 함께 달리는 중!':'♫ 음악을 들으며 자유롭게 그려 보세요'):mode==='draw'?'✎ 손가락으로 선을 이어 보세요':mode==='erase'?'⌫ 지우고 싶은 선을 쓸어 보세요':'✋ 화면을 드래그해 이동하세요';$('stageStatus').textContent=text;}
-function sizeCanvas(){const r=stage.getBoundingClientRect();width=Math.max(100,r.width);height=Math.max(100,r.height);scale=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);}
+function sizeCanvas(){minimapDirty=true;const r=stage.getBoundingClientRect();width=Math.max(100,r.width);height=Math.max(100,r.height);scale=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);}
 function w2s(x,y){return{x:(x-camera.x)*camera.zoom,y:(y-camera.y)*camera.zoom};}
 function s2w(x,y){return{x:x/camera.zoom+camera.x,y:y/camera.zoom+camera.y};}
 function eventPoint(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
-function setZoom(z){z=clamp(z,.45,2.1);const mid=s2w(width/2,height/2);camera.zoom=z;camera.x=mid.x-width/(2*z);camera.y=mid.y-height/(2*z);$('zoomLabel').textContent=Math.round(100*z)+'%';}
+function setZoom(z){minimapDirty=true;z=clamp(z,.45,2.1);const mid=s2w(width/2,height/2);camera.zoom=z;camera.x=mid.x-width/(2*z);camera.y=mid.y-height/(2*z);$('zoomLabel').textContent=Math.round(100*z)+'%';}
 function nearest(line,x,y){let best=Infinity;for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i],dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;if(len2<.01)continue;const t=clamp(((x-a.x)*dx+(y-a.y)*dy)/len2,0,1);const d=Math.hypot(x-a.x-dx*t,y-a.y-dy*t);if(d<best)best=d;}return best;}
 function eraseAt(x,y){const idx=tracks.findIndex(line=>nearest(line,x,y)<19/camera.zoom);if(idx>=0){tracks.splice(idx,1);persist();return true;}return false;}
 function down(e){if(e.button!==undefined&&e.button!==0)return;if(pointer)return;e.preventDefault();canvas.setPointerCapture(e.pointerId);const p=eventPoint(e),v=s2w(p.x,p.y);pointer={id:e.pointerId,x:p.x,y:p.y,erased:false};if(mode==='draw'){checkpoint();preview=[v];}else if(mode==='erase'){checkpoint();pointer.erased=eraseAt(v.x,v.y);}}
@@ -336,10 +340,72 @@ function loopCourse(){
 }
 
 function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
-function drawBackground(){ctx.clearRect(0,0,width,height);const g=ctx.createLinearGradient(0,0,0,height);g.addColorStop(0,'#eafbff');g.addColorStop(.6,'#f7fbff');g.addColorStop(1,'#fffef7');ctx.fillStyle=g;ctx.fillRect(0,0,width,height);
- const first=Math.floor(camera.x/440)-1,last=Math.floor((camera.x+width/camera.zoom)/440)+2;
- for(let i=first;i<last;i++){const wp={x:i*440+180,y:80+(Math.abs(i*37)%75)},sc=w2s(wp.x,wp.y),sz=clamp(37*camera.zoom,20,75);ctx.fillStyle='#ffffffb5';ctx.beginPath();ctx.ellipse(sc.x,sc.y,sz*1.8,sz*.35,0,0,Math.PI*2);ctx.ellipse(sc.x-sz*.65,sc.y-sz*.25,sz*.55,sz*.54,0,0,Math.PI*2);ctx.ellipse(sc.x,sc.y-sz*.45,sz*.76,sz*.7,0,0,Math.PI*2);ctx.fill();}
- if(grid){ctx.strokeStyle='#8cbcc91f';ctx.lineWidth=1;const k=50*camera.zoom;const x0=(-camera.x*camera.zoom)%k,y0=(-camera.y*camera.zoom)%k;ctx.beginPath();for(let x=x0;x<width;x+=k){ctx.moveTo(x,0);ctx.lineTo(x,height);}for(let y=y0;y<height;y+=k){ctx.moveTo(0,y);ctx.lineTo(width,y);}ctx.stroke();}}
+// 배경은 고정된 세계 좌표의 높이(y)에 따라 천천히 색이 바뀝니다. 물리 판정이나 코스에 영향을 주지 않습니다.
+const SKY_BANDS=[
+ [-2600,[218,226,251]],[-1450,[220,236,253]],[-650,[225,244,255]],
+ [100,[235,250,255]],[650,[249,249,242]],[1350,[255,237,219]],[2800,[242,225,213]]
+];
+function skyColor(worldY){let i=1;while(i<SKY_BANDS.length-1&&worldY>SKY_BANDS[i][0])i++;
+ const lo=SKY_BANDS[i-1],hi=SKY_BANDS[i],t=clamp((worldY-lo[0])/(hi[0]-lo[0]),0,1);return'rgb('+lo[1].map((v,j)=>Math.round(v+(hi[1][j]-v)*t)).join(',')+')';}
+function drawCloud(x,y,size,alpha){const scX=(x-camera.x*.27)*camera.zoom,scY=(y-camera.y)*camera.zoom,s=clamp(size*camera.zoom,12,90);
+ if(scX < -s*3||scX>width+s*3||scY < -s*2||scY>height+s*2)return;
+ ctx.fillStyle='rgba(255,255,255,'+alpha+')';ctx.beginPath();ctx.ellipse(scX,scY,s*1.55,s*.30,0,0,Math.PI*2);ctx.ellipse(scX-s*.49,scY-s*.26,s*.55,s*.46,0,0,Math.PI*2);ctx.ellipse(scX+s*.23,scY-s*.37,s*.65,s*.59,0,0,Math.PI*2);ctx.fill();}
+function drawMountains(baseline,peakHeight,tint,shift){const foot=(baseline-camera.y)*camera.zoom;if(foot < -peakHeight*camera.zoom-10||foot>height+peakHeight*camera.zoom+10)return;
+ ctx.fillStyle=tint;ctx.beginPath();ctx.moveTo(0,height+15);
+ for(let x=-60;x<=width+70;x+=25){const wx=x/camera.zoom+camera.x*shift,undulation=Math.sin(wx/265)*.53+Math.sin(wx/107+1.8)*.3+Math.sin(wx/62)*.12;ctx.lineTo(x,foot-(peakHeight*(.62+undulation))*camera.zoom);}
+ ctx.lineTo(width+80,height+15);ctx.closePath();ctx.fill();}
+function drawBackground(){ctx.clearRect(0,0,width,height);
+ const g=ctx.createLinearGradient(0,0,0,height);for(let i=0;i<=8;i++){const sy=height*i/8;g.addColorStop(i/8,skyColor(camera.y+sy/camera.zoom));}ctx.fillStyle=g;ctx.fillRect(0,0,width,height);
+ // 먼 산과 안개. 아래로 내려가면 따뜻한 색 지형이 보이고, 위로 올라가면 하늘이 더 푸르게 변합니다.
+ drawMountains(750,165,'rgba(162,190,205,.15)',.19);
+ drawMountains(1160,205,'rgba(166,177,195,.17)',.27);
+ // 배경 장식은 화면보다 느리게 움직이는 패럴랙스 효과를 적용합니다.
+ const first=Math.floor(camera.x*.27/430)-3,last=Math.ceil((camera.x*.27+width/camera.zoom)/430)+3;
+ for(let i=first;i<=last;i++){
+  const x=i*430+135+Math.sin(i*2.7)*90;
+  for(let layer=0;layer<4;layer++){const worldY=[-1220,-570,-30,420][layer]+Math.sin(i*3.9+layer*4)*90;drawCloud(x+(layer%2)*155,worldY,[33,42,40,51][layer],.50+layer*.06);}
+ }
+ // 높은 곳에는 아주 연한 반짝임만 더해, 화면에 그린 선이 항상 더 잘 보이게 합니다.
+ const upper=clamp((-camera.y-500)/1200,0,.48);
+ if(upper){ctx.fillStyle='rgba(255,255,255,'+upper+')';for(let i=0;i<48;i++){const x=((i*1597+291)%1999)/1999*width,y=((i*667+77)%997)/997*height;ctx.fillRect(x,y,i%9===0?2:1,i%9===0?2:1);}}
+ if(grid){ctx.strokeStyle='#8cbcc928';ctx.lineWidth=1;const k=50*camera.zoom;const x0=(-camera.x*camera.zoom)%k,y0=(-camera.y*camera.zoom)%k;ctx.beginPath();for(let x=x0;x<width;x+=k){ctx.moveTo(x,0);ctx.lineTo(x,height);}for(let y=y0;y<height;y+=k){ctx.moveTo(0,y);ctx.lineTo(width,y);}ctx.stroke();}}
+// 전체 코스는 작은 지도에 맞게 종횡비를 보존합니다. 흰 사각형은 현재 화면 범위입니다.
+function getMinimapBounds(){if(!minimapDirty&&miniBounds)return miniBounds;
+ let x0=BASE.x,x1=BASE.x,y0=BASE.y,y1=BASE.y;
+ for(const line of tracks)for(const p of line){x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y);}
+ let bw=Math.max(x1-x0,Math.max(700,width/camera.zoom)),bh=Math.max(y1-y0,Math.max(460,height/camera.zoom));
+ const cx=(x0+x1)/2,cy=(y0+y1)/2;bw*=1.22;bh*=1.30;
+ miniBounds={x0:cx-bw/2,y0:cy-bh/2,width:bw,height:bh};minimapDirty=false;return miniBounds;
+}
+function drawMinimap(){const rect=miniCanvas.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height),dpr=Math.min(2,window.devicePixelRatio||1),pixelW=Math.round(w*dpr),pixelH=Math.round(h*dpr);
+ const changedSize=miniCanvas.width!==pixelW||miniCanvas.height!==pixelH;
+ if(changedSize){miniCanvas.width=pixelW;miniCanvas.height=pixelH;minimapDirty=true;}
+ if(minimapDirty||!miniProjection){const bounds=getMinimapBounds(),pad=7,mx=(w-pad*2)/bounds.width,my=(h-pad*2)/bounds.height,unit=Math.min(mx,my),ox=(w-bounds.width*unit)/2-bounds.x0*unit,oy=(h-bounds.height*unit)/2-bounds.y0*unit;
+  miniProjection={unit,ox,oy,w,h};miniLayer.width=pixelW;miniLayer.height=pixelH;
+  const mc=miniLayer.getContext('2d');mc.setTransform(dpr,0,0,dpr,0,0);
+  const bg=mc.createLinearGradient(0,0,0,h);for(let i=0;i<=4;i++)bg.addColorStop(i/4,skyColor((h*i/4-oy)/unit));mc.fillStyle=bg;mc.fillRect(0,0,w,h);
+  mc.save();mc.beginPath();mc.rect(0,0,w,h);mc.clip();mc.strokeStyle='#526786';mc.lineWidth=1.6;mc.lineCap='round';mc.lineJoin='round';
+  for(const line of tracks){if(line.length<2)continue;mc.beginPath();mc.moveTo(line[0].x*unit+ox,line[0].y*unit+oy);
+   let px=line[0].x*unit+ox,py=line[0].y*unit+oy;
+   for(let i=1;i<line.length;i++){const x=line[i].x*unit+ox,y=line[i].y*unit+oy;if(i===line.length-1||Math.abs(x-px)+Math.abs(y-py)>1.1){mc.lineTo(x,y);px=x;py=y;}}mc.stroke();}
+  mc.fillStyle='#e7a165';mc.beginPath();mc.arc(BASE.x*unit+ox,BASE.y*unit+oy,3,0,Math.PI*2);mc.fill();mc.restore();
+ }
+ const p=miniProjection,{unit,ox,oy}=p;
+ miniCtx.setTransform(dpr,0,0,dpr,0,0);miniCtx.clearRect(0,0,w,h);miniCtx.drawImage(miniLayer,0,0,w,h);
+ miniCtx.save();miniCtx.beginPath();miniCtx.rect(0,0,w,h);miniCtx.clip();
+ if(preview?.length>1){miniCtx.strokeStyle='#ec8ba6';miniCtx.lineWidth=1.4;miniCtx.beginPath();preview.forEach((q,i)=>i?miniCtx.lineTo(q.x*unit+ox,q.y*unit+oy):miniCtx.moveTo(q.x*unit+ox,q.y*unit+oy));miniCtx.stroke();}
+ miniCtx.fillStyle='rgba(62,164,178,.11)';miniCtx.strokeStyle='#3198ad';miniCtx.lineWidth=1.5;
+ const vx=camera.x*unit+ox,vy=camera.y*unit+oy,vw=width/camera.zoom*unit,vh=height/camera.zoom*unit;miniCtx.fillRect(vx,vy,vw,vh);miniCtx.strokeRect(vx,vy,vw,vh);
+ miniCtx.fillStyle='#f05d7c';miniCtx.strokeStyle='#fff';miniCtx.lineWidth=2;miniCtx.beginPath();miniCtx.arc(rider.x*unit+ox,rider.y*unit+oy,4.2,0,Math.PI*2);miniCtx.fill();miniCtx.stroke();miniCtx.restore();}
+function jumpByMinimap(e){if(!miniProjection)return;const r=miniCanvas.getBoundingClientRect(),sx=e.clientX-r.left,sy=e.clientY-r.top,p=miniProjection;
+ const wx=(sx-p.ox)/p.unit,wy=(sy-p.oy)/p.unit;if(!Number.isFinite(wx)||!Number.isFinite(wy))return;
+ camera.x=wx-width/(2*camera.zoom);camera.y=wy-height/(2*camera.zoom);
+ if(follow){follow=false;$('follow').checked=false;showMessage('미니맵으로 이동했어요. 라이더 따라가기는 잠시 껐어요.',2100);}
+}
+miniCanvas.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();miniPointer=e.pointerId;miniCanvas.setPointerCapture(e.pointerId);jumpByMinimap(e);});
+miniCanvas.addEventListener('pointermove',e=>{if(miniPointer===e.pointerId){e.preventDefault();jumpByMinimap(e);}});
+miniCanvas.addEventListener('pointerup',()=>{miniPointer=null;});miniCanvas.addEventListener('pointercancel',()=>{miniPointer=null;});
+miniCanvas.addEventListener('keydown',e=>{if(!['Enter','Space'].includes(e.code))return;e.preventDefault();if(!miniProjection)return;const r=miniCanvas.getBoundingClientRect();jumpByMinimap({clientX:r.left+r.width/2,clientY:r.top+r.height/2});});
 function drawTrack(line,previewOnly=false){if(line.length<2)return;ctx.beginPath();ctx.moveTo(line[0].x,line[0].y);for(let i=1;i<line.length;i++)ctx.lineTo(line[i].x,line[i].y);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=previewOnly?'#e68a9a88':'#34486435';ctx.lineWidth=previewOnly?9:12;ctx.stroke();ctx.strokeStyle=previewOnly?'#fb8da4':'#394e78';ctx.lineWidth=previewOnly?5:7;ctx.stroke();ctx.strokeStyle=previewOnly?'#ffd6df':'#65d5c6';ctx.lineWidth=2;ctx.stroke();}
 function drawRider(p){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);ctx.lineCap='round';ctx.lineJoin='round';
  if(artImages.sled?.complete&&artImages.sled.naturalWidth){ctx.drawImage(artImages.sled,-29,2,58,25);}else{
@@ -358,7 +424,7 @@ function paint(){ctx.setTransform(scale,0,0,scale,0,0);drawBackground();ctx.save
  // 시작 지점
  ctx.fillStyle='#16aa9c';roundedRect(BASE.x-32,286,4,35,2);ctx.fill();ctx.beginPath();ctx.moveTo(BASE.x-28,286);ctx.lineTo(BASE.x-5,293);ctx.lineTo(BASE.x-28,300);ctx.fill();
  for(const p of sparkles){ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle='#f0b15c';ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
- drawRider(rider);ctx.restore();}
+ drawRider(rider);ctx.restore();drawMinimap();}
 function frame(t){if(!lastTime)lastTime=t;const dt=clamp((t-lastTime)/1000,0,.04);lastTime=t;now=t;if(playing){if(rideEnabled&&!death){const n=Math.ceil(dt/(1/120));for(let i=0;i<n;i++)simulate(dt/n);}handleMusic(dt);if(rideEnabled&&follow&&!pointer&&!death){const targetX=rider.x-width*.37/camera.zoom;const targetY=rider.y-height*.57/camera.zoom;camera.x+=(targetX-camera.x)*.075;camera.y+=(targetY-camera.y)*.075;}}
  if(shownMessage&&t>shownMessage){$('message').classList.remove('show');shownMessage=0;}paint();requestAnimationFrame(frame);}
 $('toolDraw').onclick=()=>setMode('draw');$('toolErase').onclick=()=>setMode('erase');$('toolPan').onclick=()=>setMode('pan');
