@@ -55,6 +55,7 @@
   <aside class="side">
     <section class="panel"><h2>나의 코스</h2>
       <button type="button" class="pbtn" id="sampleBtn"><span class="ic">⤴</span> 예시 코스 불러오기</button>
+      <button type="button" class="pbtn" id="loopSampleBtn"><span class="ic">↻</span> 한 바퀴 루프 예시</button>
       <button type="button" class="pbtn" id="pushBtn"><span class="ic">➜</span> 라이더 살짝 밀어주기</button>
       <button type="button" class="pbtn" id="undoBtn"><span class="ic">↶</span> 마지막 작업 되돌리기</button>
       <button type="button" class="pbtn" id="saveBtn"><span class="ic">↓</span> 코스 파일 저장하기</button>
@@ -63,6 +64,7 @@
       <input class="hide" type="file" accept=".json,application/json" id="courseInput">
       <label class="check"><input type="checkbox" id="follow" checked> 재생할 때 라이더 따라가기</label>
       <label class="check"><input type="checkbox" id="showGrid"> 연한 모눈 표시하기</label>
+      <label class="check"><input type="checkbox" id="loopAssist" checked> 루프 주행 보조 (추천)</label>
     </section>
     <section class="panel"><h2>나의 라이더 · 썰매</h2>
       <p class="hint">내가 직접 그린 캐릭터와 썰매를 타고 출발해요. 그림은 움직임에 영향을 주지 않아요.</p>
@@ -71,7 +73,7 @@
     </section>
     <section class="panel"><h2>이렇게 즐겨 보세요 <span class="pill">자유 놀이</span></h2>
       <div class="steps"><p><b>1</b><span>감상곡을 고르고 음악을 들어 봐요.</span></p><p><b>2</b><span>라이더나 썰매를 꾸미고, 손가락으로 내리막길을 그려요.</span></p><p><b>3</b><span>음악을 듣거나 함께 달리면서 자유롭게 코스를 바꿔 봐요.</span></p></div>
-      <div class="sep"></div><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
+      <div class="sep"></div><p class="hint">한 바퀴 돌고 싶다면 출발길부터 루프, 출구까지 한 번에 이어 그려 보세요. 루프 보조를 켜면 속력이 조금 부족해도 완주하기 쉬워요.</p><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
     </section>
   </aside>
 </div>
@@ -98,10 +100,10 @@ const SAMPLE=[
 ];
 const STORAGE='melodyRider_courses_v1';
 let tracks=[],history=[],mode='draw',camera={x:0,y:-56,zoom:1},follow=true,grid=false;
-let width=800,height=500,scale=1,pointer=null,preview=null,playing=false,rideEnabled=true,lastTime=0,now=0,shownMessage=0,death=false;
+let width=800,height=500,scale=1,pointer=null,preview=null,playing=false,rideEnabled=true,lastTime=0,now=0,shownMessage=0,death=false,loopAssist=true;
 // 자유 감상용 주행 설정: 적은 구름저항과 부드러운 코너 통과.
-const PHYSICS={gravity:970,startSpeed:290,rollingFriction:.003,airDrag:.008,maxSpeed:730,cornerSmooth:22};
-let rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,r:12},sparkles=[];
+const PHYSICS={gravity:970,startSpeed:290,rollingFriction:.003,airDrag:.008,maxSpeed:1100};
+let rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,track:null,s:0,railSpeed:0,side:1,boosted:new Set(),r:12},sparkles=[];
 // 교사가 music-library.json에 등록한 곡은 학생 전체에게 공유되고, 내 음악은 기기 안에서만 열립니다.
 const BUILTINS=[
  {id:'breeze',kind:'builtin',title:'산들바람 산책',description:'가볍고 경쾌한 느낌 · 직접 만든 멜로디',bpm:112,length:34.3,wave:'triangle',melody:[64,67,69,71,72,71,69,67,64,62,64,67,69,67,64,null,65,69,72,74,72,69,67,65,64,67,71,74,72,69,67,null,64],bass:[48,48,53,50]},
@@ -120,7 +122,7 @@ function checkpoint(){history.push(snap());if(history.length>40)history.shift();
 function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(tracks));}catch(e){}}
 function validateTrack(data){if(!Array.isArray(data)||data.length>500)return null;const out=[];for(const line of data){if(!Array.isArray(line)||line.length>15000) return null;const newLine=[];for(const p of line){if(typeof p?.x!=='number'||typeof p?.y!=='number'||!Number.isFinite(p.x)||!Number.isFinite(p.y)||Math.abs(p.x)>1e7||Math.abs(p.y)>1e7)return null;newLine.push({x:p.x,y:p.y});}if(newLine.length>1)out.push(newLine);}return out;}
 try{const stored=JSON.parse(localStorage.getItem(STORAGE));tracks=validateTrack(stored)||sample();}catch(e){tracks=sample();}
-function resetRider(){rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,r:12};death=false;sparkles=[];}
+function resetRider(){rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,track:null,s:0,railSpeed:0,side:1,boosted:new Set(),r:12};death=false;sparkles=[];}
 function resetMusic(){musicTime=0;beatPlayed=-1;if(musicMode==='url'||musicMode==='file'){try{audio.currentTime=0;}catch(e){}}updateTime();}
 function refreshButtons(){$('playBtn').textContent=playing&&rideEnabled?'Ⅱ 함께 멈춤':'▶ 함께 재생';$('listenBtn').textContent=playing&&!rideEnabled?'Ⅱ 음악 멈춤':'♫ 음악만 듣기';}
 function stop(playbackReset=false){playing=false;audio.pause();refreshButtons();if(playbackReset){resetRider();resetMusic();}updateStatus();}
@@ -175,129 +177,162 @@ async function toggle(ride=true){
  }else if(musicMode==='builtin'){audioContext();}
  rideEnabled=ride;playing=true;refreshButtons();updateStatus();
 }
-// 물리 판정은 라이더/썰매의 그림과 무관합니다. 작은 손그림 굴곡은 부드러운 길로 취급합니다.
+// 선로의 진행 방향은 학생이 선을 그린 순서입니다. x가 왼쪽으로 돌아가는 루프도 그대로 따라갑니다.
+// 선로를 작은 간격으로 보간한 다음 근처 이웃만 평균 내어, 손그림의 잔떨림을 완화합니다.
 const rideTrackCache=new WeakMap();
 function rideTrack(line){
- const existing=rideTrackCache.get(line);
- if(existing&&existing.length===line.length)return existing;
- const smoothed=line.map((p,i)=>{
-  let sum=p.y,total=1;
-  for(let offset=-6;offset<=6;offset++){
-   if(!offset||i+offset<0||i+offset>=line.length)continue;
-   const other=line[i+offset],distance=Math.hypot(other.x-p.x,other.y-p.y);
-   if(distance>=33)continue;
-   const weight=1-distance/33;
-   sum+=other.y*weight;total+=weight;
+ let geo=rideTrackCache.get(line);
+ if(geo)return geo;
+ const dense=[];
+ for(let i=1;i<line.length;i++){
+  const a=line[i-1],b=line[i],distance=Math.hypot(b.x-a.x,b.y-a.y);
+  if(!dense.length)dense.push({x:a.x,y:a.y});
+  if(distance<.1)continue;
+  const pieces=Math.min(300,Math.max(1,Math.ceil(distance/7)));
+  for(let k=1;k<=pieces;k++)dense.push({x:a.x+(b.x-a.x)*k/pieces,y:a.y+(b.y-a.y)*k/pieces});
+ }
+ const points=dense.map((p,i)=>{
+  if(i===0||i===dense.length-1)return p;
+  let x=0,y=0,total=0;
+  for(let k=-3;k<=3;k++){
+   const q=dense[i+k];if(!q)continue;
+   const w=4-Math.abs(k);x+=q.x*w;y+=q.y*w;total+=w;
   }
-  return{x:p.x,y:sum/total};
+  return{x:x/total,y:y/total};
  });
- rideTrackCache.set(line,smoothed);
- return smoothed;
-}
-function segmentDirection(a,b){
- let dx=b.x-a.x,dy=b.y-a.y;
- if(dx<0){dx=-dx;dy=-dy;}
- const length=Math.hypot(dx,dy);
- return length>.01?{x:dx/length,y:dy/length,length}:null;
-}
-function smoothTangent(line,i,t,base){
- let vx=base.x,vy=base.y;
- const a=line[i-1],b=line[i];
- const fromStart=Math.hypot(b.x-a.x,b.y-a.y)*t;
- const toEnd=Math.hypot(b.x-a.x,b.y-a.y)*(1-t);
- if(i>1&&fromStart<PHYSICS.cornerSmooth){
-  const neighbor=segmentDirection(line[i-2],line[i-1]);
-  if(neighbor&&neighbor.x*base.x+neighbor.y*base.y>.52){
-   const w=.48*(1-fromStart/PHYSICS.cornerSmooth);vx=vx*(1-w)+neighbor.x*w;vy=vy*(1-w)+neighbor.y*w;
-  }
+ const cum=[0];
+ for(let i=1;i<points.length;i++)cum.push(cum[i-1]+Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y));
+ let turn=0;
+ for(let i=2;i<points.length;i++){
+  const a=points[i-2],b=points[i-1],c=points[i];
+  const ax=b.x-a.x,ay=b.y-a.y,bx=c.x-b.x,by=c.y-b.y;
+  if(Math.hypot(ax,ay)<.05||Math.hypot(bx,by)<.05)continue;
+  turn+=Math.atan2(ax*by-ay*bx,ax*bx+ay*by);
  }
- if(i<line.length-1&&toEnd<PHYSICS.cornerSmooth){
-  const neighbor=segmentDirection(line[i],line[i+1]);
-  if(neighbor&&neighbor.x*base.x+neighbor.y*base.y>.52){
-   const w=.48*(1-toEnd/PHYSICS.cornerSmooth);vx=vx*(1-w)+neighbor.x*w;vy=vy*(1-w)+neighbor.y*w;
-  }
- }
- const l=Math.hypot(vx,vy)||1;return{x:vx/l,y:vy/l};
+ let minY=Infinity,maxY=-Infinity;for(const q of points){if(q.y<minY)minY=q.y;if(q.y>maxY)maxY=q.y;}
+ const height=maxY-minY;
+ const hasLoop=Math.abs(turn)>5.15 && cum[cum.length-1]>180;
+ const suggestedLoopSpeed=Math.min(1080,Math.sqrt(PHYSICS.gravity*(2*height+Math.min(height/2,180)))+58);
+ geo={points,cum,total:cum[cum.length-1],hasLoop,suggestedLoopSpeed};
+ rideTrackCache.set(line,geo);
+ return geo;
 }
-function findSurface(p,oldX,oldY,wasGrounded){
+// 누적 호 길이 s로 점과 접선을 얻습니다. 따라서 수직 벽/천장에서도 진행 방향이 뒤집히지 않습니다.
+function trackPosition(g,s){
+ const d=clamp(s,0,g.total),cum=g.cum,pts=g.points;
+ let lo=1,hi=cum.length-1;
+ while(lo<hi){const mid=(lo+hi)>>1;if(cum[mid]<d)lo=mid+1;else hi=mid;}
+ const i=lo,a=pts[i-1]||pts[0],b=pts[i]||pts[0],span=(cum[i]||0)-(cum[i-1]||0),u=span>0?(d-cum[i-1])/span:0;
+ return{x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u};
+}
+function trackSample(g,s){
+ const q=trackPosition(g,s),left=trackPosition(g,s-7),right=trackPosition(g,s+7);
+ let dx=right.x-left.x,dy=right.y-left.y,mag=Math.hypot(dx,dy);
+ if(mag<.0001){const a=trackPosition(g,s-.5),b=trackPosition(g,s+.5);dx=b.x-a.x;dy=b.y-a.y;mag=Math.hypot(dx,dy);}
+ if(mag<.0001)return{x:q.x,y:q.y,tx:1,ty:0};
+ return{x:q.x,y:q.y,tx:dx/mag,ty:dy/mag};
+}
+function turnAngle(a,b,k){return a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*k;}
+function findSurface(p,oldX,oldY){
  let best=null;
- for(const sourceLine of tracks){const line=rideTrack(sourceLine);for(let i=1;i<line.length;i++){
-  const a=line[i-1],b=line[i];
-  if(Math.max(a.x,b.x)+37<p.x||Math.min(a.x,b.x)-37>p.x||Math.max(a.y,b.y)+37<p.y||Math.min(a.y,b.y)-37>p.y)continue;
-  const dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
-  if(len2<.1)continue;
-  const rawT=((p.x-a.x)*dx+(p.y-a.y)*dy)/len2;
-  if(rawT<-.08||rawT>1.08)continue;
-  const t=clamp(rawT,0,1),qx=a.x+t*dx,qy=a.y+t*dy;
-  const base=segmentDirection(a,b);
-  if(!base||base.x<.04)continue; // 거의 수직인 벽은 선로가 아닙니다.
-  const nx=base.y,ny=-base.x;
-  const dist=(p.x-qx)*nx+(p.y-qy)*ny;
-  const old=(oldX-qx)*nx+(oldY-qy)*ny;
-  const approach=p.vx*nx+p.vy*ny;
-  if(dist>p.r+(wasGrounded?3:0)||dist<-p.r*.9||old<-p.r*.9)continue;
-  if(!wasGrounded&&approach>0)continue; // 공중에서 선의 아랫면에 붙지 않도록
-  const tangent=smoothTangent(line,i,t,base);
-  const aligned=p.tangent?p.tangent.x*tangent.x+p.tangent.y*tangent.y:1;
-  const score=Math.abs(p.r-dist)+(wasGrounded?(1-clamp(aligned,-1,1))*5:0);
-  if(!best||score<best.score)best={nx,ny,dist,tangent,score};
- }}
+ for(const line of tracks){const g=rideTrack(line);
+  for(let i=1;i<g.points.length;i++){
+   const a=g.points[i-1],b=g.points[i];
+   if(Math.max(a.x,b.x)+23<p.x||Math.min(a.x,b.x)-23>p.x||Math.max(a.y,b.y)+23<p.y||Math.min(a.y,b.y)-23>p.y)continue;
+   const dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
+   if(len2<.01)continue;
+   const raw=((p.x-a.x)*dx+(p.y-a.y)*dy)/len2;
+   if(raw<-.1||raw>1.1)continue;
+   const t=clamp(raw,0,1),s=g.cum[i-1]+Math.sqrt(len2)*t,q=trackSample(g,s);
+   const velAlong=p.vx*q.tx+p.vy*q.ty;
+   for(const side of [1,-1]){
+    const nx=q.ty*side,ny=-q.tx*side;
+    const dist=(p.x-q.x)*nx+(p.y-q.y)*ny,old=(oldX-q.x)*nx+(oldY-q.y)*ny;
+    const approach=p.vx*nx+p.vy*ny;
+    if(dist>p.r+5||dist<-p.r*.7||old<-p.r*.8||approach>35)continue;
+    // 중력 때문에 위에서 내려오는 접촉과 선을 따라 진입하는 접촉을 모두 허용합니다.
+    const score=Math.abs(dist-p.r)+(approach>0?approach*.05:0)+(Math.abs(velAlong)<18?5:0);
+    if(!best||score<best.score)best={line,g,s,q,side,score};
+   }
+  }
+ }
  return best;
 }
+function detachRider(p){p.grounded=false;p.track=null;p.tangent=null;p.railSpeed=0;}
 function simulate(dt){
  if(death)return;
- const p=rider,oldX=p.x,oldY=p.y,wasGrounded=p.grounded;
- let movingSpeed=0;
- if(wasGrounded&&p.tangent){
-  const t=p.tangent;
-  movingSpeed=p.vx*t.x+p.vy*t.y+PHYSICS.gravity*t.y*dt;
-  const loss=PHYSICS.rollingFriction*PHYSICS.gravity*t.x*dt;
-  movingSpeed=movingSpeed>0?Math.max(0,movingSpeed-loss):Math.min(0,movingSpeed+loss);
-  movingSpeed=clamp(movingSpeed,-PHYSICS.maxSpeed,PHYSICS.maxSpeed);
-  p.vx=movingSpeed*t.x;p.vy=movingSpeed*t.y;
- }else{
-  p.vy+=PHYSICS.gravity*dt;
-  const drag=Math.exp(-PHYSICS.airDrag*dt);
-  p.vx*=drag;p.vy*=drag;
-  const speed=Math.hypot(p.vx,p.vy);
-  if(speed>PHYSICS.maxSpeed){p.vx*=PHYSICS.maxSpeed/speed;p.vy*=PHYSICS.maxSpeed/speed;}
- }
- p.x+=p.vx*dt;p.y+=p.vy*dt;
- const hit=findSurface(p,oldX,oldY,wasGrounded);
- if(hit){
-  // 선의 미세한 모서리마다 속도를 잃지 않도록, 접지 중에는 접선 방향으로 속도를 회전시킵니다.
-  p.x+=(p.r-hit.dist)*hit.nx;p.y+=(p.r-hit.dist)*hit.ny;
-  if(wasGrounded&&p.tangent){
-   const alignment=clamp(p.tangent.x*hit.tangent.x+p.tangent.y*hit.tangent.y,-1,1);
-   const turn=Math.acos(alignment);
-   // 실제 급격한 꺾임만 조금 감속. 자연스러운 곡선은 운동량을 그대로 유지.
-   const cornerLoss=turn>.65?clamp(1-(turn-.65)*.11,.86,1):1;
-   movingSpeed*=cornerLoss;
-  }else{
-   movingSpeed=(p.vx*hit.tangent.x+p.vy*hit.tangent.y)*.993;
-   // 부드러운 경사로에 처음 착지할 때 수직 낙하로 수평 관성을 과하게 잃지 않게 보조.
-   if(p.vx>0&&hit.tangent.x>.88)movingSpeed=Math.max(movingSpeed,p.vx*hit.tangent.x*.985);
+ const p=rider,oldX=p.x,oldY=p.y;
+ if(p.grounded&&p.track&&tracks.includes(p.track)){
+  const g=rideTrack(p.track),before=trackSample(g,p.s);
+  let speed=p.railSpeed;
+  // 교사가 알려 준 기본 물리는 유지하면서, 완성된 고리 코스는 초보자도 돌아볼 수 있게 선택적 추진을 제공합니다.
+  if(loopAssist&&g.hasLoop&&!p.boosted.has(p.track)&&speed>35&&before.ty<-.12){
+   speed=Math.max(speed,g.suggestedLoopSpeed);p.boosted.add(p.track);
+   showMessage('루프 보조! 한 바퀴 돌 힘을 보탰어요',1800);
   }
-  p.vx=movingSpeed*hit.tangent.x;p.vy=movingSpeed*hit.tangent.y;
-  p.grounded=true;p.tangent=hit.tangent;
-  p.angle+=(Math.atan2(hit.tangent.y,hit.tangent.x)-p.angle)*.28;
-  if(Math.random()<.12)sparkles.push({x:p.x-15,y:p.y+10,vx:-40-Math.random()*35,vy:-25-Math.random()*50,life:.45});
+  speed+=PHYSICS.gravity*before.ty*dt;
+  const loss=PHYSICS.rollingFriction*PHYSICS.gravity*dt;
+  speed=speed>0?Math.max(0,speed-loss):Math.min(0,speed+loss);
+  speed=clamp(speed,-PHYSICS.maxSpeed,PHYSICS.maxSpeed);
+  const nextS=p.s+speed*dt;
+  if(nextS<0||nextS>g.total){
+   const q=trackSample(g,clamp(nextS,0,g.total)),nx=q.ty*p.side,ny=-q.tx*p.side;
+   p.x=q.x+nx*p.r;p.y=q.y+ny*p.r;
+   p.vx=q.tx*speed;p.vy=q.ty*speed;
+   detachRider(p);
+   const leftover=Math.abs(nextS-clamp(nextS,0,g.total))/Math.max(1,Math.abs(speed));
+   p.x+=p.vx*leftover;p.y+=p.vy*leftover;
+  }else{
+   p.s=nextS;p.railSpeed=speed;
+   const q=trackSample(g,p.s),nx=q.ty*p.side,ny=-q.tx*p.side;
+   p.x=q.x+nx*p.r;p.y=q.y+ny*p.r;
+   p.vx=q.tx*speed;p.vy=q.ty*speed;
+   p.tangent={x:q.tx,y:q.ty};
+   const facing=speed< -15?-1:1;
+   p.angle=turnAngle(p.angle,Math.atan2(q.ty*facing,q.tx*facing),.46);
+   if(Math.random()<.08&&Math.abs(speed)>70)sparkles.push({x:p.x-15,y:p.y+10,vx:-40-Math.random()*35,vy:-25-Math.random()*50,life:.45});
+  }
  }else{
-  p.grounded=false;p.tangent=null;
-  p.angle+=(clamp(Math.atan2(p.vy,p.vx),-.75,1.5)-p.angle)*.045;
+  if(p.grounded)detachRider(p);
+  p.vy+=PHYSICS.gravity*dt;
+  const drag=Math.exp(-PHYSICS.airDrag*dt);p.vx*=drag;p.vy*=drag;
+  const v=Math.hypot(p.vx,p.vy);
+  if(v>PHYSICS.maxSpeed){p.vx*=PHYSICS.maxSpeed/v;p.vy*=PHYSICS.maxSpeed/v;}
+  p.x+=p.vx*dt;p.y+=p.vy*dt;
+  const hit=findSurface(p,oldX,oldY);
+  if(hit){
+   const q=hit.q,nx=q.ty*hit.side,ny=-q.tx*hit.side;
+   p.track=hit.line;p.s=hit.s;p.side=hit.side;p.grounded=true;
+   p.x=q.x+nx*p.r;p.y=q.y+ny*p.r;
+   p.railSpeed=(p.vx*q.tx+p.vy*q.ty)*.998;
+   p.vx=q.tx*p.railSpeed;p.vy=q.ty*p.railSpeed;
+   p.tangent={x:q.tx,y:q.ty};
+   p.angle=turnAngle(p.angle,Math.atan2(q.ty*(p.railSpeed<0?-1:1),q.tx*(p.railSpeed<0?-1:1)),.46);
+  }else{
+   p.angle=turnAngle(p.angle,Math.atan2(p.vy,p.vx),.045);
+  }
  }
- if(p.y>1600||Math.abs(p.x)>200000){death=true;showMessage('앗, 떨어졌어요! ↻ 처음부터를 눌러 보세요',2600);updateStatus();}
+ if(p.y>1800||Math.abs(p.x)>200000){death=true;showMessage('앗, 떨어졌어요! ↻ 처음부터를 눌러 보세요',2600);updateStatus();}
  for(const s of sparkles){s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;}sparkles=sparkles.filter(s=>s.life>0).slice(-80);
 }
 function nudgeRider(){
  if(death){showMessage('먼저 ↻ 처음부터를 눌러 주세요');return;}
- const t=rider.tangent;
- if(t){
-  const speed=rider.vx*t.x+rider.vy*t.y;
-  const next=clamp(Math.max(0,speed)+125,0,PHYSICS.maxSpeed);
-  rider.vx=next*t.x;rider.vy=next*t.y;
- }else rider.vx=clamp(rider.vx+130,-PHYSICS.maxSpeed,PHYSICS.maxSpeed);
+ if(rider.grounded&&rider.track){
+  const dir=rider.railSpeed<0?-1:1;
+  rider.railSpeed=dir*clamp(Math.abs(rider.railSpeed)+180,0,PHYSICS.maxSpeed);
+  const t=rider.tangent||{x:1,y:0};rider.vx=rider.railSpeed*t.x;rider.vy=rider.railSpeed*t.y;
+ }else rider.vx=clamp(rider.vx+150,-PHYSICS.maxSpeed,PHYSICS.maxSpeed);
  showMessage('라이더를 앞으로 살짝 밀었어요!');
+}
+function loopCourse(){
+ const line=[[32,320],[110,320],[230,320],[330,340],[420,405],[510,520],[600,625],[670,667],[750,670]];
+ const radius=80,count=88,cx=750,cy=590;
+ for(let i=1;i<=count;i++){
+  const angle=Math.PI/2-2*Math.PI*i/count;
+  line.push([cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius]);
+ }
+ line.push([825,668],[905,645],[1010,624],[1130,635],[1280,668]);
+ return[line.map(([x,y])=>({x,y}))];
 }
 
 function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
@@ -331,11 +366,12 @@ $('zoomIn').onclick=()=>setZoom(camera.zoom*1.2);$('zoomOut').onclick=()=>setZoo
 $('playBtn').onclick=()=>toggle(true);$('listenBtn').onclick=()=>toggle(false);$('retryBtn').onclick=restart;
 $('undoBtn').onclick=()=>{if(history.length){tracks=history.pop();persist();showMessage('마지막 작업을 되돌렸어요');}else showMessage('되돌릴 작업이 없어요');};
 $('sampleBtn').onclick=()=>{checkpoint();tracks=sample();persist();restart();showMessage('예시 코스를 불러왔어요');};
+$('loopSampleBtn').onclick=()=>{checkpoint();tracks=loopCourse();persist();restart();showMessage('루프 코스! 함께 재생을 누르고 한 바퀴 돌아 보세요',2800);};
 $('pushBtn').onclick=nudgeRider;
 $('clearBtn').onclick=()=>{checkpoint();tracks=[];persist();restart();showMessage('빈 화면! 새로운 길을 그려 보세요');};
 $('saveBtn').onclick=()=>{download('나의-멜로디-라이더-작품.json',JSON.stringify({app:'melody-rider',version:2,tracks,art},null,2),'application/json');showMessage('코스와 내가 그린 그림을 저장했어요');};
 $('loadBtn').onclick=()=>$('courseInput').click();$('courseInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const parsed=validateTrack(Array.isArray(obj)?obj:obj.tracks);if(!parsed)throw new Error();checkpoint();tracks=parsed;persist();if(obj.art&&typeof obj.art==='object'){for(const part of ['rider','sled']){const url=obj.art[part];if(url===null||typeof url==='string'&&url.startsWith('data:image/png;base64,')&&url.length<1000000)applyArt(part,url);}persistArt();}restart();showMessage('나의 작품을 불러왔어요');}catch(e){showMessage('올바른 코스 파일이 아니에요');}e.target.value='';};
-$('follow').onchange=e=>follow=e.target.checked;$('showGrid').onchange=e=>grid=e.target.checked;
+$('follow').onchange=e=>follow=e.target.checked;$('showGrid').onchange=e=>grid=e.target.checked;$('loopAssist').onchange=e=>{loopAssist=e.target.checked;showMessage(loopAssist?'루프 보조가 켜졌어요':'루프 보조를 끄고 추가 추진 없이 달려요');};
 $('songSelect').onchange=e=>chooseMusic(e.target.value);
 $('pickFile').onclick=()=>$('musicInput').click();
 $('musicInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(musicFileUrl)URL.revokeObjectURL(musicFileUrl);musicFileUrl=URL.createObjectURL(f);selectedFile=f;chooseMusic('local');showMessage('내 음악을 불러왔어요');e.target.value='';};
