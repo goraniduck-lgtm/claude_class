@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f6f7fb">
+<title>멜로디 라이더 | 음악을 선으로 그리다</title>
+<style>
+:root{--ink:#24314a;--sub:#66738b;--mint:#11a89c;--mint-d:#098d82;--lilac:#8b7de8;--orange:#ff935e;--stroke:#e2e9f1;--paper:#fff;--bg:#f5f7fc;--shadow:0 10px 36px rgba(49,63,99,.08)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:var(--ink)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,input:focus-visible{outline:3px solid #74cfc5;outline-offset:2px}
+.shell{max-width:1500px;padding:18px clamp(12px,2.2vw,30px) 26px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px}.logo{height:48px;width:48px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(145deg,#53cfbe,#54a7e5);box-shadow:0 6px 13px #93d8d36b}.logo svg{width:34px;height:34px}.brand h1{font-size:clamp(22px,2.3vw,30px);margin:0;letter-spacing:-1px;line-height:1.15}.brand small{display:block;font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.3px;margin-top:5px}.teacher-tip{font-size:12px;color:#6c7891;background:#eaf0fb;border-radius:50px;padding:9px 14px;font-weight:700}
+.music-panel{display:flex;align-items:center;flex-wrap:wrap;gap:12px;background:var(--paper);border:1px solid var(--stroke);border-radius:20px;padding:12px 16px;box-shadow:var(--shadow);margin-bottom:14px}.music-label{font-size:13px;font-weight:800;white-space:nowrap}.music-picks{display:flex;background:#f0f3f9;border-radius:12px;padding:4px;gap:3px}.music-picks button{border:0;border-radius:10px;background:transparent;color:#65748a;padding:8px 12px;font-weight:800;font-size:13px}.music-picks button.selected{color:#fff;background:#776ce0;box-shadow:0 3px 10px #b8b1ef}.song-name{font-size:12px;color:#5a6580;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}.volume{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--sub);font-weight:700}.volume input{accent-color:#8b7de8;width:90px}.hide{display:none!important}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 265px;align-items:start;gap:14px}.stage-card{position:relative;background:#fff;border:1px solid var(--stroke);border-radius:23px;box-shadow:var(--shadow);overflow:hidden}.canvas-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:11px 12px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--stroke);min-height:64px}.tool{border:1px solid transparent;background:#f1f4f9;color:#586782;font-size:13px;font-weight:800;border-radius:12px;min-height:41px;padding:0 12px;display:flex;gap:7px;align-items:center;justify-content:center;white-space:nowrap}.tool.active{background:#ddf7f3;color:#097c73;border-color:#a1e5db}.tool.warn{color:#ae6060;background:#fff4f1}.tool .ic{font-size:17px}.toolbar-spacer{flex:1}.zoom-lbl{font-size:12px;color:var(--sub);font-weight:800;min-width:38px;text-align:center}.stage{position:relative;height:clamp(355px,61vh,690px);background:linear-gradient(180deg,#edfbff,#f7fbff 63%,#fffdfa);overflow:hidden;touch-action:none;user-select:none}.stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}.stage.is-pan canvas{cursor:grab}.stage.is-erase canvas{cursor:cell}.stage-overlay{position:absolute;left:16px;top:14px;pointer-events:none;background:#ffffffcc;color:#687994;font-size:12px;font-weight:800;padding:9px 12px;border:1px solid #e7edf7;border-radius:30px;backdrop-filter:blur(7px);box-shadow:0 2px 8px #d7e5f255}.message{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);background:#26364be8;border-radius:16px;padding:13px 20px;color:#fff;font-weight:800;text-align:center;max-width:80%;font-size:14px;pointer-events:none;opacity:0;transition:opacity .3s}.message.show{opacity:1}.playbar{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-top:1px solid var(--stroke)}.play{background:linear-gradient(135deg,#19b7a9,#12a095);border:0;min-height:49px;color:#fff;border-radius:15px;padding:0 22px;font-weight:900;font-size:16px;box-shadow:0 5px 12px #9cddd3}.restart{background:#edf5fb;border:0;color:#447398;border-radius:13px;padding:0 13px;min-height:47px;font-weight:800;font-size:13px}.timeline{min-width:80px;flex:1;display:flex;align-items:center;gap:8px}.timeline input{width:100%;accent-color:#8b7de8}.time{font-size:12px;color:#66738c;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:800}.timeline label{font-size:12px;color:var(--sub);white-space:nowrap;font-weight:800}.side{display:flex;flex-direction:column;gap:14px}.panel{background:#fff;border:1px solid var(--stroke);border-radius:21px;padding:18px;box-shadow:var(--shadow)}.panel h2{font-size:15px;margin:0 0 15px;letter-spacing:-.2px}.panel .sep{height:1px;background:#edf0f6;margin:13px 0}.pbtn{width:100%;display:flex;align-items:center;gap:9px;text-align:left;border:1px solid #e9edf6;background:#f7f9fc;border-radius:12px;padding:11px 12px;color:#475a78;font-weight:800;font-size:13px;margin-top:8px}.pbtn .ic{font-size:18px;width:23px;text-align:center}.pbtn:hover,.tool:hover{filter:brightness(.98)}.pbtn.danger{background:#fff8f7;color:#bb6470;border-color:#f7e6e3}.check{display:flex;align-items:center;gap:9px;color:#62718b;font-size:12px;font-weight:750;margin-top:13px;cursor:pointer}.check input{accent-color:var(--mint);width:17px;height:17px}.hint{color:#6f7d95;line-height:1.65;font-size:13px;margin:0}.steps{display:grid;gap:12px}.steps p{display:flex;gap:8px;margin:0;color:#52637d;font-size:12px;line-height:1.5;font-weight:700}.steps b{height:22px;width:22px;border-radius:8px;display:inline-grid;place-items:center;flex-shrink:0;background:#f0eefd;color:#8174d8;font-size:12px}.footer{margin-top:14px;text-align:center;color:#8290a3;font-size:12px;line-height:1.5}.pill{background:#fff2dd;color:#936b28;padding:3px 8px;border-radius:8px;font-weight:900;font-size:11px}.simple{border:0;background:transparent;color:#4e88ac;font-weight:800;font-size:12px;padding:4px}.mobile-only{display:none}
+@media(max-width:1050px){.layout{grid-template-columns:minmax(0,1fr) 220px}.panel{padding:14px}.tool{padding:0 9px}.teacher-tip{display:none}.canvas-toolbar{gap:5px}}
+@media(max-width:750px){.shell{padding:10px 10px 20px}.top{margin:5px 4px 12px}.brand h1{font-size:22px}.logo{height:42px;width:42px;border-radius:14px}.layout{display:flex;flex-direction:column}.side{display:grid;grid-template-columns:1fr 1fr}.stage{height:55vh;min-height:350px;max-height:580px}.canvas-toolbar{padding:9px;min-height:unset}.tool{min-height:40px;font-size:12px;padding:0 9px}.tool .ic{font-size:15px}.zoom-lbl{display:none}.playbar{padding:9px;gap:6px}.play{min-height:45px;padding:0 14px;font-size:14px}.restart{min-height:45px;padding:0 9px}.timeline label{display:none}.time{font-size:11px}.music-panel{padding:10px;gap:9px}.music-label{display:none}.music-picks button{padding:8px;font-size:12px}.volume{display:none}.song-name{flex-basis:100%}.footer{margin-top:10px}}
+@media(max-width:450px){.side{grid-template-columns:1fr}.stage{height:52vh}.canvas-toolbar{flex-wrap:nowrap;overflow-x:auto}.toolbar-spacer{display:none}.playbar{flex-wrap:wrap}.timeline{order:3;flex-basis:100%;padding:0 3px}.stage-overlay{font-size:10px;left:8px;top:8px}.brand small{font-size:10px}}
+
+.song-select{min-height:43px;border:1px solid #cfddec;border-radius:12px;background:#f8fbff;color:#354968;padding:0 12px;font-weight:850;font-size:13px;max-width:270px;min-width:165px;flex:1;cursor:pointer}.song-file-btn{background:#efeafe;color:#6353b7;border:1px solid #e2dcfa;border-radius:12px;min-height:42px;padding:0 12px;font-weight:800;font-size:12px;white-space:nowrap}.music-panel{gap:10px}.song-name{min-width:190px}.art-open{background:#eff9f7;border-color:#d0ece5;color:#087c76}.art-state{font-size:11px;color:#7d899d;margin-top:10px}.footer a{color:#477c9f;text-decoration:none;font-weight:800}
+.art-dialog{border:0;background:transparent;padding:8px;max-width:min(820px,calc(100vw - 20px));width:100%;max-height:min(96dvh,900px);overflow:auto}.art-dialog::backdrop{background:#172944a8;backdrop-filter:blur(3px)}.art-content{background:#fff;border-radius:25px;padding:22px;box-shadow:0 18px 55px #17294442}.art-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.art-heading h2{margin:0;font-size:23px}.art-heading p{margin:5px 0 0;color:#708098;line-height:1.5;font-size:12px}.art-close{border:0;background:#eef2f8;width:38px;height:38px;border-radius:11px;font-size:27px;color:#63758b;line-height:1}.art-tabs{display:flex;gap:8px;margin:17px 0 13px}.art-tabs button{border:1px solid #dbe5f0;background:#f5f7fc;border-radius:11px;padding:10px 15px;color:#66768b;font-weight:900}.art-tabs button.chosen{background:#def7f1;border-color:#80d8cc;color:#078476}.art-work{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,.75fr);gap:18px;align-items:center}.art-board{min-height:250px;border-radius:18px;border:2px dashed #b9d8e2;background-color:#f7fbff;background-image:linear-gradient(#a6d8e32b 1px,transparent 1px),linear-gradient(90deg,#a6d8e32b 1px,transparent 1px);background-size:24px 24px;display:flex;align-items:center;justify-content:center;padding:12px}.art-board canvas{display:block;max-width:100%;width:auto;height:auto;max-height:min(39vh,355px);touch-action:none;cursor:crosshair;filter:drop-shadow(0 1px 0 #d2d9e9)}.art-explain strong{font-size:15px}.art-explain p{font-size:12px;line-height:1.6;color:#738198}.art-color-row{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.art-color-row button{width:33px;height:33px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 1px #d8dfeb;position:relative;padding:0}.art-color-row button.chosen{box-shadow:0 0 0 3px #7468c9}.art-tools{display:flex;flex-wrap:wrap;gap:7px}.art-tools button{border:1px solid #d9e2f0;border-radius:9px;background:#f3f6fb;color:#546983;padding:9px;font-size:12px;font-weight:800}.art-tools button.chosen{color:#0a7f76;background:#dff6f0;border-color:#9ee1d7}.art-explain .art-small{font-size:11px;margin-top:15px}.art-bottom{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;border-top:1px solid #edf0f7;padding-top:15px}.art-bottom button{min-height:44px;border:0;border-radius:12px;background:#eff2f8;color:#576982;padding:0 17px;font-weight:850}.art-bottom .art-save{background:#159f95;color:white}
+@media(max-width:750px){.music-panel .song-select{max-width:none}.song-name{flex-basis:100%;min-width:0}.art-dialog{max-height:96dvh}.art-content{padding:14px}.art-work{grid-template-columns:minmax(0,1fr) minmax(145px,.7fr);gap:11px}.art-board{min-height:195px;padding:6px}.art-heading h2{font-size:19px}.art-color-row button{width:29px;height:29px}.art-tabs{margin:12px 0}}
+@media(max-width:550px){.art-work{grid-template-columns:1fr;gap:9px}.art-board{min-height:180px}.art-board canvas{max-height:29vh}.art-explain p{margin:5px 0}.art-color-row{margin:9px 0}.art-heading p{font-size:11px}.art-bottom{margin-top:8px}.art-tabs button{font-size:12px;padding:8px 9px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top">
+  <div class="brand"><div class="logo" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M4 34Q15 16 25 30T44 16" stroke="white" stroke-width="4" stroke-linecap="round"/><circle cx="14" cy="13" r="5" fill="#fff"/><path d="M11 22L18 26L25 24" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></div><div><h1>멜로디 라이더</h1><small>음악을 선으로 그리다 ♪</small></div></div>
+  <div class="teacher-tip">우리만의 음악 코스를 만들어 봐요</div>
+</header>
+<section class="music-panel" aria-label="음악 선택">
+  <div class="music-label">♫ 오늘의 감상곡</div>
+  <select class="song-select" id="songSelect" aria-label="감상곡 선택"><option>감상곡을 준비하는 중…</option></select>
+  <button type="button" class="song-file-btn" id="pickFile">＋ 내 음악 열기</button>
+  <input id="musicInput" class="hide" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg">
+  <span class="song-name" id="songName">곡을 선택한 뒤 듣거나 코스를 만들어 보세요</span>
+  <div class="volume"><label for="volume">소리</label><input id="volume" type="range" min="0" max="100" value="70" aria-label="음량"></div>
+</section>
+<div class="layout">
+  <section class="stage-card" aria-label="그리기와 라이더 영역">
+    <div class="canvas-toolbar">
+      <button type="button" class="tool active" id="toolDraw" aria-pressed="true"><span class="ic">✎</span> 선 그리기</button>
+      <button type="button" class="tool" id="toolErase" aria-pressed="false"><span class="ic">⌫</span> 지우기</button>
+      <button type="button" class="tool" id="toolPan" aria-pressed="false"><span class="ic">✋</span> 화면 이동</button>
+      <span class="toolbar-spacer"></span>
+      <button type="button" class="tool" id="zoomOut" aria-label="화면 축소">−</button><span class="zoom-lbl" id="zoomLabel">100%</span><button type="button" class="tool" id="zoomIn" aria-label="화면 확대">＋</button>
+    </div>
+    <div class="stage" id="stage"><canvas id="canvas" aria-label="터치 또는 마우스로 선을 그리는 공간"></canvas><span class="stage-overlay" id="stageStatus">✎ 선을 그려 길을 이어 보세요</span><div class="message" id="message" aria-live="polite"></div></div>
+    <div class="playbar">
+      <button type="button" class="play" id="playBtn">▶ 함께 재생</button>
+      <button type="button" class="restart" id="listenBtn">♫ 음악만 듣기</button>
+      <button type="button" class="restart" id="retryBtn">↻ 처음부터</button>
+      <div class="timeline"><label for="seek">음악</label><input type="range" min="0" max="1000" value="0" id="seek" aria-label="음악 재생 위치"><span class="time" id="time">0:00 / 0:34</span></div>
+    </div>
+  </section>
+  <aside class="side">
+    <section class="panel"><h2>나의 코스</h2>
+      <button type="button" class="pbtn" id="sampleBtn"><span class="ic">⤴</span> 예시 코스 불러오기</button>
+      <button type="button" class="pbtn" id="pushBtn"><span class="ic">➜</span> 라이더 살짝 밀어주기</button>
+      <button type="button" class="pbtn" id="undoBtn"><span class="ic">↶</span> 마지막 작업 되돌리기</button>
+      <button type="button" class="pbtn" id="saveBtn"><span class="ic">↓</span> 코스 파일 저장하기</button>
+      <button type="button" class="pbtn" id="loadBtn"><span class="ic">↑</span> 코스 파일 불러오기</button>
+      <button type="button" class="pbtn danger" id="clearBtn"><span class="ic">×</span> 빈 화면에서 시작하기</button>
+      <input class="hide" type="file" accept=".json,application/json" id="courseInput">
+      <label class="check"><input type="checkbox" id="follow" checked> 재생할 때 라이더 따라가기</label>
+      <label class="check"><input type="checkbox" id="showGrid"> 연한 모눈 표시하기</label>
+    </section>
+    <section class="panel"><h2>나의 라이더 · 썰매</h2>
+      <p class="hint">내가 직접 그린 캐릭터와 썰매를 타고 출발해요. 그림은 움직임에 영향을 주지 않아요.</p>
+      <button type="button" class="pbtn art-open" id="artOpen"><span class="ic">✎</span> 라이더와 썰매 직접 그리기</button>
+      <div class="art-state" id="artState">기본 캐릭터 · 기본 썰매</div>
+    </section>
+    <section class="panel"><h2>이렇게 즐겨 보세요 <span class="pill">자유 놀이</span></h2>
+      <div class="steps"><p><b>1</b><span>감상곡을 고르고 음악을 들어 봐요.</span></p><p><b>2</b><span>라이더나 썰매를 꾸미고, 손가락으로 내리막길을 그려요.</span></p><p><b>3</b><span>음악을 듣거나 함께 달리면서 자유롭게 코스를 바꿔 봐요.</span></p></div>
+      <div class="sep"></div><p class="hint">실패해도 괜찮아요! 언덕에서 멈추면 ‘라이더 살짝 밀어주기’를 눌러 보세요. 음악을 들으면서 자유롭게 그릴 수도 있어요.</p>
+    </section>
+  </aside>
+</div>
+<div class="footer">기본 체험곡은 오프라인에서도 재생할 수 있어요 · 직접 고른 음악은 서버로 전송하지 않아요 · 그림과 코스는 이 기기에 자동 저장돼요<br><a href="teacher.html">교사용 감상곡 등록 도구</a> · 공유 감상곡은 온라인 배포 환경에서 제공됩니다.</div>
+</div>
+<dialog id="artDialog" class="art-dialog" aria-labelledby="artDialogTitle">
+  <div class="art-content">
+    <div class="art-heading"><div><h2 id="artDialogTitle">내 라이더와 썰매 꾸미기</h2><p>손가락으로 마음껏 그려요! 그림이 작게 줄어들어 라이더와 함께 움직여요.</p></div><button type="button" id="artClose" class="art-close" aria-label="그리기 창 닫기">×</button></div>
+    <div class="art-tabs" role="group" aria-label="그림 종류"><button type="button" class="chosen" id="artTabRider">사람 · 동물 그리기</button><button type="button" id="artTabSled">썰매 그리기</button></div>
+    <div class="art-work"><div class="art-board"><canvas id="artCanvas" width="240" height="280" aria-label="캐릭터를 직접 그리는 공간"></canvas></div><div class="art-explain"><strong id="artGuideTitle">라이더를 그려 보세요</strong><p id="artGuideText">얼굴이나 몸을 크게 그리면 달릴 때도 잘 보여요. 종이처럼 보이는 배경은 저장되지 않아요.</p><div class="art-color-row" id="artPalette" aria-label="펜 색상"></div><div class="art-tools"><button id="artPen" type="button" class="chosen">✎ 펜</button><button id="artEraser" type="button">⌫ 지우개</button><button id="artUndo" type="button">↶ 되돌리기</button><button id="artClear" type="button">모두 지우기</button></div><p class="art-small">그린 부분만 사용해요. 빈 그림을 적용하면 기본 모습으로 돌아갑니다.</p></div></div>
+    <div class="art-bottom"><button type="button" id="artCancel">취소</button><button type="button" id="artApply" class="art-save">✓ 내 그림 적용하기</button></div>
+  </div>
+</dialog>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const canvas=$('canvas'),stage=$('stage'),ctx=canvas.getContext('2d');
+const BASE={x:94,y:228};
+const SAMPLE=[
+ [[32,320],[110,320],[230,320],[310,337],[410,374],[515,421]],
+ [[515,421],[590,423],[645,404],[700,359],[765,315]],
+ [[905,419],[1010,414],[1150,384],[1270,386],[1370,432]],
+ [[1420,429],[1490,371],[1545,318],[1635,316],[1750,369]]
+];
+const STORAGE='melodyRider_courses_v1';
+let tracks=[],history=[],mode='draw',camera={x:0,y:-56,zoom:1},follow=true,grid=false;
+let width=800,height=500,scale=1,pointer=null,preview=null,playing=false,rideEnabled=true,lastTime=0,now=0,shownMessage=0,death=false;
+// 자유 감상용 주행 설정: 적은 구름저항과 부드러운 코너 통과.
+const PHYSICS={gravity:970,startSpeed:290,rollingFriction:.003,airDrag:.008,maxSpeed:730,cornerSmooth:22};
+let rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,r:12},sparkles=[];
+// 교사가 music-library.json에 등록한 곡은 학생 전체에게 공유되고, 내 음악은 기기 안에서만 열립니다.
+const BUILTINS=[
+ {id:'breeze',kind:'builtin',title:'산들바람 산책',description:'가볍고 경쾌한 느낌 · 직접 만든 멜로디',bpm:112,length:34.3,wave:'triangle',melody:[64,67,69,71,72,71,69,67,64,62,64,67,69,67,64,null,65,69,72,74,72,69,67,65,64,67,71,74,72,69,67,null,64],bass:[48,48,53,50]},
+ {id:'cloud',kind:'builtin',title:'구름 위의 꿈',description:'느리고 부드러운 느낌 · 직접 만든 멜로디',bpm:76,length:41.5,wave:'sine',melody:[60,null,64,67,69,null,67,64,62,null,65,69,67,null,64,null,60,62,64,null,67,65,64,null,62,60,62,65,64,null,60,null],bass:[48,53,46,48]},
+ {id:'chase',kind:'builtin',title:'두근두근 모험',description:'빠르고 신나는 느낌 · 직접 만든 멜로디',bpm:152,length:30.3,wave:'sawtooth',melody:[64,64,67,69,71,69,67,64,72,71,69,67,69,71,74,null,76,74,72,71,69,67,69,71,72,74,76,74,71,69,67,null],bass:[48,55,53,50]}
+];
+let songs=[...BUILTINS],currentSong=BUILTINS[0],musicMode='builtin',musicFileUrl=null,selectedFile=null,musicTime=0,beatPlayed=-1,ctxAudio=null,volume=.7;
+const audio=new Audio();audio.preload='metadata';audio.volume=volume;
+let musicDuration=currentSong.length;
+const ART_STORAGE='melodyRider_art_v2',art={rider:null,sled:null},artImages={rider:null,sled:null};
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+function showMessage(txt,ms=1700){$('message').textContent=txt;$('message').classList.add('show');shownMessage=performance.now()+ms;}
+function sample(){return SAMPLE.map(line=>line.map(p=>({x:p[0],y:p[1]})));}
+function snap(){return tracks.map(line=>line.map(p=>({x:p.x,y:p.y})));}
+function checkpoint(){history.push(snap());if(history.length>40)history.shift();}
+function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(tracks));}catch(e){}}
+function validateTrack(data){if(!Array.isArray(data)||data.length>500)return null;const out=[];for(const line of data){if(!Array.isArray(line)||line.length>15000) return null;const newLine=[];for(const p of line){if(typeof p?.x!=='number'||typeof p?.y!=='number'||!Number.isFinite(p.x)||!Number.isFinite(p.y)||Math.abs(p.x)>1e7||Math.abs(p.y)>1e7)return null;newLine.push({x:p.x,y:p.y});}if(newLine.length>1)out.push(newLine);}return out;}
+try{const stored=JSON.parse(localStorage.getItem(STORAGE));tracks=validateTrack(stored)||sample();}catch(e){tracks=sample();}
+function resetRider(){rider={x:BASE.x,y:BASE.y,vx:PHYSICS.startSpeed,vy:0,angle:0,grounded:false,tangent:null,r:12};death=false;sparkles=[];}
+function resetMusic(){musicTime=0;beatPlayed=-1;if(musicMode==='url'||musicMode==='file'){try{audio.currentTime=0;}catch(e){}}updateTime();}
+function refreshButtons(){$('playBtn').textContent=playing&&rideEnabled?'Ⅱ 함께 멈춤':'▶ 함께 재생';$('listenBtn').textContent=playing&&!rideEnabled?'Ⅱ 음악 멈춤':'♫ 음악만 듣기';}
+function stop(playbackReset=false){playing=false;audio.pause();refreshButtons();if(playbackReset){resetRider();resetMusic();}updateStatus();}
+function restart(){stop(true);camera.x=0;camera.y=-56;showMessage('출발 준비 완료!');}
+function setMode(m){mode=m;['Draw','Erase','Pan'].forEach(n=>{const b=$('tool'+n);const on=m===n.toLowerCase();b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);});stage.classList.toggle('is-pan',m==='pan');stage.classList.toggle('is-erase',m==='erase');updateStatus();}
+function updateStatus(){const text=death?'↻ 처음부터를 누르면 다시 탈 수 있어요':playing?(rideEnabled?'♪ 음악과 함께 달리는 중!':'♫ 음악을 들으며 자유롭게 그려 보세요'):mode==='draw'?'✎ 손가락으로 선을 이어 보세요':mode==='erase'?'⌫ 지우고 싶은 선을 쓸어 보세요':'✋ 화면을 드래그해 이동하세요';$('stageStatus').textContent=text;}
+function sizeCanvas(){const r=stage.getBoundingClientRect();width=Math.max(100,r.width);height=Math.max(100,r.height);scale=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);}
+function w2s(x,y){return{x:(x-camera.x)*camera.zoom,y:(y-camera.y)*camera.zoom};}
+function s2w(x,y){return{x:x/camera.zoom+camera.x,y:y/camera.zoom+camera.y};}
+function eventPoint(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function setZoom(z){z=clamp(z,.45,2.1);const mid=s2w(width/2,height/2);camera.zoom=z;camera.x=mid.x-width/(2*z);camera.y=mid.y-height/(2*z);$('zoomLabel').textContent=Math.round(100*z)+'%';}
+function nearest(line,x,y){let best=Infinity;for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i],dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;if(len2<.01)continue;const t=clamp(((x-a.x)*dx+(y-a.y)*dy)/len2,0,1);const d=Math.hypot(x-a.x-dx*t,y-a.y-dy*t);if(d<best)best=d;}return best;}
+function eraseAt(x,y){const idx=tracks.findIndex(line=>nearest(line,x,y)<19/camera.zoom);if(idx>=0){tracks.splice(idx,1);persist();return true;}return false;}
+function down(e){if(e.button!==undefined&&e.button!==0)return;if(pointer)return;e.preventDefault();canvas.setPointerCapture(e.pointerId);const p=eventPoint(e),v=s2w(p.x,p.y);pointer={id:e.pointerId,x:p.x,y:p.y,erased:false};if(mode==='draw'){checkpoint();preview=[v];}else if(mode==='erase'){checkpoint();pointer.erased=eraseAt(v.x,v.y);}}
+function move(e){if(!pointer||pointer.id!==e.pointerId)return;e.preventDefault();const p=eventPoint(e);if(mode==='draw'){const v=s2w(p.x,p.y),prev=preview[preview.length-1];if(Math.hypot(v.x-prev.x,v.y-prev.y)>=4/camera.zoom)preview.push(v);}else if(mode==='pan'){camera.x-=(p.x-pointer.x)/camera.zoom;camera.y-=(p.y-pointer.y)/camera.zoom;}else if(mode==='erase'){const v=s2w(p.x,p.y);eraseAt(v.x,v.y);}pointer.x=p.x;pointer.y=p.y;}
+function up(e){if(!pointer||pointer.id!==e.pointerId)return;e.preventDefault();if(mode==='draw'&&preview){if(preview.length===1){preview.push({x:preview[0].x+2,y:preview[0].y});}tracks.push(preview);persist();preview=null;}pointer=null;}
+function download(name,data,type){const b=new Blob([data],{type});const url=URL.createObjectURL(b),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function renderSongOptions(){
+ const sel=$('songSelect'),keep=currentSong.id;sel.replaceChildren();
+ for(const s of songs){const o=document.createElement('option');o.value=s.id;o.textContent=s.kind==='url'?'♫ '+s.title:'♬ '+s.title;sel.appendChild(o);}
+ if(selectedFile){const o=document.createElement('option');o.value='local';o.textContent='내 음악 · '+selectedFile.name;sel.appendChild(o);}
+ const silent=document.createElement('option');silent.value='silent';silent.textContent='무음으로 만들기';sel.appendChild(silent);
+ sel.value=keep;$('songName').textContent=currentSong.description||currentSong.title;musicDuration=musicMode==='builtin'?currentSong.length:musicMode==='none'?0:Number.isFinite(audio.duration)?audio.duration:0;updateTime();
+}
+function chooseMusic(id){
+ stop(true);const song=id==='local'?{id:'local',kind:'file',title:selectedFile?.name||'내 음악',description:'내 기기의 음악 파일'}:id==='silent'?{id:'silent',kind:'none',title:'무음',description:'음악 없이 자유롭게 코스를 만들어요'}:songs.find(s=>s.id===id);
+ if(!song)return;currentSong=song;musicMode=song.kind==='none'?'none':song.kind==='builtin'?'builtin':song.kind==='file'?'file':'url';
+ if(musicMode==='url'){audio.src=song.src;audio.load();}else if(musicMode==='file'){audio.src=musicFileUrl;audio.load();}else{audio.removeAttribute('src');audio.load();}
+ renderSongOptions();
+}
+async function loadLibrary(){
+ try{const response=await fetch('./music-library.json',{cache:'no-store'});if(!response.ok)throw Error();const data=await response.json();const entries=Array.isArray(data)?data:Array.isArray(data.songs)?data.songs:[];
+  const clean=entries.slice(0,70).map((s,i)=>{if(!s||typeof s.title!=='string'||typeof s.src!=='string')return null;const title=s.title.trim().slice(0,80),src=s.src.trim();if(!title||!src||/^(javascript|data|blob|file):/i.test(src)||src.startsWith('//'))return null;try{const u=new URL(src,location.href);if(!['http:','https:'].includes(u.protocol))return null;}catch(e){return null;}return{id:'teacher-'+i,kind:'url',title,src,description:typeof s.description==='string'?s.description.slice(0,140):'선생님이 등록한 감상곡'};}).filter(Boolean);
+  songs=[...BUILTINS,...clean];renderSongOptions();
+ }catch(e){/* file://에서는 외부 JSON을 읽을 수 없으므로 기본 3곡만 표시 */}
+}
+function fmt(s){if(!Number.isFinite(s))return'0:00';s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function updateTime(){const pos=musicMode==='file'||musicMode==='url'?audio.currentTime:musicMode==='builtin'?musicTime:0;const dur=musicDuration;const val=dur>0?Math.round((pos/dur)*1000):0;$('seek').value=clamp(val,0,1000);$('time').textContent=fmt(pos)+' / '+fmt(dur);$('seek').disabled=musicMode==='none'||dur<=0;}
+function audioContext(){if(!ctxAudio){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ctxAudio=new C();}if(ctxAudio.state==='suspended')ctxAudio.resume().catch(()=>{});return ctxAudio;}
+function tone(note,dur,vol=.14,type='sine'){if(!Number.isFinite(note)||volume<=0)return;const ac=audioContext();if(!ac)return;const at=ac.currentTime;const osc=ac.createOscillator(),gain=ac.createGain();osc.type=type;osc.frequency.value=440*Math.pow(2,(note-69)/12);gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(Math.max(.00015,vol*volume),at+.018);gain.gain.exponentialRampToValueAtTime(.0001,at+dur);osc.connect(gain);gain.connect(ac.destination);osc.start(at);osc.stop(at+dur+.02);}
+function doBeat(step){const s=currentSong;const note=s.melody[step%s.melody.length];if(note!==null)tone(note,s.bpm<90?.38:.2,s.wave==='sawtooth'?.045:.095,s.wave);if(step%2===0)tone(s.bass[Math.floor(step/8)%s.bass.length],.33,.07,'sine');if(step%4===2&&note!==null)tone(note+12,.12,.026,'sine');}
+function handleMusic(dt){if(musicMode==='builtin'){
+ const s=currentSong,stepSecs=60/s.bpm/2,previous=beatPlayed;musicTime+=dt;if(musicTime>=s.length){musicTime%=s.length;beatPlayed=-1;}const b=Math.floor(musicTime/stepSecs);for(let i=Math.max(beatPlayed+1,b-3);i<=b;i++)if(i>=0)doBeat(i);beatPlayed=b;
+}updateTime();}
+async function toggle(ride=true){
+ if(playing){if(rideEnabled===ride){stop();return;}rideEnabled=ride;refreshButtons();updateStatus();return;}
+ if(!ride&&musicMode==='none'){showMessage('감상곡을 먼저 선택해 주세요');return;}
+ if(ride&&death)resetRider();
+ if(musicMode==='file'||musicMode==='url'){
+  if(!audio.src){showMessage('재생할 음악 파일이 없어요');return;}if(audio.ended)audio.currentTime=0;
+  try{await audio.play();}catch(e){showMessage('음악을 재생할 수 없어요. 주소나 파일을 확인해 주세요',2800);return;}
+ }else if(musicMode==='builtin'){audioContext();}
+ rideEnabled=ride;playing=true;refreshButtons();updateStatus();
+}
+// 물리 판정은 라이더/썰매의 그림과 무관합니다. 작은 손그림 굴곡은 부드러운 길로 취급합니다.
+const rideTrackCache=new WeakMap();
+function rideTrack(line){
+ const existing=rideTrackCache.get(line);
+ if(existing&&existing.length===line.length)return existing;
+ const smoothed=line.map((p,i)=>{
+  let sum=p.y,total=1;
+  for(let offset=-6;offset<=6;offset++){
+   if(!offset||i+offset<0||i+offset>=line.length)continue;
+   const other=line[i+offset],distance=Math.hypot(other.x-p.x,other.y-p.y);
+   if(distance>=33)continue;
+   const weight=1-distance/33;
+   sum+=other.y*weight;total+=weight;
+  }
+  return{x:p.x,y:sum/total};
+ });
+ rideTrackCache.set(line,smoothed);
+ return smoothed;
+}
+function segmentDirection(a,b){
+ let dx=b.x-a.x,dy=b.y-a.y;
+ if(dx<0){dx=-dx;dy=-dy;}
+ const length=Math.hypot(dx,dy);
+ return length>.01?{x:dx/length,y:dy/length,length}:null;
+}
+function smoothTangent(line,i,t,base){
+ let vx=base.x,vy=base.y;
+ const a=line[i-1],b=line[i];
+ const fromStart=Math.hypot(b.x-a.x,b.y-a.y)*t;
+ const toEnd=Math.hypot(b.x-a.x,b.y-a.y)*(1-t);
+ if(i>1&&fromStart<PHYSICS.cornerSmooth){
+  const neighbor=segmentDirection(line[i-2],line[i-1]);
+  if(neighbor&&neighbor.x*base.x+neighbor.y*base.y>.52){
+   const w=.48*(1-fromStart/PHYSICS.cornerSmooth);vx=vx*(1-w)+neighbor.x*w;vy=vy*(1-w)+neighbor.y*w;
+  }
+ }
+ if(i<line.length-1&&toEnd<PHYSICS.cornerSmooth){
+  const neighbor=segmentDirection(line[i],line[i+1]);
+  if(neighbor&&neighbor.x*base.x+neighbor.y*base.y>.52){
+   const w=.48*(1-toEnd/PHYSICS.cornerSmooth);vx=vx*(1-w)+neighbor.x*w;vy=vy*(1-w)+neighbor.y*w;
+  }
+ }
+ const l=Math.hypot(vx,vy)||1;return{x:vx/l,y:vy/l};
+}
+function findSurface(p,oldX,oldY,wasGrounded){
+ let best=null;
+ for(const sourceLine of tracks){const line=rideTrack(sourceLine);for(let i=1;i<line.length;i++){
+  const a=line[i-1],b=line[i];
+  if(Math.max(a.x,b.x)+37<p.x||Math.min(a.x,b.x)-37>p.x||Math.max(a.y,b.y)+37<p.y||Math.min(a.y,b.y)-37>p.y)continue;
+  const dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
+  if(len2<.1)continue;
+  const rawT=((p.x-a.x)*dx+(p.y-a.y)*dy)/len2;
+  if(rawT<-.08||rawT>1.08)continue;
+  const t=clamp(rawT,0,1),qx=a.x+t*dx,qy=a.y+t*dy;
+  const base=segmentDirection(a,b);
+  if(!base||base.x<.04)continue; // 거의 수직인 벽은 선로가 아닙니다.
+  const nx=base.y,ny=-base.x;
+  const dist=(p.x-qx)*nx+(p.y-qy)*ny;
+  const old=(oldX-qx)*nx+(oldY-qy)*ny;
+  const approach=p.vx*nx+p.vy*ny;
+  if(dist>p.r+(wasGrounded?3:0)||dist<-p.r*.9||old<-p.r*.9)continue;
+  if(!wasGrounded&&approach>0)continue; // 공중에서 선의 아랫면에 붙지 않도록
+  const tangent=smoothTangent(line,i,t,base);
+  const aligned=p.tangent?p.tangent.x*tangent.x+p.tangent.y*tangent.y:1;
+  const score=Math.abs(p.r-dist)+(wasGrounded?(1-clamp(aligned,-1,1))*5:0);
+  if(!best||score<best.score)best={nx,ny,dist,tangent,score};
+ }}
+ return best;
+}
+function simulate(dt){
+ if(death)return;
+ const p=rider,oldX=p.x,oldY=p.y,wasGrounded=p.grounded;
+ let movingSpeed=0;
+ if(wasGrounded&&p.tangent){
+  const t=p.tangent;
+  movingSpeed=p.vx*t.x+p.vy*t.y+PHYSICS.gravity*t.y*dt;
+  const loss=PHYSICS.rollingFriction*PHYSICS.gravity*t.x*dt;
+  movingSpeed=movingSpeed>0?Math.max(0,movingSpeed-loss):Math.min(0,movingSpeed+loss);
+  movingSpeed=clamp(movingSpeed,-PHYSICS.maxSpeed,PHYSICS.maxSpeed);
+  p.vx=movingSpeed*t.x;p.vy=movingSpeed*t.y;
+ }else{
+  p.vy+=PHYSICS.gravity*dt;
+  const drag=Math.exp(-PHYSICS.airDrag*dt);
+  p.vx*=drag;p.vy*=drag;
+  const speed=Math.hypot(p.vx,p.vy);
+  if(speed>PHYSICS.maxSpeed){p.vx*=PHYSICS.maxSpeed/speed;p.vy*=PHYSICS.maxSpeed/speed;}
+ }
+ p.x+=p.vx*dt;p.y+=p.vy*dt;
+ const hit=findSurface(p,oldX,oldY,wasGrounded);
+ if(hit){
+  // 선의 미세한 모서리마다 속도를 잃지 않도록, 접지 중에는 접선 방향으로 속도를 회전시킵니다.
+  p.x+=(p.r-hit.dist)*hit.nx;p.y+=(p.r-hit.dist)*hit.ny;
+  if(wasGrounded&&p.tangent){
+   const alignment=clamp(p.tangent.x*hit.tangent.x+p.tangent.y*hit.tangent.y,-1,1);
+   const turn=Math.acos(alignment);
+   // 실제 급격한 꺾임만 조금 감속. 자연스러운 곡선은 운동량을 그대로 유지.
+   const cornerLoss=turn>.65?clamp(1-(turn-.65)*.11,.86,1):1;
+   movingSpeed*=cornerLoss;
+  }else{
+   movingSpeed=(p.vx*hit.tangent.x+p.vy*hit.tangent.y)*.993;
+   // 부드러운 경사로에 처음 착지할 때 수직 낙하로 수평 관성을 과하게 잃지 않게 보조.
+   if(p.vx>0&&hit.tangent.x>.88)movingSpeed=Math.max(movingSpeed,p.vx*hit.tangent.x*.985);
+  }
+  p.vx=movingSpeed*hit.tangent.x;p.vy=movingSpeed*hit.tangent.y;
+  p.grounded=true;p.tangent=hit.tangent;
+  p.angle+=(Math.atan2(hit.tangent.y,hit.tangent.x)-p.angle)*.28;
+  if(Math.random()<.12)sparkles.push({x:p.x-15,y:p.y+10,vx:-40-Math.random()*35,vy:-25-Math.random()*50,life:.45});
+ }else{
+  p.grounded=false;p.tangent=null;
+  p.angle+=(clamp(Math.atan2(p.vy,p.vx),-.75,1.5)-p.angle)*.045;
+ }
+ if(p.y>1600||Math.abs(p.x)>200000){death=true;showMessage('앗, 떨어졌어요! ↻ 처음부터를 눌러 보세요',2600);updateStatus();}
+ for(const s of sparkles){s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;}sparkles=sparkles.filter(s=>s.life>0).slice(-80);
+}
+function nudgeRider(){
+ if(death){showMessage('먼저 ↻ 처음부터를 눌러 주세요');return;}
+ const t=rider.tangent;
+ if(t){
+  const speed=rider.vx*t.x+rider.vy*t.y;
+  const next=clamp(Math.max(0,speed)+125,0,PHYSICS.maxSpeed);
+  rider.vx=next*t.x;rider.vy=next*t.y;
+ }else rider.vx=clamp(rider.vx+130,-PHYSICS.maxSpeed,PHYSICS.maxSpeed);
+ showMessage('라이더를 앞으로 살짝 밀었어요!');
+}
+
+function roundedRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
+function drawBackground(){ctx.clearRect(0,0,width,height);const g=ctx.createLinearGradient(0,0,0,height);g.addColorStop(0,'#eafbff');g.addColorStop(.6,'#f7fbff');g.addColorStop(1,'#fffef7');ctx.fillStyle=g;ctx.fillRect(0,0,width,height);
+ const first=Math.floor(camera.x/440)-1,last=Math.floor((camera.x+width/camera.zoom)/440)+2;
+ for(let i=first;i<last;i++){const wp={x:i*440+180,y:80+(Math.abs(i*37)%75)},sc=w2s(wp.x,wp.y),sz=clamp(37*camera.zoom,20,75);ctx.fillStyle='#ffffffb5';ctx.beginPath();ctx.ellipse(sc.x,sc.y,sz*1.8,sz*.35,0,0,Math.PI*2);ctx.ellipse(sc.x-sz*.65,sc.y-sz*.25,sz*.55,sz*.54,0,0,Math.PI*2);ctx.ellipse(sc.x,sc.y-sz*.45,sz*.76,sz*.7,0,0,Math.PI*2);ctx.fill();}
+ if(grid){ctx.strokeStyle='#8cbcc91f';ctx.lineWidth=1;const k=50*camera.zoom;const x0=(-camera.x*camera.zoom)%k,y0=(-camera.y*camera.zoom)%k;ctx.beginPath();for(let x=x0;x<width;x+=k){ctx.moveTo(x,0);ctx.lineTo(x,height);}for(let y=y0;y<height;y+=k){ctx.moveTo(0,y);ctx.lineTo(width,y);}ctx.stroke();}}
+function drawTrack(line,previewOnly=false){if(line.length<2)return;ctx.beginPath();ctx.moveTo(line[0].x,line[0].y);for(let i=1;i<line.length;i++)ctx.lineTo(line[i].x,line[i].y);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=previewOnly?'#e68a9a88':'#34486435';ctx.lineWidth=previewOnly?9:12;ctx.stroke();ctx.strokeStyle=previewOnly?'#fb8da4':'#394e78';ctx.lineWidth=previewOnly?5:7;ctx.stroke();ctx.strokeStyle=previewOnly?'#ffd6df':'#65d5c6';ctx.lineWidth=2;ctx.stroke();}
+function drawRider(p){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);ctx.lineCap='round';ctx.lineJoin='round';
+ if(artImages.sled?.complete&&artImages.sled.naturalWidth){ctx.drawImage(artImages.sled,-29,2,58,25);}else{
+  ctx.strokeStyle='#294767';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-21,13);ctx.quadraticCurveTo(-5,18,13,13);ctx.quadraticCurveTo(22,11,24,8);ctx.stroke();ctx.strokeStyle='#ff9a6a';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-16,9);ctx.lineTo(13,9);ctx.stroke();}
+ if(artImages.rider?.complete&&artImages.rider.naturalWidth){ctx.drawImage(artImages.rider,-25,-46,50,57);}else{
+  ctx.fillStyle='#6d68b9';roundedRect(-8,-8,14,17,5);ctx.fill();ctx.fillStyle='#fff3da';ctx.beginPath();ctx.arc(-3,-19,10,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#4d506d';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#4d506d';ctx.beginPath();ctx.arc(2,-19,1.35,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ea7899';ctx.beginPath();ctx.moveTo(-10,-14);ctx.lineTo(-26,-9);ctx.lineTo(-12,-5);ctx.fill();ctx.fillStyle='#ffbf70';ctx.beginPath();ctx.ellipse(-2,-27,10,5,0,Math.PI,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(3,-29,3.8,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#344864';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(1,4);ctx.lineTo(11,7);ctx.moveTo(-5,4);ctx.lineTo(-12,9);ctx.stroke();}
+ ctx.restore();}
+function applyArt(type,url){art[type]=url||null;artImages[type]=null;if(url){const img=new Image();img.onload=()=>{if(art[type]===url)artImages[type]=img;};img.src=url;}}
+function updateArtState(){$('artState').textContent=(art.rider?'내가 그린 라이더':'기본 라이더')+' · '+(art.sled?'내가 그린 썰매':'기본 썰매');}
+function restoreArt(){try{const saved=JSON.parse(localStorage.getItem(ART_STORAGE));for(const type of ['rider','sled'])if(typeof saved?.[type]==='string'&&saved[type].startsWith('data:image/png;base64,')&&saved[type].length<1000000)applyArt(type,saved[type]);}catch(e){}updateArtState();}
+function persistArt(){try{localStorage.setItem(ART_STORAGE,JSON.stringify(art));}catch(e){showMessage('기기 저장 공간이 부족할 수 있어요');}updateArtState();}
+function paint(){ctx.setTransform(scale,0,0,scale,0,0);drawBackground();ctx.save();ctx.scale(camera.zoom,camera.zoom);ctx.translate(-camera.x,-camera.y);
+ for(const line of tracks)drawTrack(line);if(preview)drawTrack(preview,true);
+ // 시작 지점
+ ctx.fillStyle='#16aa9c';roundedRect(BASE.x-32,286,4,35,2);ctx.fill();ctx.beginPath();ctx.moveTo(BASE.x-28,286);ctx.lineTo(BASE.x-5,293);ctx.lineTo(BASE.x-28,300);ctx.fill();
+ for(const p of sparkles){ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle='#f0b15c';ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+ drawRider(rider);ctx.restore();}
+function frame(t){if(!lastTime)lastTime=t;const dt=clamp((t-lastTime)/1000,0,.04);lastTime=t;now=t;if(playing){if(rideEnabled&&!death){const n=Math.ceil(dt/(1/120));for(let i=0;i<n;i++)simulate(dt/n);}handleMusic(dt);if(rideEnabled&&follow&&!pointer&&!death){const targetX=rider.x-width*.37/camera.zoom;const targetY=rider.y-height*.57/camera.zoom;camera.x+=(targetX-camera.x)*.075;camera.y+=(targetY-camera.y)*.075;}}
+ if(shownMessage&&t>shownMessage){$('message').classList.remove('show');shownMessage=0;}paint();requestAnimationFrame(frame);}
+$('toolDraw').onclick=()=>setMode('draw');$('toolErase').onclick=()=>setMode('erase');$('toolPan').onclick=()=>setMode('pan');
+$('zoomIn').onclick=()=>setZoom(camera.zoom*1.2);$('zoomOut').onclick=()=>setZoom(camera.zoom/1.2);
+$('playBtn').onclick=()=>toggle(true);$('listenBtn').onclick=()=>toggle(false);$('retryBtn').onclick=restart;
+$('undoBtn').onclick=()=>{if(history.length){tracks=history.pop();persist();showMessage('마지막 작업을 되돌렸어요');}else showMessage('되돌릴 작업이 없어요');};
+$('sampleBtn').onclick=()=>{checkpoint();tracks=sample();persist();restart();showMessage('예시 코스를 불러왔어요');};
+$('pushBtn').onclick=nudgeRider;
+$('clearBtn').onclick=()=>{checkpoint();tracks=[];persist();restart();showMessage('빈 화면! 새로운 길을 그려 보세요');};
+$('saveBtn').onclick=()=>{download('나의-멜로디-라이더-작품.json',JSON.stringify({app:'melody-rider',version:2,tracks,art},null,2),'application/json');showMessage('코스와 내가 그린 그림을 저장했어요');};
+$('loadBtn').onclick=()=>$('courseInput').click();$('courseInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const parsed=validateTrack(Array.isArray(obj)?obj:obj.tracks);if(!parsed)throw new Error();checkpoint();tracks=parsed;persist();if(obj.art&&typeof obj.art==='object'){for(const part of ['rider','sled']){const url=obj.art[part];if(url===null||typeof url==='string'&&url.startsWith('data:image/png;base64,')&&url.length<1000000)applyArt(part,url);}persistArt();}restart();showMessage('나의 작품을 불러왔어요');}catch(e){showMessage('올바른 코스 파일이 아니에요');}e.target.value='';};
+$('follow').onchange=e=>follow=e.target.checked;$('showGrid').onchange=e=>grid=e.target.checked;
+$('songSelect').onchange=e=>chooseMusic(e.target.value);
+$('pickFile').onclick=()=>$('musicInput').click();
+$('musicInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(musicFileUrl)URL.revokeObjectURL(musicFileUrl);musicFileUrl=URL.createObjectURL(f);selectedFile=f;chooseMusic('local');showMessage('내 음악을 불러왔어요');e.target.value='';};
+audio.addEventListener('loadedmetadata',()=>{if(['url','file'].includes(musicMode)){musicDuration=audio.duration;updateTime();}});
+audio.addEventListener('error',()=>{if(['url','file'].includes(musicMode))showMessage('음악 파일을 불러오지 못했어요. 교사에게 알려 주세요.',2800);});
+audio.addEventListener('ended',()=>{stop();showMessage('음악이 끝났어요. 다시 재생할 수 있어요');});
+$('volume').oninput=e=>{volume=e.target.value/100;audio.volume=volume;};
+$('seek').oninput=e=>{const value=Number(e.target.value)/1000;if(musicMode==='builtin'){musicTime=value*currentSong.length;beatPlayed=Math.floor(musicTime/(60/currentSong.bpm/2))-1;}else if(['url','file'].includes(musicMode)&&Number.isFinite(audio.duration)){audio.currentTime=value*audio.duration;}updateTime();};
+// 각각의 그림을 투명 PNG로 저장하며, 실제 충돌 반지름은 모든 학생에게 동일합니다.
+const artCanvas=$('artCanvas'),ac2=artCanvas.getContext('2d');let artPart='rider',artColor='#26364b',artEraser=false,artPointer=null,artHistory=[],draftArt={rider:null,sled:null},artLoadToken=0;
+const COLORS=['#26364b','#f97794','#ff9d52','#f7cc52','#54bd91','#3d9ad9','#8c79d4','#ffffff'];
+for(const color of COLORS){const b=document.createElement('button');b.type='button';b.style.backgroundColor=color;b.title=color==='#ffffff'?'흰색':color;b.setAttribute('aria-label',color);b.onclick=()=>{artColor=color;artEraser=false;updateArtTools();};$('artPalette').appendChild(b);}
+function updateArtTools(){$('artPen').classList.toggle('chosen',!artEraser);$('artEraser').classList.toggle('chosen',artEraser);for(const b of $('artPalette').children)b.classList.toggle('chosen',!artEraser&&b.title===artColor);}
+function artHasPaint(){const d=ac2.getImageData(0,0,artCanvas.width,artCanvas.height).data;for(let i=3;i<d.length;i+=4)if(d[i])return true;return false;}
+function artSnapshot(){return artHasPaint()?artCanvas.toDataURL('image/png'):null;}
+function saveDraft(){draftArt[artPart]=artSnapshot();}
+function openPart(part){artLoadToken++;artPart=part;artHistory=[];const riderPart=part==='rider';artCanvas.width=riderPart?240:300;artCanvas.height=riderPart?280:130;artCanvas.setAttribute('aria-label',riderPart?'라이더를 그리는 공간':'썰매를 그리는 공간');$('artTabRider').classList.toggle('chosen',riderPart);$('artTabSled').classList.toggle('chosen',!riderPart);$('artGuideTitle').textContent=riderPart?'나만의 라이더를 그려요':'나만의 썰매를 그려요';$('artGuideText').textContent=riderPart?'사람, 동물, 상상 속 캐릭터도 좋아요. 머리와 몸을 크게 그리면 잘 보여요.':'왼쪽에서 오른쪽으로 달리는 썰매예요. 가로로 길쭉하게 그리면 좋아요.';const token=artLoadToken,url=draftArt[part];if(url){const img=new Image();img.onload=()=>{if(token===artLoadToken)ac2.drawImage(img,0,0,artCanvas.width,artCanvas.height);};img.src=url;}}
+function artPoint(e){const r=artCanvas.getBoundingClientRect();return{x:(e.clientX-r.left)*artCanvas.width/r.width,y:(e.clientY-r.top)*artCanvas.height/r.height};}
+function drawArtSegment(a,b){ac2.save();ac2.globalCompositeOperation=artEraser?'destination-out':'source-over';ac2.strokeStyle=artEraser?'#000':artColor;ac2.fillStyle=ac2.strokeStyle;ac2.lineWidth=artEraser?23:artPart==='rider'?10:11;ac2.lineCap='round';ac2.lineJoin='round';ac2.beginPath();ac2.moveTo(a.x,a.y);ac2.lineTo(b.x,b.y);ac2.stroke();ac2.restore();}
+artCanvas.onpointerdown=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(artPointer)return;artCanvas.setPointerCapture(e.pointerId);artHistory.push(artSnapshot());if(artHistory.length>25)artHistory.shift();artPointer={id:e.pointerId,pt:artPoint(e)};drawArtSegment(artPointer.pt,artPointer.pt);};
+artCanvas.onpointermove=e=>{if(!artPointer||e.pointerId!==artPointer.id)return;e.preventDefault();const pt=artPoint(e);drawArtSegment(artPointer.pt,pt);artPointer.pt=pt;};
+function endArtStroke(e){if(!artPointer||e.pointerId!==artPointer.id)return;e.preventDefault();artPointer=null;}
+artCanvas.onpointerup=endArtStroke;artCanvas.onpointercancel=endArtStroke;
+$('artOpen').onclick=()=>{stop();draftArt={...art};openPart('rider');$('artDialog').showModal();};
+$('artTabRider').onclick=()=>{if(artPart==='rider')return;saveDraft();openPart('rider');};
+$('artTabSled').onclick=()=>{if(artPart==='sled')return;saveDraft();openPart('sled');};
+$('artPen').onclick=()=>{artEraser=false;updateArtTools();};$('artEraser').onclick=()=>{artEraser=true;updateArtTools();};
+$('artUndo').onclick=()=>{if(!artHistory.length)return;const url=artHistory.pop(),part=artPart;ac2.clearRect(0,0,artCanvas.width,artCanvas.height);if(url){const img=new Image();img.onload=()=>{if(artPart===part)ac2.drawImage(img,0,0,artCanvas.width,artCanvas.height);};img.src=url;}};
+$('artClear').onclick=()=>{artHistory.push(artSnapshot());ac2.clearRect(0,0,artCanvas.width,artCanvas.height);};
+$('artCancel').onclick=$('artClose').onclick=()=>$('artDialog').close();
+$('artApply').onclick=()=>{saveDraft();for(const part of ['rider','sled'])applyArt(part,draftArt[part]);persistArt();$('artDialog').close();showMessage('내가 그린 라이더와 썰매를 적용했어요!');};
+$('artDialog').onclose=()=>{artPointer=null;};
+updateArtTools();restoreArt();renderSongOptions();loadLibrary();
+canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+canvas.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();setZoom(camera.zoom*(e.deltaY<0?1.12:1/1.12));}},{passive:false});
+window.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();toggle(true);}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();$('undoBtn').click();}});
+window.addEventListener('resize',sizeCanvas);new ResizeObserver(sizeCanvas).observe(stage);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)stop();});
+sizeCanvas();updateStatus();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
