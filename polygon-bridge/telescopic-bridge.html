@@ -1,0 +1,55 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>늘어나는 다리 · 다각형 다리 작전</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f3f4eb;color:#193d39;font:16px system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:clamp(10px,3vw,32px)}header,nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}header{justify-content:space-between}small,a{color:#44746a;font-weight:700}h1{margin:7px 0;font-size:clamp(28px,5vw,48px);letter-spacing:-.06em}p{margin:6px 0 16px}canvas{display:block;width:100%;background:#cde9d9;border-radius:16px;touch-action:none}button{font:inherit;font-weight:700;padding:12px 16px;border:1px solid #9eb3a9;border-radius:10px;background:#fff;color:#193d39;cursor:pointer}button:first-child{background:#165a4b;color:white}#msg{min-height:24px;margin:14px 0;font-weight:650}button[hidden]{display:none}
+</style><main><header><div><small>다각형 다리 작전 · 기계 실험 01</small><h1>늘어나는 다리</h1></div><a href="./index.html">스테이지 목록</a></header><p>다리를 펼쳐 구슬을 건너편으로 보내세요.</p><canvas id="view" width="1000" height="510" tabindex="0" aria-label="레일 실험대. D를 위아래로 끌거나 방향키로 조정하세요."></canvas><p id="msg" role="status"></p><nav><button id="go"></button><button id="retry">즉시 재도전</button><button id="roll">구슬 굴려 보기</button><button id="hint">단서 보기</button><button id="reset">처음부터</button></nav></main><script>
+const c=view.getContext('2d'), H=72, startX=90, endX=290, bank=360, shore=773;
+let d=488, travel=0,state='edit',clue=0,b,clock=0,demo=0,drag=null,last=0;
+function stored(k){try{return localStorage.getItem(k)}catch{return null}}
+function save(k){try{localStorage.setItem(k,'1')}catch{}}
+function enter(s){state=s;clock=0;go.textContent=demo?'직접 해보기':({edit:'▶ 시험 운행',won:'다시 플레이',fall:'레일 수정',jam:'레일 수정'}[s]||'즉시 중단·수정');
+retry.hidden=!!demo||s==='edit';roll.hidden=!!demo||s!=='jam';hint.hidden=!!demo||s!=='edit';
+msg.textContent=demo?(demo===1?'시범 ① · 바퀴가 어디에서 멈추는지 살펴보세요.':demo===2?'시범 ② · 이번에는 끝까지 움직일까요?':'두 레일이 평행하면 간격이 일정하게 유지돼요. 레일을 조정해 다리를 펼쳐 보세요.'):{edit:'노란 손잡이 D를 위아래로 끌어 레일을 조정하세요.',extend:'운반장치가 다리를 밀고 있어요.',jam:'덜컹! 바퀴가 멈춘 곳의 레일 간격을 살펴보세요.',ready:'다리가 건너편 받침대에 닿았어요.',ball:'구슬이 굴러갑니다.',won:'구슬 도착! 다리가 펼쳐지는 동안 두 레일의 간격은 어땠나요?',fall:'구슬이 틈으로 떨어졌어요. 다리가 멈춘 곳을 살펴보세요.'}[s]}
+const surface=x=>158+.049*(x-60), tip=()=>bank+(shore-bank)*travel/200;
+function rewind(s='edit'){travel=0;b={x:60,y:surface(60)-10,vx:0,vy:0,angle:0};enter(s)}
+function finishDemo(){demo=0;save('telescopic-seen');d=488;rewind()}
+go.onclick=()=>{if(demo)finishDemo();else if(state==='edit')rewind('extend');else {if(state==='won')d=488;rewind()}};
+retry.onclick=()=>rewind('extend');roll.onclick=()=>enter('ball');reset.onclick=()=>{if(demo)finishDemo();d=488;clue=0;rewind()};
+hint.onclick=()=>{clue=Math.min(3,clue+1);msg.textContent=['','바퀴 사이의 거리는 변하지 않아요.','양 끝에 표시된 두 간격을 비교해 보세요.','두 레일 사이의 간격이 일정해지도록 만들어 보세요.'][clue]};
+function pointer(e){let r=view.getBoundingClientRect();return {x:(e.clientX-r.left)*1000/r.width,y:(e.clientY-r.top)*510/r.height}}
+const offset=-60;
+view.onpointerdown=e=>{let p=pointer(e);if(state==='edit'&&!demo&&Math.abs(p.x-endX)<35&&Math.abs(p.y-d-offset)<35){drag={id:e.pointerId,dy:d-p.y};view.setPointerCapture(e.pointerId)}};
+view.onpointermove=e=>{if(drag?.id===e.pointerId)d=Math.max(422,Math.min(535,pointer(e).y+drag.dy))};
+function snap(){if(Math.abs(d-472)<=10)d=472}
+view.onpointerup=e=>{if(drag?.id===e.pointerId){snap();drag=null}};view.onlostpointercapture=()=>drag=null;
+view.onkeydown=e=>{if(!demo&&state==='edit'&&['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();d=Math.max(422,Math.min(535,d+(e.key==='ArrowUp'?-1:1)))}};
+function step(dt){clock+=dt;
+if(state==='extend'){let err=Math.abs((d-472)*travel/200);let next=Math.min(200,travel+dt*80*(1-.65*Math.min(1,err/6)**3));if(Math.abs((d-472)*next/200)>6){travel=1200/Math.abs(d-472);enter('jam')}else{travel=next;if(travel===200)enter('ready')}}
+else if(demo===1&&state==='jam'&&clock>.85){demo=2;d=472;rewind('extend')}
+else if(demo===2&&state==='ready'){demo=3;enter('ready')}
+else if(!demo&&state==='ready'&&clock>.45)enter('ball');
+else if(state==='ball'){let prev=b.y;b.vy+=600*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;let y=surface(b.x)-10;if((b.x<=tip()||b.x>=shore)&&prev<=y+.01&&b.y>=y){b.y=y;b.vy=0;b.vx+=(600*.049/(1+.049**2)-3)*dt;if(b.x>=915&&travel===200){save('telescopic-clear');enter('won')}}b.angle+=b.vx*dt/10;if(b.y>520)enter('fall')}}
+function poly(points,col){c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=col;c.fill()}
+function line(x,y,X,Y,col,w){c.beginPath();c.moveTo(x,y);c.lineTo(X,Y);c.strokeStyle=col;c.lineWidth=w;c.stroke()}
+function disk(x,y,r,col){c.beginPath();c.arc(x,y,r,0,7);c.fillStyle=col;c.fill()}
+function label(t,x,y,col='#fff',size=16){c.fillStyle=col;c.font='bold '+size+'px system-ui';c.fillText(t,x,y)}
+function wheel(x,y){disk(x,y,13,'#102e32');disk(x,y,10,'#b8cfcc');for(let i=0;i<3;i++){let a=travel/12+i*2.094;line(x,y,x+8*Math.cos(a),y+8*Math.sin(a),'#385758',3)}disk(x,y,3,'#274946')}
+function draw(){let grad=c.createLinearGradient(0,0,0,510);grad.addColorStop(0,'#c8e8db');grad.addColorStop(1,'#f6ecc4');c.fillStyle=grad;c.fillRect(0,0,1000,510);disk(832,70,34,'#fff2b7');
+for(let i=0;i<8;i++){let x=i*173-120;poly([[x,310],[x+110,75+(i%3)*22],[x+250,310]],'#a6c8b5')}
+poly([[0,510],[0,332],[265,148],[490,334],[670,190],[900,350],[1000,230],[1000,510]],'#7ea998');
+poly([[0,510],[0,465],[460,381],[620,398],[1000,331],[1000,510]],'#83c5bc');
+for(const [x,X] of [[0,bank],[shore,1000]]){poly([[x,surface(x)],[X,surface(X)],[X,510],[x,510]],'#826e54');line(x,surface(x)+5,X,surface(X)+5,'#526d45',10);line(x,surface(x),X,surface(X),'#abc36a',5)}
+for(let i=0;i<3;i++){let x=bank+i*(shore-bank)/3,X=Math.min(tip(),x+(shore-bank)/3);if(X>x){poly([[x,surface(x)],[X,surface(X)],[X,surface(X)+18-i*3],[x,surface(x)+18-i*3]],['#436e74','#548891','#72a2a6'][i]);line(x,surface(x),X,surface(X),'#f9d681',5);disk(X-5,surface(X)+8,2,'#d7e7dc')}}
+line(917,surface(917),917,147,'#29463c',4);poly([[918,146],[953,152],[918,164]],'#da693d');label('도착',905,132,'#234737');
+disk(b.x,b.y,10,'#bb482e');disk(b.x+4*Math.cos(b.angle),b.y+4*Math.sin(b.angle),3,'#ffdd84');
+c.fillStyle='#193f40';c.beginPath();c.roundRect(19,259,325,239,15);c.fill();label('발사 장치 내부',40,289,'#d3e5d9',18);
+const u=385+offset,l=457+offset,uy=u+15*travel/200,wx=startX+travel;
+line(startX,u,endX,u+15,'#a7c8bd',8);line(startX,l,endX,d+offset,'#ebbb5b',8);
+if(clue>=2){c.setLineDash([3,4]);for(const [x,y,Y] of [[startX,u,l],[endX,u+15,d+offset]])line(x,y,x,Y,'#fff',2);c.setLineDash([])}
+let shake=state==='jam'&&clock<.6?2*Math.sin(clock*60):0;
+line(wx+shake,uy,wx+shake,uy+H,'#8aa9a2',10);wheel(wx+shake,uy);wheel(wx+shake,uy+H);
+disk(endX,d+offset,14,'#ffd476');label('↕',endX-7,d+offset+6,'#294844',18);label('D',endX+18,d+offset+5,'#ffdc8d');
+if(Math.abs((d-472)*travel/200)>4){c.beginPath();c.arc(wx,uy+H,18,0,7);c.strokeStyle='#ffad50';c.lineWidth=3;c.stroke()}
+if(state==='jam'){label('덜컹!',wx+15,uy+40,'#ffcf82');c.save();c.beginPath();c.arc(417,354,40,0,7);c.clip();c.fillStyle='#193f40';c.fillRect(376,313,82,82);c.translate(417,354);c.scale(2,2);line(-21,(d-472)*travel/200-2,21,(d-472)*travel/200+2,'#edbc62',4);wheel(0,0);c.restore()}
+}
+demo=stored('telescopic-seen')?0:1;rewind(demo?'extend':'edit');
+function frame(t){let dt=Math.min(.05,(t-last)/1000);last=t;while(dt>0){let s=Math.min(dt,1/120);step(s);dt-=s}draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+</script></html>
