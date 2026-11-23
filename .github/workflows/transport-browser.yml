@@ -1,0 +1,25 @@
+name: Transport browser checks
+on:
+  pull_request:
+    paths:
+      - 'polygon-bridge/**'
+      - '.github/workflows/transport-browser.yml'
+permissions:
+  contents: read
+jobs:
+  transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: node polygon-bridge/transport-regression.cjs
+      - run: pip install playwright && python -m playwright install --with-deps chromium
+      - working-directory: polygon-bridge
+        run: |
+          python -m http.server 8765 --bind 127.0.0.1 > /tmp/transport-server.log 2>&1 &
+          python transport-browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: transport-tablet-screens
+          path: polygon-bridge/evidence/

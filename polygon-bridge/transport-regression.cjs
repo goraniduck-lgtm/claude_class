@@ -68,3 +68,90 @@ assert.equal(sameWorker('setup();model.wind'),0,'06 uses the same mechanism with
 assert.equal(sameWorker('design.cargo=false;begin();for(let i=0;i<1500&&phase!=="tested";i++)tick();phase'),'tested','the light worker can still cross');
 assert.ok(!fs.readFileSync(path.join(__dirname,'transport.html'),'utf8').includes('모터가 멈췄어요'),'child-facing failure text contains no technical motor stop');
 console.log('PASS: stage 05 crosswind and measured shear, stable diagonal, stage 06 worker weight, canvas visual checks');
+
+const stages = {
+  2: [['design.rail=railRise','won'],['design.rail=0','fall'],['design.rail=54','fall']],
+  3: [['design.gate=90','won'],['design.gate=45','blocked'],['design.gate=103','strain']],
+  4: [['design.rail=railRise;design.gate=90','won'],['design.rail=0;design.gate=90','fall'],['design.rail=railRise','blocked']],
+  7: [['design.arm=100','won'],['design.arm=65','fall'],['design.arm=120','blocked']],
+  8: [['design.arm=100;design.rail=railRise;design.gate=90;design.brace=[1,3]','won'],['design.arm=100;design.rail=railRise;design.gate=90','fall'],['design.arm=100;design.rail=railRise;design.brace=[1,3]','blocked']],
+  9: [['design.rail=railRise;design.railB=-44','won'],['design.rail=railRise','fall'],['design.railB=-44','fall']],
+  10: [['design.gate=90','won'],['design.gate=60','blocked'],['design.gate=98','strain']],
+  11: [['design.braces=[{side:0,ends:[0,2]},{side:1,ends:[1,3]}]','won'],['design.braces=[{side:1,ends:[1,3]}]','fall'],['design.braces=[{side:0,ends:[0,2]},{side:0,ends:[1,3]}]','fall']],
+  12: [['design.arm=100;design.stopAngle=113','won'],['design.arm=65;design.stopAngle=113','fall'],['design.arm=100;design.stopAngle=125','blocked']]
+};
+for(const [id,trials] of Object.entries(stages)){
+ for(const [designInput,expected] of trials){
+  const run=game(+id);
+  const actual=run('setup();'+designInput+';begin();for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();draw();phase');
+  console.log(id,designInput,actual);assert.equal(actual,expected);
+ }
+}
+for(const value of [432,518]){
+ assert.equal(first("demo=0;held=false;adjust("+value+");rewind('extend');for(let i=0;i<1200;i++)step(1/120);state"),'jam');
+}
+for(const gap of [8,10,12]){
+ const run=game(7);
+ assert.equal(run('!!connector(pt(0,0),pt('+gap+',8))'),gap<=10);
+}
+for(const hz of [30,60,120]){
+ const run=game(9);
+ assert.equal(run('setup();design.rail=railRise;design.railB=-44;begin();for(let frame=0;frame<18*'+hz+';frame++)for(let i=0;i<120/'+hz+';i++)tick();phase'),'won');
+}
+for(const [value,held,expected] of [[3.9,false,true],[4.2,false,false],[5.5,true,true],[6.1,true,false]]){
+ const run=game(2);
+ assert.equal(run('setup();lock.rail='+held+';setPart("rail",Math.tan(Math.atan2(railRise*.65,187)+'+value+'*rad)*187/.65);lock.rail'),expected);
+}
+for(const [cargo,minimum,maximum] of [[false,0,15],[true,15,100]]){
+ const run=game(6);
+ const shear=run('setup();design.cargo='+cargo+';begin();for(let i=0;i<2200&&["machine","move"].includes(phase);i++)tick();model.peakShear');
+ assert.ok(shear>=minimum&&shear<maximum,'peak shear '+shear);
+}
+console.log('PASS: opposed rail errors, angled snap hysteresis, docking boundaries, three frame rates and load displacement');
+const finalRoute=game(8);
+for(const [changes,expected] of [['design.rail=-45','fall'],['design.gate=103','strain'],['design.arm=65','fall'],['exitX+=4','blocked']]){
+ const outcome=finalRoute('setup();design.rail=railRise;design.gate=90;design.arm=100;design.brace=[0,2];'+changes+';begin();for(let i=0;i<3000&&["machine","move"].includes(phase);i++)tick();phase');
+ assert.equal(outcome,expected,changes);
+}
+const checkOverlap=game(11);
+assert.equal(checkOverlap('setup();finishBrace(0,6);model.rods.length+model.right.rods.length'),8,'Cross-frame braces cannot stretch across the pier');
+
+
+const snapDoor=game(10);
+assert.equal(snapDoor('setup();setPart("gate",86);design.gate'),90,'86° should snap actual door to 90°');
+assert.equal(snapDoor('lock.gate'),true,'Gate lock should be active at the 4° boundary');
+assert.equal(snapDoor('setPart("gate",95.5);design.gate'),90,'Held gate snap persists until release threshold');
+assert.equal(snapDoor('setPart("gate",96.1);lock.gate'),false,'Gate snap releases above 6°');
+assert.equal(snapDoor('design.gate'),96.1,'Released gate uses actual user geometry');
+assert.equal(snapDoor('setup();setPart("gate",94.1);lock.gate'),false,'4.1° fresh offset must not be accepted');
+assert.equal(snapDoor('design.gate'),94.1,'Too-far angle remains physically over-stowed');
+for(const [angle,expected] of [[87,'won'],[94,'won'],[94.1,'strain'],[85,'blocked'],[103,'strain']]){
+ const g=game(10);
+ const actual=g('setup();setPart("gate",'+angle+');begin();for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();phase');
+ assert.equal(actual,expected,'Stage 10 gate '+angle+'° must follow corrected physical geometry');
+}
+const liftSnap=game(7);
+assert.equal(liftSnap('setup();setPart("arm",103);design.arm'),100,'Nearly level platform should snap to real parallelogram');
+assert.equal(liftSnap('lock.arm'),true);
+assert.equal(liftSnap('setPart("arm",104);design.arm'),100,'Hysteresis holds a near-valid platform steady');
+assert.equal(liftSnap('setPart("arm",106);lock.arm'),false,'Wrong linkage must release snap');
+assert.equal(liftSnap('setup();setPart("arm",104);lock.arm'),false,'Out-of-range fresh platform does not snap');
+const dockSnap=game(12);
+assert.equal(dockSnap('setup();setPart("stopAngle",109);design.stopAngle'),113,'Stop-angle snap moves REAL carriage to 113°');
+assert.equal(dockSnap('setPart("stopAngle",118.5);design.stopAngle'),113,'Near-valid docking stays locked below 6°');
+assert.equal(dockSnap('setPart("stopAngle",119.1);lock.stopAngle'),false,'Large docking offset releases snap');
+assert.equal(dockSnap('setup();setPart("stopAngle",117.1);lock.stopAngle'),false,'Fresh 4.1° docking error does not snap');
+for(const [stopAngle,expected] of [[109,'won'],[115,'won'],[117,'won'],[118,'blocked'],[125,'blocked']]){
+ const g=game(12);
+ const actual=g('setup();design.arm=100;setPart("stopAngle",'+stopAngle+');begin();for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();phase');
+ assert.equal(actual,expected,'Stage 12 stop angle '+stopAngle+' must match visible dock geometry');
+}
+for(const [gap,height,expected] of [[8,8,true],[10,8,true],[12,8,false],[8,9,false]]){
+ const g=game(7);
+ assert.equal(g('setup();!!connector(pt(100,200),pt('+(100+gap)+','+(200+height)+'))'),expected,'Dock must be visible only when physically bridgeable');
+ if(expected)assert.equal(g('connector(pt(100,200),pt('+(100+gap)+','+(200+height)+')).docking'),true,'Visible deck is also a foot collider');
+}
+const docked=game(12);
+assert.equal(docked('setup();design.arm=100;setPart("stopAngle",115);begin();for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();tracks().some(s=>s.docking)'),true,'Snapped final platform renders an actual physical docking plate');
+assert.equal(docked('phase'),'won');
+console.log('PASS: 10° gate near-snap and hysteresis, 07/12 actual linkage, visible docking collision plate');
