@@ -108,3 +108,10 @@ for(const [cargo,minimum,maximum] of [[false,0,15],[true,15,100]]){
  assert.ok(shear>=minimum&&shear<maximum,'peak shear '+shear);
 }
 console.log('PASS: opposed rail errors, angled snap hysteresis, docking boundaries, three frame rates and load displacement');
+const finalRoute=game(8);
+for(const [changes,expected] of [['design.rail=-45','fall'],['design.gate=103','strain'],['design.arm=65','fall'],['exitX+=4','blocked']]){
+ const outcome=finalRoute('setup();design.rail=railRise;design.gate=90;design.arm=100;design.brace=[0,2];'+changes+';begin();for(let i=0;i<3000&&["machine","move"].includes(phase);i++)tick();phase');
+ assert.equal(outcome,expected,changes);
+}
+const checkOverlap=game(11);
+assert.equal(checkOverlap('setup();finishBrace(0,6);model.rods.length+model.right.rods.length'),8,'Cross-frame braces cannot stretch across the pier');
