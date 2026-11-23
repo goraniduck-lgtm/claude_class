@@ -53,7 +53,7 @@ if(has('f')&&a===m.nodes[0])m.load=design.cargo?9:stage===5?3:.002;
 if(has('l')&&m.platform&&a===m.platform[0]){if(!m.aboard&&m.x>a.x+34){m.aboard=true;m.vx=0}if(m.aboard&&m.angle>endAngle)m.vx=Math.abs(slope)<.34?0:Math.sign(slope)*90;else m.vx=Math.max(72,m.vx)}break}
 if(has('g')&&m.x+radius>=605&&m.x<630&&gateBlocks()&&m.y<deck+10){stop('문이 통로에 남아 있어요. 조금 더 접어 보세요.');return}
 if(m.y>deck+28){phase='fall';m.fallTime=0;sync('운송로가 끊어진 곳에서 떨어졌어요. 그곳을 지지하는 부품을 살펴보세요.');return}
-if(m.x>=950&&Math.abs(m.y-(has('l')?exitY:deck))<2){if(stage===6&&!design.cargo){phase='tested';sync('작업자가 건넜어요. 수정 화면에서 화물차로 바꾸어 운행하세요.')}else{phase='won';put('pb2-clear-'+stage,'1');sync('운송 완료! 목적지에 도착했어요.')}return}
+if(m.x>=950&&Math.abs(m.y-(has('l')?exitY:deck))<2){if(stage===6&&!design.cargo){phase='tested';sync('작업자가 건넜어요. 수정 화면에서 화물차로 바꾸어 운행하세요.')}else{phase='won';put('pb2-clear-'+stage,'1');sync(stage===5?'보강 막대 덕분에 다리가 흔들리지 않았어요. 작업자 도착!':stage===6?'화물차가 무사히 건넜어요. 다리 보강 성공!':'운송 완료! 목적지에 도착했어요.')}return}
 if(m.time>24||m.x<0){stop('운송물이 경로를 벗어났어요. 발판의 기울기와 연결 높이를 살펴보세요.')}}
 const canvas=$('view'),c=canvas.getContext('2d');
 function line(a,b,color,w){c.strokeStyle=color;c.lineWidth=w;c.lineCap='round';c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke()}
@@ -100,7 +100,7 @@ function setPart(key,v){
  else design[key]=v
 }
 function slider(label,key,min,max){let f=group(label),r=document.createElement('input');r.type='range';r.min=min;r.max=max;r.value=design[key];r.setAttribute('aria-label',label);r.oninput=()=>{setPart(key,+r.value);restart()};f.append(r)}
-function brace(i){if(selected===null){selected=i}else if(i!==selected){design.brace=[selected,i];selected=null;restart()}else selected=null;controls()}
+function brace(i){if(selected===null){selected=i;sync('경첩 '+('ABCD'[i])+' 선택! 다른 경첩을 이어 보세요.')}else if(i!==selected){finishBrace(selected,i);return}else{selected=null;sync('선택을 취소했어요.')}controls()}
 function controls(){panel.replaceChildren();if(has('r'))slider('아래 레일 D · 높이 조절','rail',-63,54);if(has('g'))slider('차단문 · 회전 멈춤 위치','gate',0,110);
 if(has('f')){let f=group('보강 막대 · 연결할 경첩 두 곳을 선택하세요');'ABCD'.split('').forEach((s,i)=>{let b=document.createElement('button');b.textContent=s;b.setAttribute('aria-pressed',selected===i||selected===null&&design.brace.includes(i));b.onclick=()=>brace(i);f.append(b)});let b=document.createElement('button');b.textContent='막대 빼기';b.onclick=()=>{design.brace=[];selected=null;restart();controls()};f.append(b)}
 if(has('l'))slider('오른쪽 연결 막대 · 길이 조절','arm',65,126);
@@ -108,7 +108,7 @@ if(stage===6){let f=group('운송 대상');for(let [val,name] of [[false,'작업
 let adjusting=null;
 function position(e){const r=canvas.getBoundingClientRect();return pt((e.clientX-r.left)*1000/r.width,(e.clientY-r.top)*410/r.height)}
 function nearJoint(p,rect){if(!has('f'))return -1;const radius=Math.max(23,22*1000/rect.width);return model.nodes.findIndex(q=>dist(q,p)<radius)}
-function finishBrace(a,b){if(a===null||b<0||a===b){selected=a;controls();return}
+function finishBrace(a,b){if(a===null||b<0||a===b){selected=a;controls();if(a!==null)sync('경첩 '+('ABCD'[a])+' 선택! 다른 경첩을 이어 보세요.');return}
  design.brace=[a,b];selected=null;restart();controls();
  const pair=Math.abs(a-b)===2;
  sync(pair?'막대가 설치됐어요. 실제로 다리가 덜 흔들리는지 시험해 보세요.':'기존 변에 막대를 덧댔어요. 움직임이 달라지는지 시험해 보세요.');
@@ -137,7 +137,7 @@ canvas.onpointerup=e=>{
   braceActive=false;bracePreview=null;braceOrigin=null;
   if(dest>=0&&dest!==a)finishBrace(a,dest);
   else if(dest===a&&selected!==null&&selected!==a)finishBrace(selected,a);
-  else{selected=a;controls()}
+  else{selected=a;controls();sync('경첩 '+('ABCD'[a])+' 선택! 다른 경첩을 이어 보세요.')}
  }
  adjusting=null;
  if(canvas.hasPointerCapture?.(e.pointerId))canvas.releasePointerCapture(e.pointerId);
