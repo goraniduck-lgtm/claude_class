@@ -66,7 +66,7 @@ if(has('l')&&m.aboard&&m.angle>endAngle){let angle=Math.max(endAngle,m.angle-dt*
 if(has('l')&&m.aboard&&m.angle===endAngle&&m.platform&&!connector(m.platform[1],pt(exitX,exitY))&&m.x>=m.platform[1].x-2){stop('발판과 강둑이 이어지지 않았어요. 두 끝의 높이와 틈을 살펴보세요.');return}
 let oldY=m.y;m.vy+=540*dt;m.y+=m.vy*dt;m.x+=m.vx*dt;let radius=design.cargo?13:8;
 for(let [a,b] of tracks()){if(b.x-a.x<.1||m.x<a.x||m.x>b.x)continue;let slope=(b.y-a.y)/(b.x-a.x),floor=a.y+(m.x-a.x)*slope;if(oldY>floor+1.8||m.y<floor-1)continue;m.y=floor;m.vy=0;
-if(has('f')&&a===m.nodes[0])m.load=design.cargo?9:.35;
+if(has('f')&&a===m.nodes[0])m.load=design.cargo?9:.04;
 if(has('l')&&m.platform&&a===m.platform[0]){if(!m.aboard&&m.x>a.x+34){m.aboard=true;m.vx=0}if(m.aboard&&m.angle>endAngle)m.vx=Math.abs(slope)<.34?0:Math.sign(slope)*90;else m.vx=Math.max(72,m.vx)}break}
 if(has('g')&&m.x+radius>=605&&m.x<630&&gateBlocks()&&m.y<deck+10){stop('문이 통로에 남아 있어요. 조금 더 접어 보세요.');return}
 if(m.y>deck+28){phase='fall';m.fallTime=0;sync(has('f')&&m.peakShear>18?'다리 뼈대가 휘청여 발판이 어긋났어요.':'운송로가 끊어진 곳에서 떨어졌어요. 그곳을 지지하는 부품을 살펴보세요.');return}
@@ -80,7 +80,33 @@ function text(t,x,y,col='#193e39',size=16){c.font='bold '+size+'px system-ui';c.
 function rod(a,b,col='#8fa99b'){line(a,b,'#254743',10);line(a,b,col,5)}
 function draw(){let m=model;rect(0,0,1000,410,'#d8ebe2');dot(pt(911,57),31,'#f7edbf');for(let i=0;i<6;i++){c.fillStyle=i%2?'#afcdbb':'#bdd6c6';c.beginPath();c.moveTo(i*215-130,285);c.lineTo(i*215+40,120+(i%3)*20);c.lineTo(i*215+235,285);c.fill()}rect(0,350,1000,60,'#83bcb3');
 for(const [x,X,y] of [[0,200,deck],[has('f')?frameEnd:rigEnd,has('l')?initialLeft:1000,deck],...(has('l')?[[exitX,1000,exitY]]:[])])rect(x,y,X-x,410-y,'#927e63');
-if(has('f')){let n=m.nodes;if(hints>=2){c.setLineDash([3,6]);line(pt(rigEnd,deck-10),pt(frameEnd,deck-10),'#438367',2);c.setLineDash([])}for(let i=2;i<4;i++)rect(n[i].x-9,n[i].y,18,410-n[i].y,'#485f54');m.rods.forEach(({a,b},i)=>rod(n[a],n[b],i===4?'#efb84e':'#91aca0'));n.forEach((p,i)=>{dot(p,8,'#ffce60');text('ABCD'[i],p.x+10,p.y+(i<2?-12:20))})}
+if(has('f')){
+  const n=m.nodes,drift=m.frameShear;
+  // The ghost shows the unloaded outline. Actual rods and the walking deck follow n[].
+  if(phase!=='edit'&&drift>3){c.save();c.setLineDash([5,5]);
+    line(pt(rigEnd,deck),pt(frameEnd,deck),'#93aaa8',2);
+    line(pt(rigEnd,deck),pt(rigEnd,deck+85),'#93aaa8',2);
+    line(pt(frameEnd,deck),pt(frameEnd,deck+85),'#93aaa8',2);c.restore();
+  }
+  if(hints>=2){c.setLineDash([3,6]);line(pt(rigEnd,deck-10),pt(frameEnd,deck-10),'#438367',2);c.setLineDash([])}
+  for(let i=2;i<4;i++)rect(n[i].x-9,n[i].y,18,410-n[i].y,'#485f54');
+  m.rods.forEach(({a,b},i)=>rod(n[a],n[b],i===4?'#efb84e':drift>24?'#d89059':'#91aca0'));
+  // This indicator is driven by measured hinge displacement, not by a correct/incorrect flag.
+  rect(391,188,176,6,'#adc4ba');const fill=clamp(m.peakShear/65,0,1);
+  rect(391,188,176*fill,6,m.peakShear>35?'#c66543':m.peakShear>12?'#d8a14c':'#388f77');
+  text(m.peakShear>28?'다리가 크게 흔들려요':'다리 흔들림',391,181,m.peakShear>28?'#99512d':'#365b51',13);
+  if(stage===5){text('옆바람',396,221,'#347d70',12);
+    line(pt(395,230),pt(438,230),'#609e91',3);line(pt(432,225),pt(438,230),'#609e91',2);line(pt(432,235),pt(438,230),'#609e91',2)}
+  if(phase==='move'&&m.x>=rigEnd-12&&m.x<=frameEnd+12){
+    const x=clamp(m.x,rigEnd+12,frameEnd-12),y=(n[0].y+n[1].y)/2-34,col=design.cargo?'#af613a':'#337c73';
+    line(pt(x,y),pt(x,y+17),col,3);line(pt(x-5,y+11),pt(x,y+17),col,3);line(pt(x+5,y+11),pt(x,y+17),col,3);
+  }
+  if(phase==='edit'&&selected!==null){
+    dot(n[selected],13,'#f0aa4f');dot(n[selected],8,'#fff1ba');
+    if(braceHover){c.save();c.setLineDash([7,6]);line(n[selected],braceHover,'#e7aa45',3);c.restore()}
+  }
+  n.forEach((p,i)=>{dot(p,8,selected===i?'#fff1a0':'#ffce60');text('ABCD'[i],p.x+10,p.y+(i<2?-12:20))});
+}
 if(has('l')){let p=m.platform;rod(pt(735,300),pt(835,300));if(p){rod(pt(735,300),p[0]);rod(pt(835,300),p[1],'#efb84e');p.forEach(q=>dot(q,7,'#d3e6db'))}dot(pt(735,300),13,'#365c54');line(pt(735,300),pt(735+9*Math.cos(m.angle),300-9*Math.sin(m.angle)),'#ebd28c',3)}
 for(let [a,b] of tracks()){if(b.x-a.x>.5){c.lineCap='butt';c.strokeStyle='#344f49';c.lineWidth=6;c.beginPath();c.moveTo(a.x,a.y+3);c.lineTo(b.x,b.y+3);c.stroke();c.strokeStyle=has('l')&&m.platform&&a===m.platform[1]?'#ffd369':'#d4bf83';c.lineWidth=2;c.stroke()}}
 line(pt(950,has('l')?exitY:deck),pt(950,(has('l')?exitY:deck)-40),'#294841',3);rect(951,(has('l')?exitY:deck)-40,22,12,'#ce6140');
@@ -97,14 +123,19 @@ function setPart(key,v){
  else design[key]=v
 }
 function slider(label,key,min,max){let f=group(label),r=document.createElement('input');r.type='range';r.min=min;r.max=max;r.value=design[key];r.setAttribute('aria-label',label);r.oninput=()=>{setPart(key,+r.value);restart()};f.append(r)}
-function brace(i){if(selected===null){selected=i}else if(i!==selected){design.brace=[selected,i];selected=null;restart()}else selected=null;controls()}
+function brace(i){
+ if(selected===null){selected=i;braceHover=null;sync('경첩 '+ 'ABCD'[i]+' 선택! 이어 줄 다른 경첩을 누르세요.')}
+ else if(i!==selected){design.brace=[selected,i];selected=null;braceHover=null;restart();sync('보강 막대를 설치했어요. 시험 운행으로 움직임을 확인해 보세요.')}
+ else {selected=null;braceHover=null;sync('선택을 취소했어요. 다시 두 경첩을 골라 보세요.')}
+ controls();
+}
 function controls(){panel.replaceChildren();if(has('r'))slider('아래 레일 D · 높이 조절','rail',-63,54);if(has('g'))slider('차단문 · 회전 멈춤 위치','gate',0,110);
-if(has('f')){let f=group('보강 막대 · 연결할 경첩 두 곳을 선택하세요');'ABCD'.split('').forEach((s,i)=>{let b=document.createElement('button');b.textContent=s;b.setAttribute('aria-pressed',selected===i||selected===null&&design.brace.includes(i));b.onclick=()=>brace(i);f.append(b)});let b=document.createElement('button');b.textContent='막대 빼기';b.onclick=()=>{design.brace=[];selected=null;restart();controls()};f.append(b)}
+if(has('f')){let f=group('보강 막대 · 연결할 경첩 두 곳을 선택하세요');'ABCD'.split('').forEach((s,i)=>{let b=document.createElement('button');b.textContent=s;b.setAttribute('aria-pressed',selected===i||selected===null&&design.brace.includes(i));b.onclick=()=>brace(i);f.append(b)});let b=document.createElement('button');b.textContent='막대 빼기';b.onclick=()=>{design.brace=[];selected=null;braceHover=null;restart();sync('막대를 뺐어요. 시험 운행으로 변화를 확인해 보세요.');controls()};f.append(b)}
 if(has('l'))slider('오른쪽 연결 막대 · 길이 조절','arm',65,126);
 if(stage===6){let f=group('운송 대상');for(let [val,name] of [[false,'작업자'],[true,'화물차']]){let b=document.createElement('button');b.textContent=name;b.setAttribute('aria-pressed',design.cargo===val);b.onclick=()=>{design.cargo=val;restart();controls()};f.append(b)}}}
 let adjusting=null;function position(e){const r=canvas.getBoundingClientRect();return pt((e.clientX-r.left)*1000/r.width,(e.clientY-r.top)*410/r.height)}
 canvas.onpointerdown=e=>{if(phase!=='edit')return;let r=canvas.getBoundingClientRect(),p=pt((e.clientX-r.left)*1000/r.width,(e.clientY-r.top)*410/r.height);let target=gateTip(design.gate*rad);if(has('r')&&dist(p,pt(252,119+design.rail*.65))<Math.max(25,22000/r.width))adjusting='rail';else if(has('g')&&dist(p,pt(580+target.x,127+target.y))<Math.max(25,22000/r.width))adjusting='gate';if(adjusting){canvas.setPointerCapture(e.pointerId);return}if(has('f')){let i=model.nodes.findIndex(q=>dist(q,p)<Math.max(23,22000/r.width));if(i>=0)brace(i)}};
-canvas.style.touchAction='none';canvas.onpointermove=e=>{if(!adjusting||phase!=='edit')return;let p=position(e);if(adjusting==='rail')setPart('rail',clamp((p.y-119)/.65,-63,54));else design.gate=clamp(Math.round(Math.atan2(p.x-580,127-p.y)/rad),0,110);restart();controls()};canvas.onlostpointercapture=()=>{adjusting=null;if(phase==='edit')controls()};
+canvas.style.touchAction='none';canvas.onpointermove=e=>{if(phase!=='edit')return;let p=position(e);if(!adjusting){if(has('f')&&selected!==null)braceHover=p;return}if(adjusting==='rail')setPart('rail',clamp((p.y-119)/.65,-63,54));else design.gate=clamp(Math.round(Math.atan2(p.x-580,127-p.y)/rad),0,110);restart();controls()};canvas.onlostpointercapture=()=>{adjusting=null;if(phase==='edit')controls()};canvas.onpointerleave=()=>{braceHover=null};
 $('run').onclick=()=>{lesson=false;if(phase==='edit')begin();else restart()};$('retry').onclick=()=>{lesson=false;begin()};$('reset').onclick=()=>{lesson=false;setup()};$('next').onclick=()=>goto(stage+1);
 const clues={r:['바퀴가 멈추는 곳에서 두 홈은 어떻게 달라지나요?','양 끝의 레일 간격을 비교하세요.','두 홈이 같은 방향으로 뻗게 해 보세요.'],g:['문 끝이 통로 안에 얼마나 남았나요?','문 끝과 수납 홈의 방향을 비교하세요.','닫힌 위치에서 직각만큼 돌면 어느 곳에 닿을까요?'],f:['화물이 올라가면 어느 경첩이 움직이나요?','위쪽 경첩과 반대편 아래쪽 경첩을 살펴보세요.','막대 하나로 사각형을 삼각형 두 개로 나누어 보세요.'],l:['올라가는 동안 작업자의 발밑이 어느 쪽으로 기우나요?','발판과 수평 기준선의 방향을 비교하세요.','양옆 막대의 길이를 맞추면 발판의 방향은 어떻게 될까요?']};
 $('hint').onclick=()=>{hints=Math.min(3,hints+1);$('status').textContent=config[stage].split('').map(k=>clues[k][hints-1]).join(' ')};
