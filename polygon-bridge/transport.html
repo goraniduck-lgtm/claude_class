@@ -1,0 +1,79 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>끊어진 운송로를 복구하라</title><style>*{box-sizing:border-box}body{margin:0;background:#eff2e8;color:#173c37;font:16px system-ui,sans-serif}main{max-width:1080px;padding:clamp(12px,2.5vw,32px);margin:auto}header,nav,.controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}header{justify-content:space-between}small,a{color:#426b5f;font-weight:bold}h1{margin:8px 0 2px;font-size:clamp(27px,4vw,44px);letter-spacing:-.06em}p{margin:8px 0 14px}button,select{font:inherit;font-weight:bold;color:inherit;background:white;border:1px solid #a2b5a9;border-radius:9px;padding:10px;min-height:44px}button{cursor:pointer}#run{background:#185e50;color:white}canvas{width:100%;display:block;border-radius:14px;touch-action:manipulation}fieldset{margin:7px 0;border:1px solid #adbfb0;border-radius:10px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}legend{font-weight:bold}input{width:min(200px,48vw);accent-color:#b0780c}#status{min-height:1.5em;font-weight:bold}[hidden]{display:none!important}button[aria-pressed=true]{background:#ffda77}textarea{width:100%;min-height:80px}</style><main><header><small>다각형 다리 작전 / 끊어진 운송로를 복구하라</small><select id="level" aria-label="스테이지 선택"></select></header><h1 id="title"></h1><p id="goal"></p><canvas id="view" width="1000" height="410" aria-label="운송로 측면과 장치 내부"></canvas><section id="toolsPanel"></section><p id="status" role="status"></p><nav><button id="run">▶ 시험 운행</button><button id="retry" hidden>즉시 재도전</button><button id="reset">처음부터</button><button id="hint">단서 보기</button><button id="next" hidden>다음 스테이지 →</button></nav><section id="reflection" hidden><h2>운송 일지</h2><label for="note">어느 장치에서 문제가 생겼나요? 무엇을 바꾸었고, 그 뒤 움직임이 어떻게 달라졌나요?</label><textarea id="note"></textarea></section></main><script>
+'use strict';
+const $=id=>document.getElementById(id), names=['늘어나는 다리','기울어진 발사대','접혀 있는 차단문','첫 번째 복합 운송','흔들리는 다리','무거운 화물','수평을 지키는 승강교','마지막 운송 작전'];
+const config=[null,null,'r','g','rg','f','rf','l','rfgl'];
+const goals=['','','기울어진 발사대에서 다리를 펼쳐 구슬을 보내세요.','차단문을 옆으로 접어 구슬이 지날 길을 여세요.','계곡을 건너 차단문 너머로 구슬을 보내세요.','막대 하나로 흔들리는 다리를 보강하세요.','가벼운 구슬로 시험한 뒤 화물차를 건너편까지 보내세요.','구슬을 발판에 싣고 높은 강둑으로 올리세요.','네 장치를 연결해 화물차를 높은 강둑까지 보내세요.'];
+const stage=Math.max(2,Math.min(8,parseInt(location.hash.slice(1))||2)),has=k=>config[stage].includes(k);
+const get=k=>{try{return localStorage.getItem(k)}catch{return null}},put=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+function goto(n){if(n===1)location.href='telescopic-bridge.html';else{location.hash=n;location.reload()}}
+names.forEach((name,i)=>$('level').add(new Option((get(i?'pb2-clear-'+(i+1):'telescopic-clear')?'✓ ':'')+String(i+1).padStart(2,'0')+' · '+name,i+1)));$('level').value=stage;$('level').onchange=e=>goto(+e.target.value);$('title').textContent=names[stage-1];$('goal').textContent=goals[stage];
+const dt=1/120,rad=Math.PI/180,clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),pt=(x,y)=>({x,y});
+const rigStart=200,rigEnd=390,frameEnd=570, deck=258, railRise=stage===2?-44:18;
+let design,model,phase,hints,selected,preview=false,lesson=false;
+function setup(){design={rail:0,gate:42,arm:76,brace:[],cargo:stage===8};selected=null;hints=0;preview=false;restart();controls()}
+function pose(a){const base=pt(735,300),anchor=pt(835,300),left=pt(base.x+100*Math.cos(a),base.y-100*Math.sin(a)),dx=anchor.x-left.x,dy=anchor.y-left.y,D=Math.hypot(dx,dy),len=design.arm;
+if(D>100+len||D<Math.abs(100-len))return null;
+const along=(100**2-len**2+D**2)/(2*D),perp=Math.sqrt(Math.max(0,100**2-along**2));return [left,pt(left.x+(along*dx+perp*dy)/D,left.y+(along*dy-perp*dx)/D)]}
+const baseAngle=155*rad,endAngle=85*rad,initialLeft=735+100*Math.cos(baseAngle),exitX=835+100*Math.cos(endAngle),exitY=300-100*Math.sin(endAngle);
+function restart(){const nodes=[pt(rigEnd,deck),pt(frameEnd,deck),pt(frameEnd,deck+85),pt(rigEnd,deck+85)];
+const pairs=[[0,1],[1,2],[2,3],[3,0]];if(design.brace.length===2)pairs.push(design.brace.slice());
+model={p:0,gate:0,jam:false,wall:false,angle:baseAngle,platform:pose(baseAngle),aboard:false,nodes:nodes.map(p=>({...p,px:p.x,py:p.y})),rods:pairs.map(([a,b])=>({a,b,len:dist(nodes[a],nodes[b])})),x:35,y:deck-9,vx:100,vy:0,load:0,time:0};phase='edit';sync('조작할 부품을 선택하고 시험 운행을 누르세요.')}
+function sync(msg){$('status').textContent=msg;$('run').textContent=phase==='edit'?'▶ 시험 운행':'중단 · 수정';$('retry').hidden=phase==='edit';$('next').hidden=phase!=='won'||stage===8;$('hint').hidden=phase!=='edit';$('toolsPanel').querySelectorAll('fieldset').forEach(f=>f.disabled=phase!=='edit');$('reflection').hidden=phase!=='won'||stage!==8}
+function begin(){restart();phase='machine';sync('장치가 움직입니다. 운송로가 어디까지 연결될까요?')}
+function stop(reason){phase='blocked';sync(reason)}
+function frameStep(load){let n=model.nodes;
+for(let i=0;i<2;i++){let p=n[i],x=p.x,y=p.y;p.x+=(x-p.px)*.986-load*190*dt*dt;p.y+=(y-p.py)*.986+(3+load*90)*dt*dt;p.px=x;p.py=y}
+for(let iter=0;iter<22;iter++)for(let {a,b,len} of model.rods){let A=n[a],B=n[b],dx=B.x-A.x,dy=B.y-A.y,D=Math.hypot(dx,dy),w=(a<2)+(b<2);if(!w||!D)continue;let f=(D-len)/(D*w);if(a<2){A.x+=dx*f;A.y+=dy*f}if(b<2){B.x-=dx*f;B.y-=dy*f}}}
+function tracks(){let m=model,n=m.nodes,segs=[[pt(0,deck),pt(rigStart,deck)],[pt(rigStart,deck),pt(has('r')?rigStart+190*m.p:rigEnd,deck)],has('f')?[n[0],n[1]]:[pt(rigEnd,deck),pt(frameEnd,deck)],[pt(frameEnd,deck),pt(has('l')?initialLeft:1000,deck)]];
+if(has('l')){if(m.platform)segs.push(m.platform);segs.push([pt(exitX,exitY),pt(1000,exitY)])}return segs}
+function gateTip(a){return pt(0+68*Math.sin(a),-68*Math.cos(a))}
+function gateBlocks(){let tip=gateTip(model.gate);return tip.y < -3}
+function tick(){let m=model;if(!['machine','move'].includes(phase))return;m.time+=dt;
+if(phase==='machine'){if(has('r')&&!m.jam){let p=Math.min(1,m.p+dt*.47),err=Math.abs(design.rail-railRise)*p;if(err>4){m.p=4/Math.abs(design.rail-railRise);m.jam=true}else m.p=p}
+if(has('g')&&!m.wall){let a=Math.min(design.gate*rad,m.gate+dt*1.5);if(gateTip(a).y>4){m.wall=true}else m.gate=a}
+if((!has('r')||m.jam||m.p===1)&&(!has('g')||m.wall||m.gate>=design.gate*rad)){if(m.wall){stop('문 끝이 수납 벽에 닿아 모터가 멈췄어요.');return}phase='move';sync(m.jam?'덜컹! 다리가 멈췄어요. 구슬이 갈 수 있는 곳을 살펴보세요.':'운송을 시작합니다.')}return}
+if(has('f'))frameStep(m.load);m.load=0;
+if(has('l')&&m.aboard&&m.angle>endAngle){let angle=Math.max(endAngle,m.angle-dt*.63),p=pose(angle);if(!p){stop('막대가 팽팽해져 모터가 더 돌지 못해요.');return}let old=m.platform;m.platform=p;m.angle=angle;let u=(m.x-old[0].x)/(old[1].x-old[0].x);m.x+=p[0].x-old[0].x;m.y+=(p[0].y-old[0].y)*(1-u)+(p[1].y-old[1].y)*u}
+let oldY=m.y;m.vy+=540*dt;m.y+=m.vy*dt;m.x+=m.vx*dt;let radius=9;
+for(let [a,b] of tracks()){if(b.x-a.x<.1||m.x<a.x||m.x>b.x)continue;let slope=(b.y-a.y)/(b.x-a.x),floor=a.y+(m.x-a.x)*slope-radius;if(oldY>floor+1.8||m.y<floor-1)continue;m.y=floor;m.vy=0;
+if(has('f')&&a===m.nodes[0])m.load=design.cargo?9:stage===5?3:.002;
+if(has('l')&&m.platform&&a===m.platform[0]){if(!m.aboard&&m.x>a.x+34){m.aboard=true;m.vx=0}if(m.aboard&&m.angle>endAngle)m.vx+=540*slope/(1+slope*slope)*dt;else m.vx=Math.max(72,m.vx)}break}
+if(has('g')&&m.x+radius>=605&&m.x<630&&gateBlocks()&&m.y<deck+10){stop('화물이 통로에 남은 문에 부딪혔어요.');return}
+if(m.y>400){stop('운송로가 끊어진 곳에서 떨어졌어요. 그곳을 지지하는 부품을 살펴보세요.');return}
+if(m.x>=950&&Math.abs(m.y-(has('l')?exitY:deck)+radius)<2){if(stage===6&&!design.cargo){phase='tested';sync('가벼운 구슬이 건넜어요. 수정 화면에서 화물차로 바꾸어 운행하세요.')}else{phase='won';put('pb2-clear-'+stage,'1');sync('운송 완료! 목적지에 도착했어요.')}return}
+if(m.time>24||m.x<0){stop('운송물이 경로를 벗어났어요. 발판의 기울기와 연결 높이를 살펴보세요.')}}
+const canvas=$('view'),c=canvas.getContext('2d');
+function line(a,b,color,w){c.strokeStyle=color;c.lineWidth=w;c.lineCap='round';c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke()}
+function dot(p,r,color){c.fillStyle=color;c.beginPath();c.arc(p.x,p.y,r,0,2*Math.PI);c.fill()}
+function rect(x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h)}
+function text(t,x,y,col='#193e39',size=16){c.font='bold '+size+'px system-ui';c.fillStyle=col;c.fillText(t,x,y)}
+function rod(a,b,col='#8fa99b'){line(a,b,'#254743',10);line(a,b,col,5)}
+function draw(){let m=model;rect(0,0,1000,410,'#d8ebe2');dot(pt(911,57),31,'#f7edbf');for(let i=0;i<6;i++){c.fillStyle=i%2?'#afcdbb':'#bdd6c6';c.beginPath();c.moveTo(i*215-130,285);c.lineTo(i*215+40,120+(i%3)*20);c.lineTo(i*215+235,285);c.fill()}rect(0,350,1000,60,'#83bcb3');
+for(const [x,X,y] of [[0,200,deck],[has('f')?frameEnd:rigEnd,has('l')?initialLeft:1000,deck],...(has('l')?[[exitX,1000,exitY]]:[])])rect(x,y,X-x,410-y,'#927e63');
+if(has('f')){let n=m.nodes;if(hints>=2){c.setLineDash([3,6]);line(pt(rigEnd,deck-10),pt(frameEnd,deck-10),'#438367',2);c.setLineDash([])}for(let i=2;i<4;i++)rect(n[i].x-9,n[i].y,18,410-n[i].y,'#485f54');m.rods.forEach(({a,b},i)=>rod(n[a],n[b],i===4?'#efb84e':'#91aca0'));n.forEach((p,i)=>{dot(p,8,'#ffce60');text('ABCD'[i],p.x+10,p.y+(i<2?-12:20))})}
+if(has('l')){let p=m.platform;rod(pt(735,300),pt(835,300));if(p){rod(pt(735,300),p[0]);rod(pt(835,300),p[1],'#efb84e');p.forEach(q=>dot(q,7,'#d3e6db'))}dot(pt(735,300),13,'#365c54');line(pt(735,300),pt(735+9*Math.cos(m.angle),300-9*Math.sin(m.angle)),'#ebd28c',3)}
+for(let [a,b] of tracks()){if(b.x-a.x>.5){line(a,b,'#344f49',8);line(a,b,'#d4bf83',3)}}
+line(pt(950,has('l')?exitY:deck),pt(950,(has('l')?exitY:deck)-40),'#294841',3);rect(951,(has('l')?exitY:deck)-40,22,12,'#ce6140');
+if(has('r')){rect(16,20,308,144,'#214744');text('발사 장치 내부',30,44,'#e0ece3');let a=pt(65,85),b=pt(252,85+railRise*.65),cc=pt(65,119),dd=pt(252,119+design.rail*.65);for(const [p,q] of [[a,b],[cc,dd]]){line(p,q,'#94aca2',10);line(p,q,'#314f4b',4)}let x=65+187*m.p,y=85+railRise*.65*m.p;line(pt(42,105),pt(x,y+17),'#8bada2',6);dot(pt(42,105),12,'#577c70');line(pt(42,105),pt(42+8*Math.cos(m.p*30),105+8*Math.sin(m.p*30)),'#d5e4d4',3);rod(pt(x,y),pt(x,y+34));for(let yy of [y,y+34]){dot(pt(x,yy),8,'#c8d9ce');dot(pt(x,yy),3,'#436759')}dot(dd,9,'#ffd05f');text('D',dd.x+13,dd.y+5,'#ffe5a2');if(hints>=2){for(let [p,q] of [[a,cc],[b,dd]])line(p,q,'#eecb74',2)}if(m.jam)text('덜컹!',x+12,y+20,'#ffb26b');line(pt(166,164),pt(200,deck-6),'#658279',2)}
+if(has('g')){rect(471,18,220,158,'#214744');text('차단문 · 위에서 보기',483,41,'#e0ece3');rect(481,60,200,65,'#6a887b');rect(580,125,76,8,'#adc2b2');rect(580,133,78,5,'#dfad71');let pivot=pt(580,127),tip=gateTip(m.gate);if(phase==='edit'){let target=gateTip(design.gate*rad);c.setLineDash([4,5]);line(pivot,pt(pivot.x+target.x,pivot.y+target.y),'#ffda80',3);c.setLineDash([]);dot(pt(pivot.x+target.x,pivot.y+target.y),6,'#ffda80')}rod(pivot,pt(pivot.x+tip.x,pivot.y+tip.y),'#eebe62');dot(pivot,7,'#d7e6d8');if(hints>=2)line(pivot,pt(648,127),'#ade4c2',2);line(pt(604,177),pt(605,deck-24),'#658279',2);if(gateBlocks())rect(604,deck-23,6,23,'#c36d42');else rect(604,deck-4,12,4,'#427d66')}
+if(has('l')&&hints>=2&&m.platform)line(m.platform[0],pt(m.platform[0].x+110,m.platform[0].y),'#55a07c',2);
+if(design.cargo){rect(m.x-13,m.y-11,26,14,'#ba673f');dot(pt(m.x-8,m.y+5),4,'#34463d');dot(pt(m.x+8,m.y+5),4,'#34463d')}else{dot(pt(m.x,m.y),9,'#b74932');dot(pt(m.x-2,m.y-3),3,'#f8c16b')}
+}
+const panel=$('toolsPanel');
+function group(title){let f=document.createElement('fieldset'),l=document.createElement('legend');l.textContent=title;f.append(l);panel.append(f);return f}
+function slider(label,key,min,max){let f=group(label),r=document.createElement('input');r.type='range';r.min=min;r.max=max;r.value=design[key];r.setAttribute('aria-label',label);r.oninput=()=>{design[key]=+r.value;if(key==='rail'&&Math.abs(design.rail-railRise)<=2)design.rail=railRise;r.value=design[key];restart()};f.append(r)}
+function brace(i){if(selected===null){selected=i}else if(i!==selected){design.brace=[selected,i];selected=null;restart()}else selected=null;controls()}
+function controls(){panel.replaceChildren();if(has('r'))slider('아래 레일 D · 높이 조절','rail',-63,54);if(has('g'))slider('차단문 · 회전 멈춤 위치','gate',0,110);
+if(has('f')){let f=group('보강 막대 · 연결할 경첩 두 곳을 선택하세요');'ABCD'.split('').forEach((s,i)=>{let b=document.createElement('button');b.textContent=s;b.setAttribute('aria-pressed',selected===i||selected===null&&design.brace.includes(i));b.onclick=()=>brace(i);f.append(b)});let b=document.createElement('button');b.textContent='막대 빼기';b.onclick=()=>{design.brace=[];selected=null;restart();controls()};f.append(b)}
+if(has('l'))slider('오른쪽 연결 막대 · 길이 조절','arm',65,126);
+if(stage===6){let f=group('운송 대상');for(let [val,name] of [[false,'구슬'],[true,'화물차']]){let b=document.createElement('button');b.textContent=name;b.setAttribute('aria-pressed',design.cargo===val);b.onclick=()=>{design.cargo=val;restart();controls()};f.append(b)}}}
+let adjusting=null;function position(e){const r=canvas.getBoundingClientRect();return pt((e.clientX-r.left)*1000/r.width,(e.clientY-r.top)*410/r.height)}
+canvas.onpointerdown=e=>{if(phase!=='edit')return;let r=canvas.getBoundingClientRect(),p=pt((e.clientX-r.left)*1000/r.width,(e.clientY-r.top)*410/r.height);let target=gateTip(design.gate*rad);if(has('r')&&dist(p,pt(252,119+design.rail*.65))<25)adjusting='rail';else if(has('g')&&dist(p,pt(580+target.x,127+target.y))<25)adjusting='gate';if(adjusting){canvas.setPointerCapture(e.pointerId);return}if(has('f')){let i=model.nodes.findIndex(q=>dist(q,p)<23);if(i>=0)brace(i)}};
+canvas.style.touchAction='none';canvas.onpointermove=e=>{if(!adjusting||phase!=='edit')return;let p=position(e);if(adjusting==='rail')design.rail=clamp(Math.round((p.y-119)/.65),-63,54);else design.gate=clamp(Math.round(Math.atan2(p.x-580,127-p.y)/rad),0,110);restart();controls()};canvas.onlostpointercapture=()=>{if(adjusting==='rail'&&Math.abs(design.rail-railRise)<5)design.rail=railRise;adjusting=null;if(phase==='edit')controls()};
+$('run').onclick=()=>{lesson=false;if(phase==='edit')begin();else restart()};$('retry').onclick=()=>{lesson=false;begin()};$('reset').onclick=()=>{lesson=false;setup()};$('next').onclick=()=>goto(stage+1);
+const clues={r:['바퀴가 멈추는 곳에서 두 홈은 어떻게 달라지나요?','양 끝의 레일 간격을 비교하세요.','두 홈이 같은 방향으로 뻗게 해 보세요.'],g:['문 끝이 통로 안에 얼마나 남았나요?','문 끝과 수납 홈의 방향을 비교하세요.','닫힌 위치에서 직각만큼 돌면 어느 곳에 닿을까요?'],f:['화물이 올라가면 어느 경첩이 움직이나요?','위쪽 경첩과 반대편 아래쪽 경첩을 살펴보세요.','막대 하나로 사각형을 삼각형 두 개로 나누어 보세요.'],l:['올라가는 동안 구슬은 어느 쪽으로 굴러가나요?','발판과 수평 기준선의 방향을 비교하세요.','양옆 막대의 길이를 맞추면 발판의 방향은 어떻게 될까요?']};
+$('hint').onclick=()=>{hints=Math.min(3,hints+1);$('status').textContent=config[stage].split('').map(k=>clues[k][hints-1]).join(' ')};
+$('note').value=get('pb2-reflection')||'';$('note').oninput=e=>put('pb2-reflection',e.target.value);
+setup();const newDevice=({3:'g',5:'f',7:'l'})[stage];if(newDevice&&!get('pb2-intro-'+newDevice)){lesson=true;begin();put('pb2-intro-'+newDevice,'1');$('status').textContent='첫 시범 · 장치가 움직이는 모습을 관찰하세요.'}
+let last=0,acc=0;function render(t){acc+=Math.min(.15,(t-last)/1000);last=t;while(acc>=dt){tick();acc-=dt}if(lesson&&phase==='blocked'){lesson=false;$('run').textContent='직접 해보기';$('status').textContent+=' '+clues[newDevice][2]}draw();requestAnimationFrame(render)}requestAnimationFrame(render);
+</script></html>
