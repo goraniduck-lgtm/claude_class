@@ -26,9 +26,9 @@
 #next-device{background:#138c73;color:#fff}
 #stop:disabled,#retry:disabled,#start:disabled,#reset:disabled,#hint:disabled{display:none}
 .device-tray{position:absolute;top:10px;right:11px;display:flex;gap:6px;z-index:3;pointer-events:none}
-.device-token{display:grid;place-items:center;width:37px;height:37px;background:#263f55eb;border:1.5px solid #89a9bb;border-radius:10px;color:#d8e8ef;font-weight:900;font-size:22px}
-.device-token.active{border-color:#ffe0a5;background:#725332;color:#ffe6b1;box-shadow:0 0 0 2px #ffce6a66}
-.device-token.done{border-color:#7cffe0;background:#108c6d;color:#fff}
+.device-token{display:grid;place-items:center;width:37px;height:37px;background:#263f55eb;border:1.5px solid var(--device-color);border-radius:10px;color:var(--device-color);font-weight:900;font-size:22px}
+.device-token.active{background:#263f55;box-shadow:0 0 0 1px #b8d3df44}
+.device-token.done{background:#193d4b;box-shadow:inset 0 -3px var(--device-color)}
 .intro-screen{position:absolute;inset:0;z-index:8;display:grid;place-items:center;background:#142238c9;padding:10px}
 .intro-panel{max-width:340px;width:90%;text-align:center;background:#f7fffc;border:2px solid #a4f6d8;border-radius:18px;box-shadow:0 14px 48px #0006;padding:19px 17px}
 .intro-panel small{color:#078469;font-weight:900;font-size:13px}.intro-icon{font-size:54px;color:#139b78;font-weight:900;margin:4px}
@@ -55,6 +55,9 @@
 .stage:nth-child(n+17){background:#f0f0fb;border-color:#d7d4f0}
 .stage:nth-child(n+17).active{background:#eaf9f1;border-color:#24a789}
 .stage:nth-child(n+17).done{background:#e7f6ef;border-color:#a8dcca}
+.route-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;font-weight:800}
+.route-controls[hidden],#send-lift[hidden]{display:none}
+.route-controls button[aria-pressed="true"]{background:#276884;color:#fff;border-color:#276884}
 </style>
 </head>
 <body>
@@ -72,7 +75,9 @@
 <div class="condition" id="condition" role="status" aria-live="polite"><div class="sigil" id="sigil" aria-hidden="true"></div><div class="condition-copy"><small>장치 작동 원리</small><strong id="condition-title"></strong><p id="condition-tip"></p></div><div class="status" id="condition-status"></div></div>
 <div class="viewport"><canvas id="game" width="1100" height="560" tabindex="0" aria-label="도형 꼭짓점을 움직이거나 연결해 수학 퍼즐을 풀어보세요"></canvas><div id="device-tray" class="device-tray" aria-label="이번 스테이지 장치 진행 상태"></div><div id="intro-screen" class="intro-screen" hidden><div class="intro-panel"><small>새로운 장치 발견!</small><div class="intro-icon" id="intro-icon"></div><h3 id="intro-name"></h3><p id="intro-explain"></p><button type="button" id="intro-ok">직접 해보기</button></div></div><div class="hud"><span>STAGE <b id="stage-num">01</b></span><span>도전 <b id="attempt">0</b>회</span><span>이동 <b id="progress">0%</b></span></div><div id="toast" class="toast"></div></div>
 <div class="stats"><div class="stat"><small>도형</small><b id="shape"></b></div><div class="stat" id="math-card"><small>수학 조건</small><b id="math"></b></div><div class="stat" id="lock-card"><small>기계장치</small><b id="latch"></b></div></div>
-<div class="controls"><div class="group"><button id="next-device" class="btn go" hidden>다음 장치 켜기 ▶</button><button id="reset" class="btn soft">↶ 처음부터</button><button id="hint" class="btn hint" aria-pressed="false">단서 보기</button></div><div class="group"><button id="stop" class="btn stop" disabled>■ 중단·수정</button><button id="retry" class="btn retry" disabled>↻ 즉시 재도전</button><button id="start" class="btn go">▶ 구슬 출발!</button></div></div>
+<div class="controls"><div class="route-controls" id="route-controls" role="group" aria-label="구슬 출발 속도" hidden><span>출발 속도</span><button type="button" class="btn soft" data-speed="190">천천히</button><button type="button" class="btn soft" data-speed="280">보통</button><button type="button" class="btn soft" data-speed="390">빠르게</button></div>
+<div class="route-controls" id="route-choice" role="group" aria-label="운송 경로" hidden><span>운송 경로</span><button type="button" class="btn soft" data-route="ridge">위층 다리</button><button type="button" class="btn soft" data-route="basin">아래층 관문</button></div>
+<div class="group"><button id="next-device" class="btn go" hidden>다음 장치 켜기 ▶</button><button id="reset" class="btn soft">↶ 처음부터</button><button id="hint" class="btn hint" aria-pressed="false">단서 보기</button></div><div class="group"><button id="send-lift" class="btn hint" hidden>↧ 승강기 내리기</button><button id="stop" class="btn stop" disabled>■ 중단·수정</button><button id="retry" class="btn retry" disabled>↻ 즉시 재도전</button><button id="start" class="btn go">▶ 구슬 출발!</button></div></div>
 <div class="feedback" aria-live="polite"><div class="bubble">i</div><p id="feedback"></p></div>
 <div class="quiz" id="quiz"><h3 id="quiz-title">도착 성공! 수학 확인</h3><p id="quiz-prompt"></p><div class="answers" id="answers"></div><p class="quiz-outcome" id="quiz-outcome"></p><button class="next" id="next">다음 스테이지 ▶</button></div>
 <details class="info"><summary>교사용 설계 설명 · 게임 속 장치와 실제 물리 구분</summary><p id="teacher-note"></p></details>
@@ -94,31 +99,31 @@ const stages=[
 const catalog=stages.slice();
 const levelSettings=[
   {name:'첫 번째 잠금',title:'01 · 첫 번째 잠금',desc:'노란 꼭짓점을 움직여 양쪽 기계팔을 닫으세요.',modes:[0],intro:0},
-  {name:'멀어진 고리',title:'02 · 멀어진 고리',desc:'익숙한 장치를 다시 작동시켜 구슬을 건너게 하세요.',modes:[0]},
+  {name:'낮은 착지대',title:'02 · 낮은 착지대',desc:'출발대 끝에서 떨어진 구슬이 아래쪽 착지대까지 닿을 속도를 찾아보세요.',modes:[],route:'ledge',intro:'ledge'},
   {name:'꺾인 연결기',title:'03 · 꺾인 연결기',desc:'노란 꼭짓점을 움직여 연결기를 닫으세요.',modes:[1],intro:1},
   {name:'두 단계 잠금',title:'04 · 두 단계 잠금',desc:'서로 다른 두 장치를 차례대로 켜 다리를 완성하세요.',modes:[0,1]},
   {name:'빛나는 열쇠',title:'05 · 빛나는 열쇠',desc:'삼각형의 꼭짓점을 움직여 열쇠를 작동시키세요.',modes:[2],intro:2},
-  {name:'교차 관문',title:'06 · 교차 관문',desc:'이전에 배운 두 가지 장치를 작동시켜 관문을 여세요.',modes:[0,2]},
+  {name:'교차 관문',title:'06 · 교차 관문',desc:'이전에 배운 두 가지 장치를 작동시켜 관문을 여세요.',modes:[1,2]},
   {name:'별빛 발전기',title:'07 · 별빛 발전기',desc:'오각형의 꼭짓점을 연결해 발전기를 충전하세요.',modes:[3],intro:3},
   {name:'마지막 동력실',title:'08 · 마지막 동력실',desc:'익숙한 네 장치를 모두 작동시키고 구슬을 보내세요.',modes:[0,1,2,3],chapterEnd:true},
   {name:'두 개의 표시등',title:'09 · 두 개의 표시등',desc:'사각형 하나로 두 장치를 동시에 켜 보세요.',modes:[4]},
   {name:'돌아온 열쇠',title:'10 · 돌아온 열쇠',desc:'이전에 배운 열쇠와 발전기를 차례로 켜세요.',modes:[2,3]},
   {name:'마름모 톱니',title:'11 · 마름모 톱니',desc:'노란 점을 움직여 톱니바퀴를 회전시키세요.',modes:[5],intro:5},
-  {name:'연결된 톱니',title:'12 · 연결된 톱니',desc:'잠금 다리와 톱니 장치를 차례로 작동시키세요.',modes:[0,5]},
+  {name:'연결된 톱니',title:'12 · 연결된 톱니',desc:'삼각 열쇠와 마름모 톱니를 차례로 작동시켜 굽은 길을 연결하세요.',modes:[2,5]},
   {name:'정사각형 방패',title:'13 · 정사각형 방패',desc:'노란 점을 움직여 보호막을 켜세요.',modes:[6],intro:6},
   {name:'회전하는 방패',title:'14 · 회전하는 방패',desc:'새로 배운 장치와 익숙한 연결기를 활용하세요.',modes:[6,1]},
   {name:'혼합 회로',title:'15 · 혼합 회로',desc:'같은 도형의 두 조건을 맞춘 뒤, 열쇠와 톱니도 켜세요.',modes:[4,2,5]},
   {name:'챕터 2 동력실',title:'16 · 챕터 2 동력실',desc:'모든 동력을 연결하고 구슬을 목적지까지 보내세요.',modes:[4,5,6,3],chapterEnd:true},
   {name:'쌍둥이 장치',title:'17 · 쌍둥이 장치',desc:'서로 다른 두 도형을 조작해 양쪽 장치를 함께 켜세요.',modes:[0,1],simultaneous:true},
-  {name:'두 개의 결정',title:'18 · 두 개의 결정',desc:'왼쪽 톱니와 오른쪽 방패를 동시에 작동시키세요.',modes:[5,6],simultaneous:true},
-  {name:'이어지는 에너지',title:'19 · 이어지는 에너지',desc:'다리 잠금과 삼각 열쇠를 함께 작동시키세요.',modes:[0,2],simultaneous:true},
-  {name:'챕터 3 동력실',title:'20 · 챕터 3 동력실',desc:'한 화면의 세 장치를 모두 켜 구슬을 이동시키세요.',modes:[0,1,6],simultaneous:true,chapterEnd:true},
-  {name:'두 칸의 접이식 다리',title:'21 · 두 칸의 접이식 다리',desc:'두 사각형의 윗변과 아랫변을 각각 평행하게 맞추세요. 어느 다리에서 구슬이 떨어지는지 실험해 보세요.',modes:[0,0],route:['deck','deck'],intro:'deck'},
-  {name:'회전문 너머',title:'22 · 회전문 너머',desc:'직각 연결기로 회전문을 올리고, 평행 잠금장치로 오른쪽 다리를 펴세요.',modes:[1,0],route:['gate','deck'],intro:'gate'},
-  {name:'아래층으로',title:'23 · 아래층으로',desc:'세 변이 같은 삼각형으로 승강기를 켜세요. 아래층 출구의 문은 직각 연결기로 열 수 있어요.',modes:[2,1],route:['lift','gate'],intro:'lift'},
-  {name:'골짜기 운송로',title:'24 · 골짜기 운송로',desc:'평행 잠금장치, 삼각 열쇠, 정사각형 장치로 다리·승강기·회전문을 각각 움직이세요.',modes:[0,2,6],route:['deck','lift','gate'],chapterEnd:true}
+  {name:'두 갈래 협곡',title:'18 · 두 갈래 협곡',desc:'위층 다리나 아래층 관문 중 한 길을 골라 구슬을 보내세요. 고른 길에 필요한 도형만 맞추면 돼요.',modes:[5,6],route:'fork'},
+  {name:'이어지는 에너지',title:'19 · 이어지는 에너지',desc:'마름모 톱니와 삼각 열쇠로 굽은 다리를 연결하세요.',modes:[5,2],simultaneous:true},
+  {name:'챕터 3 동력실',title:'20 · 챕터 3 동력실',desc:'한 화면의 세 장치를 모두 켜 구슬을 이동시키세요.',modes:[2,1,6],simultaneous:true,chapterEnd:true},
+  {name:'끊어진 도약로',title:'21 · 끊어진 도약로',desc:'다리 끝의 경사로에서 구슬이 빈 구간을 뛰어넘어야 해요. 어느 속도면 건너편에 닿을까요?',modes:[0],route:'ravine',intro:'deck'},
+  {name:'낮은 터널',title:'22 · 낮은 터널',desc:'회전문 뒤에서 구슬을 아래층으로 떨어뜨리세요. 터널 벽에 닿기 전에 구슬이 충분히 내려가야 해요.',modes:[1],route:'tunnel',intro:'gate'},
+  {name:'승강기 환승',title:'23 · 승강기 환승',desc:'구슬이 승강기 발판에 멈추면 아래층으로 내려 보내세요.',modes:[2],route:'shaft',intro:'lift'},
+  {name:'골짜기 운송로',title:'24 · 골짜기 운송로',desc:'다리와 승강기로 아래층까지 간 뒤 마지막 틈을 뛰어넘으세요. 출발 전에 속도를 정할 수 있어요.',modes:[5,6],route:'relay',chapterEnd:true}
 ];
-stages.splice(0,stages.length,...levelSettings.map((p,i)=>{const base=catalog[p.modes[0]]||catalog[0];return {...base,...p,simultaneous:Boolean(p.route||p.simultaneous),subject:p.route?"도형 · 이동 장치":base.subject,short:String(i+1),note:p.route?"도형의 성질은 장치의 가상 작동 규칙입니다. 구슬은 중력으로 떨어지고, 발판에 닿으면 지지를 받습니다. 승강기는 구슬을 감지해 아래층까지 옮기고 회전문은 구슬의 진행을 막습니다. 수업용 2차원 모형입니다.":p.simultaneous?'한 장면의 서로 다른 도형을 각각 조작해 모든 장치를 작동시키는 복합 문제입니다. 각 장치는 수학적 조건을 엄밀히 판정해 게임 속 다리를 열고 닫지만, 실제 다리의 안전성을 일반화하는 규칙은 아닙니다.':p.modes.length>1?'이미 배운 수학 조건을 단계별 기계장치에 적용하는 복합 퍼즐입니다. 장치의 작동 규칙은 가상의 게임 규칙이며 실제 다리의 보편적인 안정성 조건은 아닙니다.':base.note}}));
+stages.splice(0,stages.length,...levelSettings.map((p,i)=>{const base=catalog[p.modes[0]]||catalog[0];return {...base,...p,simultaneous:Boolean(p.route||p.simultaneous),subject:p.route?"도형 · 이동 장치":base.subject,short:String(i+1),note:p.route==='ledge'?'출발대 끝을 지나면 구슬이 중력으로 떨어집니다. 빠르게 출발하면 같은 시간에 더 멀리 움직입니다.':p.route?"도형의 성질은 장치의 가상 작동 규칙입니다. 구슬은 중력으로 떨어지고, 발판에 닿으면 지지를 받습니다. 승강기는 구슬을 감지해 아래층까지 옮기고 회전문은 구슬의 진행을 막습니다. 수업용 2차원 모형입니다.":p.simultaneous?'한 장면의 서로 다른 도형을 각각 조작해 모든 장치를 작동시키는 복합 문제입니다. 각 장치는 수학적 조건을 엄밀히 판정해 게임 속 다리를 열고 닫지만, 실제 다리의 안전성을 일반화하는 규칙은 아닙니다.':p.modes.length>1?'이미 배운 수학 조건을 단계별 기계장치에 적용하는 복합 퍼즐입니다. 장치의 작동 규칙은 가상의 게임 규칙이며 실제 다리의 보편적인 안정성 조건은 아닙니다.':base.note}}));
 const mode=()=>stages[current].modes[part];
 const motionRoute=()=>stages[current].route;
 const isConcurrent=()=>Boolean(stages[current].simultaneous);
@@ -126,14 +131,18 @@ const isFinalPart=()=>part===stages[current].modes.length-1;
 const completeModule=()=>isConcurrent()?isReady():isFinalPart()&&isReady();
 const ui={nav:$('stage-nav'),total:$('total'),title:$('mission-title'),detail:$('mission-detail'),subject:$('subject'),condition:$('condition'),condTitle:$('condition-title'),condTip:$('condition-tip'),condStatus:$('condition-status'),sigil:$('sigil'),stageNum:$('stage-num'),attempt:$('attempt'),progress:$('progress'),toast:$('toast'),shape:$('shape'),math:$('math'),mathCard:$('math-card'),latch:$('latch'),lockCard:$('lock-card'),reset:$('reset'),hint:$('hint'),inspect:$('inspect'),stop:$('stop'),retry:$('retry'),start:$('start'),feedback:$('feedback'),quiz:$('quiz'),quizPrompt:$('quiz-prompt'),quizTitle:$('quiz-title'),answers:$('answers'),outcome:$('quiz-outcome'),next:$('next'),note:$('teacher-note')};
 const tray=$('device-tray'),introScreen=$('intro-screen'),introName=$('intro-name'),introIcon=$('intro-icon'),introExplain=$('intro-explain'),nextDevice=$('next-device');
+const deviceColors=['#73e6ff','#ffca78','#c1a6ff','#f7a8e0','#bcdbff','#ffac8c','#a9ecc2'];
 const deviceIcons=['∥','∟','△','✧','∥∟','◇','□'];
 const tutorialNames=['평행 잠금장치','직각 연결기','정삼각형 열쇠','대각선 발전기','복합 잠금장치','마름모 톱니','정사각형 방패'];
 const tutorialText=['마주 보는 두 변을 평행하게 하면 잠금장치가 닫혀요.','두 변이 직각으로 만나면 꺾인 연결기가 체결돼요.','세 변의 길이가 같아지면 삼각형 열쇠가 작동해요.','오각형에서 이웃하지 않은 두 꼭짓점을 연결해 에너지를 충전해요.','한 사각형에서 평행과 직각을 동시에 맞추면 두 표시등이 켜집니다.','네 변의 길이가 모두 같아지면 마름모 톱니가 돌아갑니다.','네 변의 길이가 같고 네 각이 모두 직각이면 방패가 켜집니다.'];
 let introduced=new Set();try{introduced=new Set(JSON.parse(localStorage.getItem('polygon-intros')||sessionStorage.getItem('polygon-intros')||'[]'))}catch{}
 const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-let current=0,part=0,attempts=Array(stages.length).fill(0),completed=Array(stages.length).fill(false),phase='edit',hint=false,drag=null,hover=null,geom=null,ball=null,trail=[],elapsed=0,bridgeFall=0,frameLast=0,readyLast=null,lockPulse=0,visualLock=0,selected=null,flash=0,sparks=[],sceneToast='',machinePulse=[],lastMachineReady=[];
-const ROUTE_Y=184,LIFT_DROP=70;
-const structureNames={deck:'접이식 다리',gate:'회전문',lift:'승강기'};
+let current=0,part=0,attempts=Array(stages.length).fill(0),completed=Array(stages.length).fill(false),phase='edit',hint=false,drag=null,hover=null,geom=null,ball=null,trail=[],elapsed=0,bridgeFall=0,frameLast=0,readyLast=null,visualLock=0,selected=null,flash=0,sparks=[],machinePulse=[],lastMachineReady=[];
+let launchSpeed=280,pathChoice='ridge';
+const speedPanel=$('route-controls'),liftButton=$('send-lift');
+const speedButtons=[...speedPanel.querySelectorAll('button')];
+const choicePanel=$('route-choice'),choiceButtons=[...choicePanel.querySelectorAll('button')];
+const structureNames={ledge:'낮은 착지대',deck:'접이식 다리',gate:'회전문',lift:'승강기'};
 let route=null;
 const A=LEFT,B=RIGHT,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const copy=p=>({x:p.x,y:p.y}),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),dot=(u,v)=>u.x*v.x+u.y*v.y,vec=(a,b)=>({x:b.x-a.x,y:b.y-a.y}),cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
@@ -145,7 +154,7 @@ const diagonalKeys=()=>{const pairs=[];for(let i=0;i<5;i++)for(let j=i+1;j<5;j++
 const allDiagonals=diagonalKeys();
 function makeMachine(m,i,count){
   const width=count===3?112:150;
-  const center=count===3?[390,544,699][i]:[415,660][i];
+  const center=count===1?550:count===3?[390,544,699][i]:[415,660][i];
   const y=count===3?359:353;
   const a={x:center-width/2,y}, b={x:center+width/2,y:y+([0,1].includes(m)?12:0)};
   if(m===0)return{mode:m,a,b,d:{x:a.x+17,y:y+98},c:{x:b.x-17,y:y+122},center,width};
@@ -176,7 +185,7 @@ function newGeometry(){
  if(m===6)return{D:current===13?{x:595,y:446}:current===15?{x:533,y:495}:{x:565,y:414}};
  return{edges:new Set()};
 }
-function initBall(){route=motionRoute()?buildRoute():null;ball={x:95,y:(route?ROUTE_Y:LEFT.y)-R,vx:0,vy:0,rotation:0};elapsed=0;trail=[];bridgeFall=0;ui.progress.textContent='0%'}
+function initBall(){route=motionRoute()?buildRoute():null;ball={x:95,y:(route?route.startY:terrain().points[0].y)-R,vx:0,vy:0,rotation:0};elapsed=0;trail=[];bridgeFall=0;ui.progress.textContent='0%'}
 function quadProper(poly){if(poly.length!==4)return false;const signs=poly.map((p,i)=>cross(p,poly[(i+1)%4],poly[(i+2)%4]));return (signs.every(v=>v>0)||signs.every(v=>v<0))&&poly[2].y>RIGHT.y+18&&poly[3].y>LEFT.y+18}
 function parallel(){const D=geom.D,C=geom.C;if(!quadProper([A,B,C,D]))return false;const u=vec(A,B),v=vec(D,C);return Math.abs(u.x*v.y-u.y*v.x)/(vlen(u)*vlen(v))<.0025}
 function rightAngle(){const D=geom.D,C=geom.C;if(!quadProper([A,B,C,D]))return false;const u=vec(A,B),v=vec(A,D);return Math.abs(dot(u,v))/(vlen(u)*vlen(v))<.0035}
@@ -190,6 +199,7 @@ function square(){
  return len>0&&Math.abs(dot(u,v)/(vlen(u)*len))<.015&&Math.abs(len-vlen(u))<2.5&&geom.D.y>Q0.y+30;
 }
 function isReady(){
+ if(motionRoute()==='fork')return machineReady(geom.modules[pathChoice==='ridge'?0:1]);
  if(isConcurrent())return geom.modules.every(machineReady);
  if(mode()===0)return parallel();
  if(mode()===1)return rightAngle();
@@ -210,16 +220,16 @@ function shapeName(){return['사각형 · 점 4개','사각형 · 점 4개','삼
 function mathStatus(){const m=mode();if(m===0)return isReady()?'평행':'방향 비교';if(m===1)return isReady()?'직각':'각 비교';if(m===2)return isReady()?'정삼각형':'변 비교';if(m===3)return '대각선 '+geom.edges.size+' / 5';if(m===4)return '평행 '+(parallel()?'✓':'○')+' · 직각 '+(rightAngle()?'✓':'○');if(m===5)return isReady()?'마름모':'네 변 비교';return isReady()?'정사각형':'변과 각 비교'}
 function statusText(){if(isReady())return['양쪽 잠금 체결!','ㄱ자 힌지 체결!','삼각 열쇠 완성!','발전기 충전!','두 잠금 체결!','마름모 톱니 작동!','정사각형 방패 작동!'][mode()];if(mode()===3)return '발전기 '+geom.edges.size+' / 5';return '장치 대기 중'}
 function feedback(title,detail){ui.feedback.innerHTML=`<b>${title}</b> ${detail}`;ui.feedback.parentElement.classList.add('visible')}
-let toastSeq=0;function toast(s){sceneToast=s;ui.toast.textContent=s;ui.toast.classList.toggle('visible',!!s);const id=++toastSeq;if(s)setTimeout(()=>{if(id===toastSeq){ui.toast.classList.remove('visible');ui.toast.textContent=''}},2700)}
+let toastSeq=0;function toast(s){ui.toast.textContent=s;ui.toast.classList.toggle('visible',!!s);const id=++toastSeq;if(s)setTimeout(()=>{if(id===toastSeq){ui.toast.classList.remove('visible');ui.toast.textContent=''}},2700)}
 function clearQuiz(){ui.quiz.classList.remove('show');ui.outcome.textContent='';ui.next.classList.remove('show')}
 function displayModules(){
  const mods=stages[current].modes;
- if(isConcurrent()){
-   tray.innerHTML=geom.modules.map((g,i)=>'<span class="device-token '+(g.mode===4?'combo ':'')+(machineReady(g)?'done':'active')+'" title="장치 '+(i+1)+'">'+(machineReady(g)?'✓':deviceIcons[g.mode])+'</span>').join('');
-   nextDevice.hidden=true;return;
- }
- tray.innerHTML=mods.map((m,i)=>'<span class="device-token '+(m===4?'combo ':'')+(i<part?'done':i===part?'active':'')+'" title="장치 '+(i+1)+'">'+(i<part?'✓':deviceIcons[m])+'</span>').join('');
- nextDevice.hidden=!(phase==='edit'&&!isFinalPart()&&isReady());
+ tray.innerHTML=mods.map((m,i)=>{
+   const done=isConcurrent()?machineReady(geom.modules[i]):i<part;
+   const active=isConcurrent()||i===part;
+   return `<span class="device-token ${m===4?'combo ':''}${done?'done':active?'active':''}" style="--device-color:${deviceColors[m]}" title="${tutorialNames[m]} · ${done?'작동':'대기'}">${deviceIcons[m]}</span>`;
+ }).join('');
+ nextDevice.hidden=isConcurrent()||!(phase==='edit'&&!isFinalPart()&&isReady());
 }
 function advanceModule(){
  if(isConcurrent())return;
@@ -241,6 +251,16 @@ function showIntro(){
 }
 $('intro-ok').addEventListener('click',()=>{const m=stages[current].intro;introduced.add(m);try{localStorage.setItem('polygon-intros',JSON.stringify([...introduced]))}catch{}introScreen.hidden=true});
 nextDevice.addEventListener('click',advanceModule);
+choiceButtons.forEach(b=>b.addEventListener('click',()=>{
+  pathChoice=b.dataset.route;phase='edit';initBall();clearQuiz();toast('');
+  ui.feedback.parentElement.classList.remove('visible');refresh({announce:false});
+}));
+speedButtons.forEach(b=>b.addEventListener('click',()=>{launchSpeed=+b.dataset.speed;refresh({announce:false});}));
+liftButton.addEventListener('click',()=>{
+  const lift=route?.lift;
+  if(phase!=='running'||!lift?.waiting)return;
+  lift.waiting=false;lift.carrying=true;liftButton.disabled=true;toast('');
+});
 function refresh({announce=true}={}){
   const good=isReady();
   if(isConcurrent()){
@@ -251,15 +271,21 @@ function refresh({announce=true}={}){
     lastMachineReady=currentReady;
   }
   if(readyLast!==null && readyLast!==good && announce){
-    if(good){lockPulse=performance.now();ui.condition.classList.remove('trigger');void ui.condition.offsetWidth;ui.condition.classList.add('trigger');ui.feedback.parentElement.classList.remove('visible');toast('');}
+    if(good){ui.condition.classList.remove('trigger');void ui.condition.offsetWidth;ui.condition.classList.add('trigger');ui.feedback.parentElement.classList.remove('visible');toast('');}
     else if(phase==='edit'){ui.condition.classList.remove('trigger');toast('장치가 다시 열렸어요.');}
   }
   readyLast=good;
-  ui.condition.classList.toggle('ready',good);ui.condStatus.textContent=motionRoute()?'이동 장치':statusText();
-  ui.shape.textContent=shapeName();ui.math.textContent=mathStatus();ui.latch.textContent=motionRoute()?geom.modules.filter(machineReady).length+' / '+geom.modules.length+' 작동':good?'장치 작동 · 다리 고정':'장치 대기 · 다리 불안정';
+  ui.condition.classList.toggle('ready',good);ui.condStatus.textContent=geom.modules?.length===0?'운송 실험':motionRoute()?'이동 장치':statusText();
+  ui.shape.textContent=geom.modules?.length===0?'착지대':shapeName();ui.math.textContent=geom.modules?.length===0?'거리와 속도':mathStatus();ui.latch.textContent=geom.modules?.length===0?'속도 선택':motionRoute()==='fork'?(good?'선택한 길 작동':'선택한 길 대기'):motionRoute()?geom.modules.filter(machineReady).length+' / '+geom.modules.length+' 작동':good?'장치 작동 · 다리 고정':'장치 대기 · 다리 불안정';
   for(const [el,okay] of [[ui.mathCard,good],[ui.lockCard,good]]){el.classList.toggle('good',okay);el.classList.toggle('bad',!okay)}
+  choicePanel.hidden=motionRoute()!=='fork';
+  choiceButtons.forEach(b=>{b.disabled=phase==='running';b.setAttribute('aria-pressed',String(b.dataset.route===pathChoice));});
+  speedPanel.hidden=!route?.varySpeed;
+  speedButtons.forEach(b=>{b.disabled=phase==='running';b.setAttribute('aria-pressed',String(+b.dataset.speed===launchSpeed));});
+  liftButton.hidden=!route?.lift;
+  liftButton.disabled=phase!=='running'||!route?.lift?.waiting;
   ui.attempt.textContent=attempts[current];ui.hint.textContent=hint?'단서 숨기기':'단서 보기';ui.hint.setAttribute('aria-pressed',String(hint));
-  ui.start.disabled=phase==='running';ui.stop.disabled=phase!=='running';ui.retry.disabled=attempts[current]===0;ui.reset.disabled=phase==='running';ui.hint.disabled=phase==='running';
+  ui.start.disabled=phase==='running';ui.stop.disabled=phase!=='running';ui.retry.disabled=attempts[current]===0;ui.reset.disabled=phase==='running';ui.hint.disabled=phase==='running';ui.hint.hidden=geom.modules?.length===0;
   ui.start.textContent=phase==='won'?'▶ 한 번 더 실험':phase==='failed'?'▶ 다시 출발!':'▶ 구슬 출발!';
   ui.total.textContent=`${completed.filter(Boolean).length} / ${stages.length}`;displayModules();if(!isConcurrent()&&!isFinalPart())ui.start.disabled=true;
   for(let i=0;i<stages.length;i++){const b=ui.nav.children[i];if(!b)continue;b.classList.toggle('active',i===current);b.classList.toggle('done',completed[i]);b.querySelector('.number').textContent=completed[i]?'✓':String(i+1);b.setAttribute('aria-current',i===current?'step':'false')}refreshChapterNav()
@@ -273,8 +299,8 @@ function refreshChapterNav(){
 }
 chapterButtons.forEach((b,i)=>b.addEventListener('click',()=>loadStage(chapterStarts[i])));
 function buildNav(){ui.nav.innerHTML='';stages.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='stage';b.title=s.name;b.innerHTML=`<span class="number">${i+1}</span><span class="name">${s.name}</span><small>${s.subject}</small>`;b.addEventListener('click',()=>loadStage(i));ui.nav.append(b)})}
-function loadStage(n){current=n;part=0;geom=newGeometry();machinePulse=[];lastMachineReady=[];phase='edit';hint=false;drag=null;hover=null;selected=null;readyLast=null;visualLock=0;lockPulse=-10000;sparks=[];initBall();clearQuiz();
-  const s=stages[n];ui.title.textContent=s.title;ui.detail.textContent=s.desc;ui.subject.textContent='';ui.condTitle.textContent='';ui.condTip.textContent='';ui.sigil.textContent=s.icon;ui.stageNum.textContent=String(n+1).padStart(2,'0');ui.note.textContent=s.note;cv.setAttribute('aria-label',mode()===3?'오각형 꼭짓점 중 이웃하지 않은 두 점을 차례로 선택해 대각선을 연결하세요':'노란 점을 끌어 도형의 성질을 완성하세요');
+function loadStage(n){current=n;launchSpeed=280;pathChoice='ridge';part=0;geom=newGeometry();machinePulse=[];lastMachineReady=[];phase='edit';hint=false;drag=null;hover=null;selected=null;readyLast=null;visualLock=0;sparks=[];initBall();clearQuiz();
+  const s=stages[n];ui.title.textContent=s.title;ui.detail.textContent=s.desc;ui.subject.textContent='';ui.condTitle.textContent='';ui.condTip.textContent='';ui.sigil.textContent=s.icon;ui.stageNum.textContent=String(n+1).padStart(2,'0');ui.note.textContent=s.note;cv.setAttribute('aria-label',geom.modules?.length===0?'출발 속도를 선택해 구슬을 아래 착지대로 보내세요':mode()===3?'오각형 꼭짓점 중 이웃하지 않은 두 점을 차례로 선택해 대각선을 연결하세요':'노란 점을 끌어 도형의 성질을 완성하세요');
   toast('');ui.feedback.parentElement.classList.remove('visible');ui.condition.classList.remove('trigger');refresh({announce:false});showIntro();
 }
 function inspect(){const ready=isReady();let s='';if(current===0)s=ready?'윗변과 아랫변이 평행합니다. 평행 잠금이 체결됐어요.':'윗변과 아랫변이 평행하지 않아요. 두 변의 기울어진 방향을 비교하세요.';
@@ -285,7 +311,7 @@ function inspect(){const ready=isReady();let s='';if(current===0)s=ready?'윗변
 }
 function stop(){if(phase!=='running')return;phase='edit';initBall();clearQuiz();feedback('실험을 즉시 중단했어요.','구슬이 움직이거나 공중에 있어도 바로 멈춥니다. 만든 도형은 유지되므로 수정하거나 즉시 재도전할 수 있습니다.');toast('중단 완료 · 도형 수정 또는 즉시 재도전');refresh({announce:false})}
 function reset(){if(phase==='running')stop();part=0;geom=newGeometry();machinePulse=[];lastMachineReady=[];phase='edit';selected=null;hint=false;sparks=[];initBall();clearQuiz();readyLast=null;refresh({announce:false});feedback('처음 도형으로 되돌렸어요.','조건을 다시 찾아 보세요. 기존의 도전 횟수와 완료 기록은 유지됩니다.');toast('도형 초기화 · 처음부터 다시 설계해 보세요.')}
-function begin(){if(!introScreen.hidden||(!isConcurrent()&&!isFinalPart()))return;geom=geom||newGeometry();phase='running';sparks=[];initBall();clearQuiz();ball.vx=255;attempts[current]++;if(route){toast('');ui.feedback.parentElement.classList.remove('visible');route.devices.forEach((d,i)=>{d.powered=machineReady(geom.modules[i])});refresh({announce:false});return}const ready=completeModule();feedback('구슬 실험 시작!',ready?'장치가 모두 켜져 다리를 고정했습니다. 구슬의 움직임을 살펴보세요.':'수학 조건을 만족하지 않아 장치가 다리를 붙잡지 못합니다. 움직이는 중에도 중단·재도전을 할 수 있어요.');toast(ready?'연결 성공! 구슬이 다리를 건너고 있어요.':'장치가 열려 있어요. 다리는 구슬을 지탱하지 못합니다.');refresh({announce:false})}
+function begin(){if(!introScreen.hidden||(!isConcurrent()&&!isFinalPart()))return;geom=geom||newGeometry();phase='running';sparks=[];initBall();clearQuiz();ball.vx=route?.varySpeed?launchSpeed:255;attempts[current]++;if(route){toast('');ui.feedback.parentElement.classList.remove('visible');route.devices.forEach(d=>{d.powered=machineReady(geom.modules[d.module])});refresh({announce:false});return}const ready=completeModule();feedback('구슬 실험 시작!',ready?'장치가 모두 켜져 다리를 고정했습니다. 구슬의 움직임을 살펴보세요.':'수학 조건을 만족하지 않아 장치가 다리를 붙잡지 못합니다. 움직이는 중에도 중단·재도전을 할 수 있어요.');toast(ready?'연결 성공! 구슬이 다리를 건너고 있어요.':'장치가 열려 있어요. 다리는 구슬을 지탱하지 못합니다.');refresh({announce:false})}
 function retry(){begin()}
 function fail(reason){if(phase!=='running')return;phase='failed';feedback('구슬 이동 실패:',reason+' [중단·수정]을 기다릴 필요 없이 도형을 수정한 뒤 다시 출발하거나 [즉시 재도전]을 누르세요.');toast('실패 · 공이 멈추기를 기다리지 않고 다시 시도하세요.');refresh({announce:false})}
 
@@ -317,10 +343,10 @@ function startChapterQuiz(index,chapter){
   {question:'한 장치가 작동하지 않았다면 어떤 행동이 적절할까요?',answers:['① 성공으로 간주','② 화면을 무조건 재시작','③ 해당 도형의 변과 각을 다시 관찰하고 수정'],right:2,explain:'각 장치의 성질을 살펴보고 그 도형을 수정하면 됩니다.'}
  ];
  const extra4=[
-  {question:'한쪽 다리만 펴면 구슬은 어떻게 될까요?',answers:['① 펴진 다리를 건너고 다음 빈 구간에서 떨어짐','② 출발점에서 멈춤','③ 두 다리가 한꺼번에 펴짐'],right:0,explain:'각 도형은 짝이 된 구조물 하나만 움직여요.'},
-  {question:'세 변의 길이가 같은 삼각형은?',answers:['① 직각삼각형','② 정삼각형','③ 오각형'],right:1,explain:'정삼각형의 세 변은 길이가 모두 같아요.'},
-  {question:'승강기가 아래로 움직일 때 구슬이 함께 내려가는 까닭은?',answers:['① 구슬이 발판 위에 있어서','② 구슬이 더 작아져서','③ 회전문이 구슬을 당겨서'],right:0,explain:'승강기 발판이 구슬을 받친 채 아래층으로 내려가요.'},
-  {question:'마지막 회전문을 여는 정사각형의 성질은?',answers:['① 네 각만 직각','② 두 변만 같은 길이','③ 네 변의 길이가 같고 네 각이 직각'],right:2,explain:'정사각형은 변의 길이 조건과 직각 조건을 모두 만족해요.'}
+  {question:'평행 다리를 폈는데도 첫 골짜기에서 떨어진다면 무엇을 살펴볼까요?',answers:['① 경사로를 떠나는 구슬의 속도','② 구슬의 색','③ 다리의 기호 색'],right:0,explain:'구슬이 경사로를 떠나는 속도에 따라 건너는 거리가 달라져요.'},
+  {question:'서로 직각으로 만나는 두 변이 이루는 각은?',answers:['① 45도','② 90도','③ 180도'],right:1,explain:'직각은 90도예요.'},
+  {question:'승강기에서 내려갈 때 구슬을 무엇이 받쳐 주나요?',answers:['① 발판','② 회전문','③ 도착 깃발'],right:0,explain:'승강기 발판이 구슬을 받쳐 아래층으로 함께 내려가요.'},
+  {question:'네 변의 길이가 같고 네 각이 모두 직각인 도형은?',answers:['① 삼각형','② 오각형','③ 정사각형'],right:2,explain:'정사각형은 변의 길이 조건과 직각 조건을 모두 만족해요.'}
  ];
  const pool=chapter===1?catalog:chapter===2?extra:chapter===3?extra3:extra4;
  const quizStage=current;
@@ -338,15 +364,13 @@ function startChapterQuiz(index,chapter){
   });ui.answers.append(b);
  });
 }
-function physicsStep(dt){if(phase!=='running'||dt<=0)return;if(motionRoute()){stepMotion(dt);return}const pieces=Math.ceil(dt/.007),h=dt/pieces,active=completeModule();
+function physicsStep(dt){if(phase!=='running'||dt<=0)return;if(motionRoute()){stepMotion(dt);return}const pieces=Math.ceil(dt/.007),h=dt/pieces,active=completeModule(),course=terrain();
   for(let k=0;k<pieces;k++){
     ball.vy+=grav*h;ball.x+=ball.vx*h;ball.y+=ball.vy*h;ball.rotation+=ball.vx*h/R;
-    let floor=null,slope=0;
-    if(ball.x<=LEFT.x)floor=LEFT.y;
-    else if(ball.x>=RIGHT.x)floor=RIGHT.y;
-    else if(active){const u=(ball.x-LEFT.x)/(RIGHT.x-LEFT.x);floor=LEFT.y+(RIGHT.y-LEFT.y)*u;slope=(RIGHT.y-LEFT.y)/(RIGHT.x-LEFT.x)}
+    const track=legacyTrack(course,ball.x,active);
+    const floor=track?.y??null,slope=track?.slope??0;
     if(floor!==null&&ball.y+R>=floor-9&&ball.y+R<=floor+24&&ball.vy>-140){ball.y=floor-R;ball.vy=ball.vx*slope;ball.vx*=.99997}
-    if(ball.x>=956 && ball.y<RIGHT.y){win();break}
+    if(ball.x>=956 && ball.y<course.points.at(-1).y){win();break}
     if(ball.y>H-16||ball.x>W+20){fail(active?'구슬이 경로를 벗어났습니다.':'수학 조건이 충족되지 않아 다리가 고정되지 않았습니다.');break}
   }
   elapsed+=dt;
@@ -356,125 +380,211 @@ function physicsStep(dt){if(phase!=='running'||dt<=0)return;if(motionRoute()){st
   ui.progress.textContent=clamp(Math.round((ball.x-95)/(956-95)*100),0,100)+'%'
 }
 const motionIntros={
-  deck:{icon:'↗',tip:'평행을 맞추면 같은 번호의 다리가 펴져요. 한쪽만 펴고 구슬이 어디까지 가는지 살펴보세요.'},
-  gate:{icon:'↷',tip:'직각을 맞추면 같은 번호의 회전문이 위로 열려요. 닫힌 문에 구슬이 닿으면 멈춰요.'},
-  lift:{icon:'↕',tip:'정삼각형을 만들면 승강기가 켜져요. 발판에 구슬이 올라오면 아래층으로 내려가요.'}
+  ledge:{icon:'↘',tip:'높은 출발대 끝을 지나면 구슬이 떨어져요. 속도를 바꾸면서 아래쪽 착지대의 가장자리까지 닿는지 살펴보세요.'},
+  deck:{icon:'↗',tip:'평행을 맞추면 다리가 펴져요. 다리 너머 경사로와 착지점 사이의 거리를 보고 출발 속도를 골라 보세요.'},
+  gate:{icon:'↷',tip:'직각을 맞추면 회전문이 열려요. 구슬이 아래층으로 떨어져 낮은 터널에 들어갈 수 있게 속도를 골라 보세요.'},
+  lift:{icon:'↕',tip:'정삼각형을 만들면 승강기에 전원이 들어와요. 구슬이 발판에 멈추면 [승강기 내리기]를 눌러 아래층으로 보내세요.'}
+};
+
+const legacyBanks=[
+  [[240,215],[490,240],[775,270]], null,
+  [[278,247],[500,198],[811,244]], [[186,210],[430,273],[650,275],[849,233]],
+  [[314,225],[605,235],[731,273]], [[230,249],[430,223],[542,244],[806,275]],
+  [[286,280],[475,226],[719,206],[837,231]], [[200,214],[382,235],[544,287],[830,287]],
+  [[315,242],[525,248],[696,205]], [[248,212],[395,226],[685,247],[789,219]],
+  [[358,265],[498,244],[648,264],[759,243]], [[215,260],[373,280],[596,232],[795,210]],
+  [[250,203],[510,247],[698,247],[839,260]], [[303,240],[470,281],[652,237],[873,213]],
+  [[194,264],[403,235],[581,251],[811,211]], [[253,210],[430,249],[643,272],[871,234]],
+  [[336,268],[490,228],[657,238],[820,255]], null,
+  [[272,274],[464,274],[615,228],[804,239]], [[175,222],[377,260],[543,236],[729,282],[887,260]]
+];
+const legacyCourses=legacyBanks.map(bank=>bank&&({
+  points:bank.map(([x,y])=>({x,y})),
+  launchEdge:bank[0][0],
+  exitEdge:bank.at(-1)[0]
+}));
+function terrain(){return legacyCourses[current]}
+function legacyTrack(course,x,powered){
+  const points=course.points;
+  if(x<=course.launchEdge)return {y:points[0].y,slope:0};
+  if(x>=course.exitEdge)return {y:points.at(-1).y,slope:0};
+  if(!powered)return null;
+  const index=points.findIndex(point=>point.x>=x);
+  const a=points[index-1],b=points[index];
+  const slope=(b.y-a.y)/(b.x-a.x);
+  return {y:a.y+(x-a.x)*slope,slope};
+}
+
+const routes={
+  ridge:{startY:167,entry:254,exit:848,sections:[
+    {type:'ramp',end:352,rise:-28},
+    {type:'deck',end:597,module:0,width:122},
+    {type:'ramp',end:848,rise:72}
+  ]},
+  basin:{startY:167,entry:254,exit:848,sections:[
+    {type:'ramp',end:518,rise:105},
+    {type:'gate',end:715,module:1},
+    {type:'ramp',end:848,rise:-54}
+  ]},
+  ledge:{startY:145,entry:290,exit:862,speed:true,sections:[
+    {type:'road',end:365},
+    {type:'gap',end:443,drop:60},
+    {type:'ramp',end:680,rise:38},
+    {type:'road',end:862}
+  ]},
+  ravine:{startY:202,entry:245,exit:803,speed:true,sections:[
+    {type:'deck',end:445,module:0,width:104},
+    {type:'ramp',end:495,rise:-14,kick:222},
+    {type:'gap',end:638,drop:21},
+    {type:'road',end:803}
+  ]},
+  tunnel:{startY:151,entry:280,exit:874,speed:true,sections:[
+    {type:'gate',end:482,module:0},
+    {type:'gap',end:530,drop:116},
+    {type:'road',end:874}
+  ],ceiling:{x:609,end:751}},
+  shaft:{startY:159,entry:326,exit:807,sections:[
+    {type:'lift',end:616,module:0,drop:84},
+    {type:'ramp',end:807,rise:32}
+  ]},
+  relay:{startY:173,entry:241,exit:876,speed:true,sections:[
+    {type:'deck',end:415,module:0,width:116},
+    {type:'lift',end:569,module:1,drop:65},
+    {type:'ramp',end:621,rise:-14,kick:199},
+    {type:'gap',end:739,drop:25},
+    {type:'road',end:876}
+  ]}
 };
 
 function buildRoute(){
-  const slots=motionRoute();
-  const boundaries=[LEFT.x,...geom.modules.slice(1).map((g,i)=>(g.center+geom.modules[i].center)/2),RIGHT.x];
-  let y=ROUTE_Y;
-  const devices=slots.map((type,i)=>{
-    const x=boundaries[i],end=boundaries[i+1];
-    const device={type,x,end,y,center:geom.modules[i].center,powered:false,lowering:0};
-    if(type==='deck'){device.hinge=(x+end-112)/2;device.landing=device.hinge+112;}
-    if(type==='lift')y+=LIFT_DROP;
-    return device;
+  const map=routes[motionRoute()==='fork'?pathChoice:motionRoute()];
+  let x=map.entry,y=map.startY;
+  const sections=map.sections.map(spec=>{
+    const d={...spec,x,y,center:(x+spec.end)/2,powered:false,lowering:0};
+    if(d.type==='deck'){d.hinge=d.center-d.width/2;d.landing=d.center+d.width/2;}
+    x=d.end;
+    y+=(d.drop??0)+(d.rise??0);
+    return d;
   });
-  return {devices,exitY:y};
+  const devices=sections.filter(section=>section.module!==undefined);
+  return {...map,sections,devices,exitY:y,varySpeed:map.speed,lift:devices.find(d=>d.type==='lift'),
+    ceiling:map.ceiling?{...map.ceiling,y:y-46}:null};
 }
 
 function deckEnd(d){
-  const angle=1.12*(1-(d.powered?clamp(elapsed/.55,0,1):0));
-  const length=d.landing-d.hinge;
-  return {x:d.hinge+length*Math.cos(angle),y:d.y+length*Math.sin(angle)};
+  const angle=1.12*(1-(d.powered?clamp(elapsed/.45,0,1):0));
+  return {x:d.hinge+d.width*Math.cos(angle),y:d.y+d.width*Math.sin(angle)};
 }
-
 function gateArm(d){
-  const pivot={x:d.center,y:d.y-77};
-  const angle=(d.powered?clamp(elapsed/.62,0,1):0)*Math.PI/2;
-  return [pivot,{x:pivot.x+77*Math.sin(angle),y:pivot.y+77*Math.cos(angle)}];
+  const pivot={x:d.center,y:d.y-69};
+  const angle=(d.powered?clamp(elapsed/.57,0,1):0)*Math.PI/2;
+  return [pivot,{x:pivot.x+69*Math.sin(angle),y:pivot.y+69*Math.cos(angle)}];
 }
-
 function routeFloor(x){
-  if(x<=LEFT.x)return ROUTE_Y;
-  if(x>=RIGHT.x)return route.exitY;
-  const d=route.devices.find(device=>x<device.end);
-  if(d.type==='gate')return d.y;
+  if(x<=route.entry)return route.startY;
+  if(x>=route.exit)return route.exitY;
+  const d=route.sections.find(section=>x<section.end);
+  if(d.type==='gap')return null;
+  if(d.type==='ramp')return d.y+d.rise*(x-d.x)/(d.end-d.x);
   if(d.type==='lift')return d.y+d.lowering;
-  if(x<=d.hinge||x>=d.landing)return d.y;
+  if(d.type!=='deck'||x<=d.hinge||x>=d.landing)return d.y;
   const tip=deckEnd(d);
   return x<=tip.x?d.y+(tip.y-d.y)*(x-d.hinge)/(tip.x-d.hinge):null;
 }
-
 function touchesGate(d){
   const [a,b]=gateArm(d);
   const arm=vec(a,b);
   const t=clamp(dot(vec(a,ball),arm)/dot(arm,arm),0,1);
   return dist(ball,{x:a.x+t*arm.x,y:a.y+t*arm.y})<=R+4;
 }
-
 function stepMotion(dt){
   const pieces=Math.ceil(dt/.006),h=dt/pieces;
-  const lift=route.devices.find(d=>d.type==='lift');
+  const {lift,ceiling}=route;
   for(let i=0;i<pieces&&phase==='running';i++){
+    if(lift?.waiting)break;
     elapsed+=h;
     if(lift?.carrying){
-      lift.lowering=Math.min(LIFT_DROP,lift.lowering+95*h);
+      lift.lowering=Math.min(lift.drop,lift.lowering+95*h);
       ball.y=lift.y+lift.lowering-R;
-      if(lift.lowering===LIFT_DROP){lift.carrying=false;ball.vx=255;}
+      if(lift.lowering===lift.drop){lift.carrying=false;ball.vx=route.varySpeed?launchSpeed:255;}
       continue;
     }
 
-    const previousBottom=ball.y+R;
-    const previousFloor=routeFloor(ball.x);
+    const previousX=ball.x,previousBottom=ball.y+R;
+    const previousFloor=routeFloor(previousX);
+    const supported=previousFloor!==null&&Math.abs(previousBottom-previousFloor)<.1;
     ball.x+=ball.vx*h;
+    const ramp=route.sections.find(d=>d.kick&&previousX<d.end&&ball.x>=d.end);
+    if(ramp&&supported)ball.vy=-ramp.kick*ball.vx/280;
     ball.vy+=grav*h;
     ball.y+=ball.vy*h;
     ball.rotation+=ball.vx*h/R;
     const floor=routeFloor(ball.x);
-    const supported=previousFloor!==null&&Math.abs(previousBottom-previousFloor)<.1;
-    const followsFloor=supported&&floor!==null&&Math.abs(floor-previousFloor)<4;
-    if(floor!==null&&(followsFloor||(previousBottom<=floor&&ball.y+R>=floor&&ball.vy>=0))){
-      ball.y=floor-R;
-      ball.vy=0;
+    if(floor!==null&&((supported&&Math.abs(floor-previousFloor)<4)||
+      (previousBottom<=floor&&ball.y+R>=floor&&ball.vy>=0))){
+      ball.y=floor-R;ball.vy=0;
     }
 
-    if(lift&&lift.lowering<LIFT_DROP&&ball.x+R>=lift.center&&ball.x<lift.center&&Math.abs(ball.y+R-lift.y)<1){
-      ball.x=lift.center-R;
-      ball.vx=0;
-      if(lift.powered)lift.carrying=true;
-      else fail('승강기 앞에서 멈췄어요. 세 변의 길이를 비교해 보세요.');
+    if(lift&&lift.lowering<lift.drop&&ball.x+R>=lift.center&&ball.x<lift.center&&Math.abs(ball.y+R-lift.y)<1){
+      ball.x=lift.center-R;ball.vx=0;
+      if(lift.powered){
+        lift.waiting=true;liftButton.disabled=false;
+        toast('발판에 탔어요. 승강기를 내려 보세요.');
+      }else fail('승강기 앞에서 멈췄어요. 발판의 장치 모양을 확인해 보세요.');
     }
     if(route.devices.some(d=>d.type==='gate'&&touchesGate(d))){
       ball.vx=0;
-      fail('구슬이 회전문에 닿았어요. 문과 같은 번호의 도형을 살펴보세요.');
+      fail('구슬이 닫힌 회전문에 닿았어요. 문과 같은 모양의 장치를 살펴보세요.');
+    }
+    if(ceiling&&ball.x+R>=ceiling.x&&ball.x-R<=ceiling.end&&ball.y-R<ceiling.y){
+      ball.vx=0;
+      fail('구슬이 충분히 내려가기 전에 터널 벽에 닿았어요. 더 천천히 출발해 보세요.');
     }
     if(ball.x>=956&&Math.abs(ball.y+R-route.exitY)<1)win();
-    if(ball.y>H-16||ball.x>W+20)fail('구슬이 발판 아래로 떨어졌어요. 지나온 다리와 빈 구간을 살펴보세요.');
+    if(ball.y>H-16||ball.x>W+20)fail('구슬이 빈 구간 아래로 떨어졌어요. 다리와 경사로를 떠나는 속도를 살펴보세요.');
   }
-  if(phase==='running'&&elapsed>7.8)fail('이동 시간이 지났습니다.');
+  if(phase==='running'&&elapsed>9)fail('이동 시간이 지났습니다.');
   if(!trail.length||dist(ball,trail[trail.length-1])>10)trail.push(copy(ball));
   ui.progress.textContent=clamp(Math.round((ball.x-95)/(956-95)*100),0,100)+'%';
 }
 
 function drawMotionRoute(){
-  land(0,ROUTE_Y,LEFT.x,true);
-  land(RIGHT.x,route.exitY,W-RIGHT.x,false);
-  route.devices.forEach((d,i)=>{
-    const color=machineReady(geom.modules[i])?'#80f1c7':'#ffc782';
-    text((i+1)+' · '+structureNames[d.type],d.center,87,19,color);
+  land(0,route.startY,route.entry,true);
+  land(route.exit,route.exitY,W-route.exit,false);
+  for(const d of route.sections){
+    const g=geom.modules[d.module];
+    const color=g?deviceColors[g.mode]:'#9ebcc7';
+    if(g){
+      const markerX=d.type==='gate'?d.center-76:d.center;
+      drawDevice(markerX,83,g.mode,machineReady(g),.62);
+      text((d.module+1)+' · '+structureNames[d.type],markerX,115,17,color);
+    }
     if(d.type==='deck'){
-      const tip=deckEnd(d);
       const hinge={x:d.hinge,y:d.y},landing={x:d.landing,y:d.y};
       line({x:d.x,y:d.y},hinge,'#9ebcc7',8);
       line(landing,{x:d.end,y:d.y},'#9ebcc7',8);
       line(hinge,landing,'#b3d6e688',2,[6,8]);
-      line(hinge,tip,color,9);
+      line(hinge,deckEnd(d),color,9);
       circle(hinge.x,hinge.y,6,'#233c53',color);
     }else if(d.type==='gate'){
       line({x:d.x,y:d.y},{x:d.end,y:d.y},'#9ebcc7',8);
       const [pivot,tip]=gateArm(d);
       line(pivot,tip,color,8);
       circle(pivot.x,pivot.y,6,'#233c53',color);
-    }else{
+    }else if(d.type==='lift'){
       const y=d.y+d.lowering;
-      for(const x of [d.x+4,d.end-4])line({x,y:d.y},{x,y:d.y+LIFT_DROP},'#b3d6e6aa',3,[5,6]);
+      for(const x of [d.x+4,d.end-4])line({x,y:d.y},{x,y:d.y+d.drop},'#b3d6e6aa',3,[5,6]);
       line({x:d.x,y},{x:d.end,y},color,9);
-      if(d.lowering<LIFT_DROP)line({x:d.center,y},{x:d.center,y:y-32},color,6);
+      if(d.lowering<d.drop)line({x:d.center,y},{x:d.center,y:y-32},color,6);
+    }else if(d.type!=='gap'){
+      line({x:d.x,y:d.y},{x:d.end,y:d.y+(d.rise??0)},d.kick?'#ffe396':'#9ebcc7',8);
     }
-  });
+  }
+  const c=route.ceiling;
+  if(c){
+    roundRect(c.x,c.y-40,c.end-c.x,40,5,'#56788c','#a7c0cc');
+    text('낮은 터널', (c.x+c.end)/2,c.y-14,15,'#f1faff');
+  }
 }
 
 function roundRect(x,y,w,h,r,fill,stroke=null,lineWidth=2){cx.beginPath();cx.roundRect(x,y,w,h,r);if(fill){cx.fillStyle=fill;cx.fill()}if(stroke){cx.strokeStyle=stroke;cx.lineWidth=lineWidth;cx.stroke()}}
@@ -498,30 +608,55 @@ function handle(p,label,active=false){circle(p.x,p.y,active?20:17,'#f9d987',acti
 function parallelArrows(a,b,color,offset){const d=norm(vec(a,b)),px=-d.y,py=d.x,x=(a.x+b.x)/2+px*offset,y=(a.y+b.y)/2+py*offset;
  line({x:x-d.x*29,y:y-d.y*29},{x:x+d.x*29,y:y+d.y*29},color,4);path([{x:x+d.x*30,y:y+d.y*30},{x:x+d.x*16+px*7,y:y+d.y*16+py*7},{x:x+d.x*16-px*7,y:y+d.y*16-py*7}],color)
 }
-function groundBeam(ts){const active=completeModule(),a=copy(A),b=copy(B);if(!active){line(a,b,'#cde7e86e',4,[11,11]);cx.save();cx.translate(0,phase==='running'?bridgeFall:0);cx.rotate(phase==='running'?-Math.min(.18,bridgeFall/2300):0);path([a,b,{x:b.x,y:b.y+16},{x:a.x,y:a.y+16}],'#8f9fa86b','#aecbd870',2);cx.restore()}else{
-  cx.save();cx.shadowColor='#38f7c1';cx.shadowBlur=visualLock*19;path([a,b,{x:b.x,y:b.y+17},{x:a.x,y:a.y+17}],'#33ae979c','#79ffcf',3);line(a,b,'#cfffea',6);cx.restore();
-  for(let i=0;i<10;i++){const f=(i+1)/11,u=reduce?f:(f+ts*.0002)%1,x=a.x+(b.x-a.x)*u,y=a.y+(b.y-a.y)*u;circle(x,y-5,2.7,'#d9fff4')}
-}}
-function clampDevice(point,ts){const q=visualLock;cx.save();cx.translate(point.x,point.y);
-  roundRect(-31,-14,62,42,10,'#182d42','#839bb1');roundRect(-24,-9,48,29,7,'#465e73','#abbfc9');
-  for(const side of [-1,1]){const x=side*(29-17*q);roundRect(x-7,-22,14,37,4,q>.7?'#6ef8c7':'#ecc28a','#26485b');roundRect(x-9,-26,18,8,3,q>.7?'#e8fff1':'#fff1ca')}
-  cx.shadowBlur=q*18;cx.shadowColor='#2af3be';circle(0,-44,14,q>.7?'#33edbf':'#eda964');cx.shadowBlur=0;text(q>.7?'✓':'×',0,-37,18,'#124c46',950);cx.restore()
+function drawDevice(x,y,m,good,scale=1){
+  const ink=deviceColors[m],dark='#172e44',body=good?'#356178':'#263b50';
+  cx.save();
+  cx.translate(x,y);cx.scale(scale,scale);
+  if(good){cx.shadowColor=ink;cx.shadowBlur=10;}
+  const polygon=pts=>path(pts.map(([x,y])=>({x,y})),body,ink,3.5);
+  if(m===0){
+    const offset=good?7:11;
+    for(const dy of [-offset,offset])roundRect(-22,dy-4,44,8,3,body,ink,3);
+  }else if(m===1){
+    polygon([[-18,-21],[-7,-21],[-7,7],[19,7],[19,18],[-18,18]]);
+    if(good)line({x:-5,y:3},{x:10,y:3},ink,2,[3,3]);
+  }else if(m===2){
+    polygon([[0,-23],[23,17],[-23,17]]);
+    for(const p of [[0,-15],[15,12],[-15,12]])circle(...p,2.8,ink);
+  }else if(m===3){
+    const vertices=Array.from({length:5},(_,i)=>({x:22*Math.sin(i*2*Math.PI/5),y:-22*Math.cos(i*2*Math.PI/5)}));
+    path(vertices,body,ink,3);
+    for(let i=0;i<5;i++)line(vertices[i],vertices[(i+2)%5],ink,good?2:1);
+  }else if(m===4){
+    roundRect(-30,-17,60,34,7,body,ink,2);
+    text('∥',-13,7,21,deviceColors[0]);text('∟',13,7,21,deviceColors[1]);
+  }else if(m===5){
+    polygon([[0,-24],[24,0],[0,24],[-24,0]]);
+    polygon([[0,-11],[11,0],[0,11],[-11,0]]);
+  }else{
+    roundRect(-19,-19,38,38,2,body,ink,3);
+    roundRect(-12,-12,24,24,1,dark,ink,2);
+  }
+  cx.restore();
 }
-function drawConditionBadge(ts){const good=isReady();
- if(isConcurrent()){
-  const count=geom.modules.filter(machineReady).length;
-  roundRect(390,161,320,52,14,good?'#0e745fe8':'#4b5870e9',good?'#8cffd5':'#a3bdd7');
-  text(good?'✓ 모든 장치 작동':`장치 ${count} / ${geom.modules.length} 작동`,550,194,21,'#fff7e9',900);
-  return;
- }
- if(mode()===4){const bits=conditionBits();
-  for(let i=0;i<2;i++){const x=421+i*133;roundRect(x,155,125,60,11,bits[i]?'#0d876fe8':'#5f4f37e8',bits[i]?'#81ffcf':'#dfbb7a',2);text((bits[i]?'✓ ':'○ ')+(i===0?'∥':'∟'),x+63,194,25,'#fff',900)}
- }else{
-  roundRect(390,161,320,52,14,good?'#0e6a58e8':'#5e492ce5',good?'#8cffd5':'#e5b77e');
-  text(good?'✓ 장치 작동!':mode()===3?`발전기 ${geom.edges.size} / 5 충전`:'○ 장치를 작동시켜 보세요',550,194,20,'#fff7e9',900);
- }
- const age=(ts-lockPulse)/1000;if(good&&age>0&&age<1.2&&!reduce){cx.save();cx.globalAlpha=1-age/1.2;cx.strokeStyle='#8affd8';cx.lineWidth=4;cx.strokeRect(385-age*11,156-age*7,330+age*22,62+age*14);cx.restore()}
+function drawLegacyCourse(){
+  const course=terrain(),points=course.points,good=completeModule();
+  land(0,points[0].y,course.launchEdge,true);
+  land(course.exitEdge,points.at(-1).y,W-course.exitEdge,false);
+  const modes=stages[current].modes;
+  for(let i=1;i<points.length;i++){
+    const a=points[i-1],b=points[i];
+    if(good){
+      const ink=deviceColors[modes[(i-1)%modes.length]];
+      path([a,b,{x:b.x,y:b.y+10},{x:a.x,y:a.y+10}],'#284e60',ink,2);
+    }else line(a,b,'#b0cad585',3,[8,8]);
+  }
+  if(isConcurrent())return;
+  const m=mode();
+  for(const point of [points[0],points.at(-1)])drawDevice(point.x,point.y-28,m,isReady(),.78);
+  if(m===3)text(geom.edges.size+' / 5',550,105,18,deviceColors[m]);
 }
+
 function drawConcurrentMachines(ts){
  const list=geom.modules;
  list.forEach((g,i)=>{
@@ -529,12 +664,7 @@ function drawConcurrentMachines(ts){
   const x=g.center-g.width/2-18,frameY=310,frameW=g.width+36;
   cx.save();
   roundRect(x,frameY,frameW,215,13,good?'#195d5482':'#203b5391',good?'#5ff5bd':'#7194a6',good?2.5:1.5);
-  if(good){
-    cx.shadowColor='#42f3bc';cx.shadowBlur=10;
-    circle(g.center,330,15,'#24c39e','#aaffd9',2);
-    cx.shadowBlur=0;
-  }else circle(g.center,330,15,'#c18c52','#ffe0a1',2);
-  text(deviceIcons[m],g.center,338,m===0?18:21,good?'#153f37':'#294257',900);
+  drawDevice(g.center,330,m,good,.64);
   text(String(i+1),x+14,327,12,'#e2f8f3',900);
   cx.restore();
   const fill=good?'#54d7ae89':'#d8b88699',stroke=good?'#a9ffde':'#ffe3af';
@@ -640,7 +770,7 @@ function drawBall(){if(trail.length>1){cx.beginPath();trail.forEach((p,i)=>i?cx.
   cx.save();cx.translate(ball.x,ball.y);cx.rotate(ball.rotation);cx.shadowBlur=11;cx.shadowColor='#07162a';const g=cx.createRadialGradient(-6,-7,1,0,0,R);g.addColorStop(0,'#fff2dc');g.addColorStop(.5,'#ffae84');g.addColorStop(1,'#db6171');circle(0,0,R,g,'#fff0df',2);cx.shadowBlur=0;circle(2,2,4,'#b14b55');cx.restore()
 }
 function drawSparks(dt){if(!sparks.length)return;cx.save();for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=grav*.15*dt;p.t+=dt;if(p.t>p.life){sparks.splice(i,1);continue}cx.globalAlpha=Math.max(0,1-p.t/p.life);cx.fillStyle=p.color;cx.save();cx.translate(p.x,p.y);cx.rotate(p.t*4);cx.fillRect(-4,-3,8,6);cx.restore()}cx.restore()}
-function render(ts,dt){cx.clearRect(0,0,W,H);bg(ts);if(route){drawMotionRoute();stageShapes(ts)}else{land(0,LEFT.y,LEFT.x,true);land(RIGHT.x,RIGHT.y,W-RIGHT.x,false);groundBeam(ts);stageShapes(ts);clampDevice(A,ts);clampDevice(B,ts);drawConditionBadge(ts)}drawBall();drawSparks(dt)}
+function render(ts,dt){cx.clearRect(0,0,W,H);bg(ts);if(route)drawMotionRoute();else drawLegacyCourse();stageShapes(ts);drawBall();drawSparks(dt)}
 function tick(ts){if(!frameLast)frameLast=ts;const dt=clamp((ts-frameLast)/1000,0,.034);frameLast=ts;const goal=isReady()?1:0;visualLock=reduce?goal:visualLock+(goal-visualLock)*Math.min(1,dt*8);if(phase==='running')physicsStep(dt);render(ts,dt);requestAnimationFrame(tick)}
 function stagePoint(event){const r=cv.getBoundingClientRect();return{x:(event.clientX-r.left)*W/r.width,y:(event.clientY-r.top)*H/r.height}}
 function closest(p){
@@ -713,10 +843,10 @@ function selectVertex(id){if(id===null){toast('오각형의 노란 꼭짓점 하
   if(geom.edges.has(key)){feedback('이미 연결한 대각선이에요.','같은 선분을 두 번 세지 않아요. 아직 그리지 않은 대각선을 찾아보세요.');toast('이미 연결했습니다 · 중복은 세지 않아요.');selected=null;return}
   geom.edges.add(key);selected=null;if(phase==='won'||phase==='failed'){phase='edit';initBall();clearQuiz()}refresh();if(geom.edges.size<5){feedback('대각선 연결 성공!',`${a+1}번과 ${b+1}번 꼭짓점을 이어서 대각선 ${geom.edges.size}개를 완성했어요.`);toast(`대각선 연결! ${geom.edges.size} / 5개`)}
 }
-cv.addEventListener('pointerdown',e=>{if(phase==='running'||!introScreen.hidden)return;const p=stagePoint(e),id=closest(p);if(mode()===3){selectVertex(id);e.preventDefault();return}if(id!==null){drag=id;cv.setPointerCapture(e.pointerId);editPoint(p);e.preventDefault()}else toast('노란 꼭짓점을 직접 잡고 움직여 보세요.')});
+cv.addEventListener('pointerdown',e=>{if(phase==='running'||!introScreen.hidden||geom.modules?.length===0)return;const p=stagePoint(e),id=closest(p);if(mode()===3){selectVertex(id);e.preventDefault();return}if(id!==null){drag=id;cv.setPointerCapture(e.pointerId);editPoint(p);e.preventDefault()}else toast('노란 꼭짓점을 직접 잡고 움직여 보세요.')});
 cv.addEventListener('pointermove',e=>{const p=stagePoint(e);if(drag){editPoint(p);e.preventDefault()}else{hover=closest(p);cv.style.cursor=hover!==null?'grab':'default'}});
 function release(e){drag=null;if(cv.hasPointerCapture(e.pointerId))cv.releasePointerCapture(e.pointerId)}cv.addEventListener('pointerup',release);cv.addEventListener('pointercancel',release);cv.addEventListener('lostpointercapture',()=>{drag=null});
-ui.reset.addEventListener('click',reset);ui.stop.addEventListener('click',stop);ui.start.addEventListener('click',begin);ui.retry.addEventListener('click',retry);ui.hint.addEventListener('click',()=>{hint=!hint;refresh({announce:false});if(hint){const messages=['윗변과 아랫변의 방향을 비교하세요.','한 꼭짓점에서 만나는 두 변의 각도를 비교하세요.','세 변이 같은 길이가 되게 해보세요.','서로 이웃하지 않는 꼭짓점 두 개를 이으세요.','같은 사각형에서 평행과 직각 두 가지를 동시에 찾아보세요.','마름모는 네 변의 길이가 모두 같아요.','네 변의 길이와 네 각을 모두 확인하세요.'];feedback('단서를 켰어요.',messages[mode()]);toast(messages[mode()])}else toast('힌트를 숨겼어요. 이번에는 직접 발견해 보세요.')});
+ui.reset.addEventListener('click',reset);ui.stop.addEventListener('click',stop);ui.start.addEventListener('click',begin);ui.retry.addEventListener('click',retry);ui.hint.addEventListener('click',()=>{hint=!hint;refresh({announce:false});if(hint){const routeHint={fork:'고른 길 위의 장치 모양을 아래 도형과 비교하세요.',ravine:'경사로 끝과 건너편 발판 사이의 거리를 살펴보세요.',tunnel:'구슬이 터널에 닿기 전에 낮아질 시간이 얼마나 필요한지 생각해 보세요.',shaft:'발판이 구슬을 받은 뒤 아래층과 높이를 맞춰 보세요.',relay:'아래쪽 경사로와 착지점 사이의 거리를 살펴보세요.'};const messages=['윗변과 아랫변의 방향을 비교하세요.','한 꼭짓점에서 만나는 두 변의 각도를 비교하세요.','세 변이 같은 길이가 되게 해보세요.','서로 이웃하지 않는 꼭짓점 두 개를 이으세요.','같은 사각형에서 평행과 직각 두 가지를 동시에 찾아보세요.','마름모는 네 변의 길이가 모두 같아요.','네 변의 길이와 네 각을 모두 확인하세요.'];const clue=(isReady()||motionRoute()==='fork')&&motionRoute()?routeHint[motionRoute()]:messages[mode()];feedback('단서를 켰어요.',clue);toast(clue)}else toast('힌트를 숨겼어요. 이번에는 직접 발견해 보세요.')});
 ui.next.addEventListener('click',()=>loadStage(current<stages.length-1?current+1:0));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&phase==='running')stop();if(e.key==='r'&&phase==='running')retry()});
 // Local test interface; this runs entirely inside the browser and sends no data.
 window.__mathLabTest={state:()=>({stage:current,part,mode:mode(),parts:stages[current].modes.length,phase,ready:isReady(),geom:mode()===3?{edges:[...geom.edges]}:JSON.parse(JSON.stringify(geom)),attempt:attempts[current],completed:[...completed],ball:{...ball},elapsed,selected}),setStage:loadStage,nextModule:advanceModule,drag:(name,x,y)=>{drag=name;editPoint({x,y});drag=null},connect:(i,j)=>{selectVertex(String(i));selectVertex(String(j))},begin,stop,retry,advance:(seconds)=>{const n=Math.ceil(seconds/.012);for(let i=0;i<n&&phase==='running';i++)physicsStep(.012)},check:inspect};
