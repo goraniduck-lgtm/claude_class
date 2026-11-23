@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>늘어나는 다리 · 다각형 다리 작전</title><style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4eb;color:#193d39;font:16px system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:clamp(10px,3vw,32px)}header,nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}header{justify-content:space-between}small,a{color:#44746a;font-weight:700}h1{margin:7px 0;font-size:clamp(28px,5vw,48px);letter-spacing:-.06em}p{margin:6px 0 16px}canvas{display:block;width:100%;background:#cde9d9;border-radius:16px;touch-action:none}button{font:inherit;font-weight:700;padding:12px 16px;border:1px solid #9eb3a9;border-radius:10px;background:#fff;color:#193d39;cursor:pointer}button:first-child{background:#165a4b;color:white}#msg{min-height:24px;margin:14px 0;font-weight:650}button[hidden]{display:none}
-</style><main><header><div><small>다각형 다리 작전 · 기계 실험 01</small><h1>늘어나는 다리</h1></div><a href="./index.html">스테이지 목록</a></header><p>다리를 펼쳐 구슬을 건너편으로 보내세요.</p><canvas id="view" width="1000" height="510" tabindex="0" aria-label="레일 실험대. D를 위아래로 끌거나 방향키로 조정하세요."></canvas><p id="msg" role="status"></p><nav><button id="go"></button><button id="retry">즉시 재도전</button><button id="roll">구슬 굴려 보기</button><button id="hint">단서 보기</button><button id="reset">처음부터</button></nav></main><script>
+</style><main><header><div><small>다각형 다리 작전 · 기계 실험 01</small><h1>늘어나는 다리</h1></div><nav><a href="transport.html#2">다음 실험 · 기울어진 발사대 →</a><a href="./index.html">전체 목록</a></nav></header><p>다리를 펼쳐 구슬을 건너편으로 보내세요.</p><canvas id="view" width="1000" height="510" tabindex="0" aria-label="레일 실험대. D를 위아래로 끌거나 방향키로 조정하세요."></canvas><p id="msg" role="status"></p><nav><button id="go"></button><button id="retry">즉시 재도전</button><button id="roll">구슬 굴려 보기</button><button id="hint">단서 보기</button><button id="reset">처음부터</button></nav></main><script>
 const c=view.getContext('2d'), H=72, startX=90, endX=290, bank=360, shore=773;
 let d=488, travel=0,state='edit',clue=0,b,clock=0,demo=0,drag=null,last=0;
 function stored(k){try{return localStorage.getItem(k)}catch{return null}}
@@ -43,7 +43,7 @@ disk(b.x,b.y,10,'#bb482e');disk(b.x+4*Math.cos(b.angle),b.y+4*Math.sin(b.angle),
 c.fillStyle='#193f40';c.beginPath();c.roundRect(19,259,325,239,15);c.fill();label('발사 장치 내부',40,289,'#d3e5d9',18);
 const u=385+offset,l=457+offset,uy=u+15*travel/200,wx=startX+travel;
 line(startX,u,endX,u+15,'#a7c8bd',8);line(startX,l,endX,d+offset,'#ebbb5b',8);
-if(clue>=2){c.setLineDash([3,4]);for(const [x,y,Y] of [[startX,u,l],[endX,u+15,d+offset]])line(x,y,x,Y,'#fff',2);c.setLineDash([])}
+line(startX,u,endX,u+15,'#355653',3);line(startX,l,endX,d+offset,'#705f38',3);line(50,365,wx,uy+36,'#829c92',8);wheel(50,365);line(wx,uy+36,338,355,'#557c72',4);line(338,355,bank,surface(bank)+8,'#557c72',4);if(clue>=2){c.setLineDash([3,4]);for(const [x,y,Y] of [[startX,u,l],[endX,u+15,d+offset]])line(x,y,x,Y,'#fff',2);c.setLineDash([])}
 let shake=state==='jam'&&clock<.6?2*Math.sin(clock*60):0;
 line(wx+shake,uy,wx+shake,uy+H,'#8aa9a2',10);wheel(wx+shake,uy);wheel(wx+shake,uy+H);
 disk(endX,d+offset,14,'#ffd476');label('↕',endX-7,d+offset+6,'#294844',18);label('D',endX+18,d+offset+5,'#ffdc8d');
