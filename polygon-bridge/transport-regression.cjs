@@ -115,3 +115,43 @@ for(const [changes,expected] of [['design.rail=-45','fall'],['design.gate=103','
 }
 const checkOverlap=game(11);
 assert.equal(checkOverlap('setup();finishBrace(0,6);model.rods.length+model.right.rods.length'),8,'Cross-frame braces cannot stretch across the pier');
+
+
+const snapDoor=game(10);
+assert.equal(snapDoor('setup();setPart("gate",86);design.gate'),90,'86° should snap actual door to 90°');
+assert.equal(snapDoor('lock.gate'),true,'Gate lock should be active at the 4° boundary');
+assert.equal(snapDoor('setPart("gate",95.5);design.gate'),90,'Held gate snap persists until release threshold');
+assert.equal(snapDoor('setPart("gate",96.1);lock.gate'),false,'Gate snap releases above 6°');
+assert.equal(snapDoor('design.gate'),96.1,'Released gate uses actual user geometry');
+assert.equal(snapDoor('setup();setPart("gate",94.1);lock.gate'),false,'4.1° fresh offset must not be accepted');
+assert.equal(snapDoor('design.gate'),94.1,'Too-far angle remains physically over-stowed');
+for(const [angle,expected] of [[87,'won'],[94,'won'],[94.1,'strain'],[85,'blocked'],[103,'strain']]){
+ const g=game(10);
+ const actual=g('setup();setPart("gate",'+angle+');begin();for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();phase');
+ assert.equal(actual,expected,'Stage 10 gate '+angle+'° must follow corrected physical geometry');
+}
+const liftSnap=game(7);
+assert.equal(liftSnap('setup();setPart("arm",103);design.arm'),100,'Nearly level platform should snap to real parallelogram');
+assert.equal(liftSnap('lock.arm'),true);
+assert.equal(liftSnap('setPart("arm",104);design.arm'),100,'Hysteresis holds a near-valid platform steady');
+assert.equal(liftSnap('setPart("arm",106);lock.arm'),false,'Wrong linkage must release snap');
+assert.equal(liftSnap('setup();setPart("arm",104);lock.arm'),false,'Out-of-range fresh platform does not snap');
+const dockSnap=game(12);
+assert.equal(dockSnap('setup();setPart("stopAngle",109);design.stopAngle'),113,'Stop-angle snap moves REAL carriage to 113°');
+assert.equal(dockSnap('setPart("stopAngle",118.5);design.stopAngle'),113,'Near-valid docking stays locked below 6°');
+assert.equal(dockSnap('setPart("stopAngle",119.1);lock.stopAngle'),false,'Large docking offset releases snap');
+assert.equal(dockSnap('setup();setPart("stopAngle",117.1);lock.stopAngle'),false,'Fresh 4.1° docking error does not snap');
+for(const [stopAngle,expected] of [[109,'won'],[115,'won'],[117,'won'],[118,'blocked'],[125,'blocked']]){
+ const g=game(12);
+ const actual=g('setup();design.arm=100;setPart("stopAngle",'+stopAngle+');begin();for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();phase');
+ assert.equal(actual,expected,'Stage 12 stop angle '+stopAngle+' must match visible dock geometry');
+}
+for(const [gap,height,expected] of [[8,8,true],[10,8,true],[12,8,false],[8,9,false]]){
+ const g=game(7);
+ assert.equal(g('setup();!!connector(pt(100,200),pt('+(100+gap)+','+(200+height)+'))'),expected,'Dock must be visible only when physically bridgeable');
+ if(expected)assert.equal(g('connector(pt(100,200),pt('+(100+gap)+','+(200+height)+')).docking'),true,'Visible deck is also a foot collider');
+}
+const docked=game(12);
+assert.equal(docked('setup();design.arm=100;setPart("stopAngle",115);begin();for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();tracks().some(s=>s.docking)'),true,'Snapped final platform renders an actual physical docking plate');
+assert.equal(docked('phase'),'won');
+console.log('PASS: 10° gate near-snap and hysteresis, 07/12 actual linkage, visible docking collision plate');
