@@ -29,6 +29,10 @@ assert.equal(s5,'[0,2]','Dragging between opposite hinges must create a real bra
 assert.equal(direct('model.rods.length'),5,'New brace must add one fixed-length rod');
 const tap=game(5);
 assert.equal(tap("setup();canvas.onpointerdown("+touch(390,258)+");canvas.onpointerup("+touch(390,258)+");canvas.onpointerdown("+touch(570,343)+");canvas.onpointerup("+touch(570,343)+");JSON.stringify(design.brace)"),'[0,2]','Two-tap alternative must work');
+const mobile=game(5);
+assert.equal(mobile("setup();canvas.getBoundingClientRect=()=>({left:0,top:0,width:500,height:205});canvas.onpointerdown("+touch(195,129)+");canvas.onpointermove("+touch(285,171.5)+");canvas.onpointerup("+touch(285,171.5)+");JSON.stringify(design.brace)"),'[0,2]','Touch coordinates must scale correctly on a tablet');
+const byButton=game(5);
+assert.equal(byButton("setup();brace(0);brace(2);JSON.stringify(design.brace)"),'[0,2]','Accessible joint buttons must still connect braces');
 const cancel=game(5);
 assert.equal(cancel("setup();canvas.onpointerdown("+touch(390,258)+");canvas.onpointercancel("+touch(485,300)+");design.brace.length"),0,'Cancelled drag must not install a rod');
 function trial(stage,brace,cargo){
