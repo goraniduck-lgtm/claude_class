@@ -98,7 +98,7 @@ const stages=[
 
 const catalog=stages.slice();
 const levelSettings=[
-  {name:'아침 협곡의 다리',title:'01 · 아침 협곡의 다리',desc:'다리 끝의 노란 손잡이를 끌어 출구에 맞추세요. 움직인 판 위로 구슬이 굴러갑니다.',modes:[0],intro:'workshop',note:'노란 손잡이는 구슬을 받치는 다리의 실제 끝점입니다. 아래 기준 보는 출발점과 출구를 잇는 방향으로 놓였습니다. 판의 윗변을 기준 보와 평행하게 맞추면 출구에 같은 높이로 닿습니다.'},
+  {name:'나란히 건너는 두 구슬',title:'01 · 나란히 건너는 두 구슬',desc:'노란 손잡이로 위쪽 길을 움직여 두 구슬을 각자의 도착지로 보내세요.',modes:[0],intro:'parallel-pair',note:'위쪽 판의 끝을 움직이면 두 구슬이 지나가는 길의 간격이 달라집니다. 두 길이 평행하면 협곡을 지나는 동안 간격이 일정합니다. 끝이 출구에 연결되고 두 구슬이 각각 도착하면 성공입니다.'},
   {name:'낮은 착지대',title:'02 · 낮은 착지대',desc:'출발대 끝에서 떨어진 구슬이 아래쪽 착지대까지 닿을 속도를 찾아보세요.',modes:[],route:'ledge',intro:'ledge'},
   {name:'꺾인 연결기',title:'03 · 꺾인 연결기',desc:'노란 꼭짓점을 움직여 연결기를 닫으세요.',modes:[1],intro:1},
   {name:'두 단계 잠금',title:'04 · 두 단계 잠금',desc:'서로 다른 두 장치를 차례대로 켜 다리를 완성하세요.',modes:[0,1]},
@@ -142,11 +142,13 @@ let launchSpeed=280,pathChoice='ridge';
 const speedPanel=$('route-controls'),liftButton=$('send-lift');
 const speedButtons=[...speedPanel.querySelectorAll('button')];
 const choicePanel=$('route-choice'),choiceButtons=[...choicePanel.querySelectorAll('button')];
-const structureNames={workshop:'출구에 맞추는 다리',ledge:'낮은 착지대',deck:'접이식 다리',gate:'회전문',lift:'승강기'};
+const structureNames={'parallel-pair':'서로 만나지 않는 두 길',ledge:'낮은 착지대',deck:'접이식 다리',gate:'회전문',lift:'승강기'};
 let route=null;
 const workshop=()=>current===0;
 // The fixed lower beam has the same rise and span as the bank-to-bank line.
 const deckStart={x:268,y:265},dock={x:808,y:324},beamOffset=108,dockClearance=5;
+const workshopFinish={upper:956,lower:1008};
+let lowerBall=null;
 const A=LEFT,B=RIGHT,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const copy=p=>({x:p.x,y:p.y}),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),dot=(u,v)=>u.x*v.x+u.y*v.y,vec=(a,b)=>({x:b.x-a.x,y:b.y-a.y}),cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
 const vlen=v=>Math.hypot(v.x,v.y),norm=v=>{const k=vlen(v)||1;return{x:v.x/k,y:v.y/k}};
@@ -177,7 +179,7 @@ function machineReady(g){
   return false;
 }
 function newGeometry(){
- if(workshop())return{tipY:dock.y+70};
+ if(workshop())return{tipY:dock.y+122};
   if(isConcurrent())return{modules:stages[current].modes.map((m,i)=>makeMachine(m,i,stages[current].modes.length))};
  const m=mode();
  if(m===0)return current===1||current===11?{D:{x:371,y:447},C:{x:702,y:480}}:{D:{x:327,y:425},C:{x:766,y:462}};
@@ -189,7 +191,7 @@ function newGeometry(){
  if(m===6)return{D:current===13?{x:595,y:446}:current===15?{x:533,y:495}:{x:565,y:414}};
  return{edges:new Set()};
 }
-function initBall(){route=motionRoute()?buildRoute():null;ball={x:95,y:(workshop()?deckStart.y:route?route.startY:terrain().points[0].y)-R,vx:0,vy:0,rotation:0};elapsed=0;trail=[];bridgeFall=0;ui.progress.textContent='0%'}
+function initBall(){route=motionRoute()?buildRoute():null;ball={x:95,y:(workshop()?deckStart.y:route?route.startY:terrain().points[0].y)-R,vx:0,vy:0,rotation:0};lowerBall=workshop()?{...ball,y:ball.y+beamOffset}:null;elapsed=0;trail=[];bridgeFall=0;ui.progress.textContent='0%'}
 function quadProper(poly){if(poly.length!==4)return false;const signs=poly.map((p,i)=>cross(p,poly[(i+1)%4],poly[(i+2)%4]));return (signs.every(v=>v>0)||signs.every(v=>v<0))&&poly[2].y>RIGHT.y+18&&poly[3].y>LEFT.y+18}
 function parallel(){if(workshop())return geom.tipY===dock.y;const D=geom.D,C=geom.C;if(!quadProper([A,B,C,D]))return false;const u=vec(A,B),v=vec(D,C);return Math.abs(u.x*v.y-u.y*v.x)/(vlen(u)*vlen(v))<.0025}
 function rightAngle(){const D=geom.D,C=geom.C;if(!quadProper([A,B,C,D]))return false;const u=vec(A,B),v=vec(A,D);return Math.abs(dot(u,v))/(vlen(u)*vlen(v))<.0035}
@@ -304,7 +306,7 @@ function refreshChapterNav(){
 chapterButtons.forEach((b,i)=>b.addEventListener('click',()=>loadStage(chapterStarts[i])));
 function buildNav(){ui.nav.innerHTML='';stages.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='stage';b.title=s.name;b.innerHTML=`<span class="number">${i+1}</span><span class="name">${s.name}</span><small>${s.subject}</small>`;b.addEventListener('click',()=>loadStage(i));ui.nav.append(b)})}
 function loadStage(n){current=n;launchSpeed=280;pathChoice='ridge';part=0;geom=newGeometry();machinePulse=[];lastMachineReady=[];phase='edit';hint=false;drag=null;hover=null;selected=null;readyLast=null;visualLock=0;sparks=[];initBall();clearQuiz();
-  const s=stages[n];ui.title.textContent=s.title;ui.detail.textContent=s.desc;ui.subject.textContent='';ui.condTitle.textContent='';ui.condTip.textContent='';ui.sigil.textContent=s.icon;ui.stageNum.textContent=String(n+1).padStart(2,'0');ui.note.textContent=s.note;cv.setAttribute('aria-label',workshop()?'다리의 오른쪽 노란 손잡이를 위아래로 움직여 출구에 맞추세요':geom.modules?.length===0?'출발 속도를 선택해 구슬을 아래 착지대로 보내세요':mode()===3?'오각형 꼭짓점 중 이웃하지 않은 두 점을 차례로 선택해 대각선을 연결하세요':'노란 점을 끌어 도형의 성질을 완성하세요');
+  const s=stages[n];ui.title.textContent=s.title;ui.detail.textContent=s.desc;ui.subject.textContent='';ui.condTitle.textContent='';ui.condTip.textContent='';ui.sigil.textContent=s.icon;ui.stageNum.textContent=String(n+1).padStart(2,'0');ui.note.textContent=s.note;cv.setAttribute('aria-label',workshop()?'위쪽 길의 노란 손잡이를 위아래로 움직여 두 구슬을 각자의 출구에 보내세요':geom.modules?.length===0?'출발 속도를 선택해 구슬을 아래 착지대로 보내세요':mode()===3?'오각형 꼭짓점 중 이웃하지 않은 두 점을 차례로 선택해 대각선을 연결하세요':'노란 점을 끌어 도형의 성질을 완성하세요');
   toast('');ui.feedback.parentElement.classList.remove('visible');ui.condition.classList.remove('trigger');refresh({announce:false});showIntro();
 }
 function inspect(){const ready=isReady();let s='';if(current===0)s=ready?'윗변과 아랫변이 평행합니다. 평행 잠금이 체결됐어요.':'윗변과 아랫변이 평행하지 않아요. 두 변의 기울어진 방향을 비교하세요.';
@@ -352,7 +354,7 @@ function startChapterQuiz(index,chapter){
   {question:'승강기에서 내려갈 때 구슬을 무엇이 받쳐 주나요?',answers:['① 발판','② 회전문','③ 도착 깃발'],right:0,explain:'승강기 발판이 구슬을 받쳐 아래층으로 함께 내려가요.'},
   {question:'네 변의 길이가 같고 네 각이 모두 직각인 도형은?',answers:['① 삼각형','② 오각형','③ 정사각형'],right:2,explain:'정사각형은 변의 길이 조건과 직각 조건을 모두 만족해요.'}
  ];
- const pool=chapter===1?[{question:'첫 다리의 윗변과 아래 기준 보를 평행하게 하면 어떤 일이 일어나나요?',answers:['① 판의 색만 바뀜','② 판 끝이 출구 높이에 맞음','③ 구슬이 더 작아짐'],right:1,explain:'기준 보는 양쪽 둑을 잇는 방향으로 놓여 있어요. 판이 같은 방향이 되면 판 끝이 출구 높이에 맞아요.'},...catalog.slice(1)]:chapter===2?extra:chapter===3?extra3:extra4;
+ const pool=chapter===1?[{question:'첫 다리에서 위쪽 길과 아래쪽 길을 평행하게 하면 어떻게 되나요?',answers:['① 길 사이가 점점 좁아짐','② 두 길의 방향과 사이 간격이 유지됨','③ 두 길이 중간에서 만남'],right:1,explain:'평행한 두 직선은 같은 방향으로 뻗으며 만나지 않아요. 여기서는 두 구슬이 각자의 길을 따라 도착했어요.'},...catalog.slice(1)]:chapter===2?extra:chapter===3?extra3:extra4;
  const quizStage=current;
  const item=pool[index];ui.quizTitle.textContent='챕터 '+chapter+' · 수학 탐구';
  ui.quizPrompt.textContent=(index+1)+' / '+pool.length+' · '+item.question;
@@ -384,7 +386,7 @@ function physicsStep(dt){if(phase!=='running'||dt<=0)return;if(workshop()){stepW
   ui.progress.textContent=clamp(Math.round((ball.x-95)/(956-95)*100),0,100)+'%'
 }
 const motionIntros={
-  workshop:{icon:'∥',tip:'노란 손잡이를 위아래로 끌면 구슬이 밟는 판이 함께 움직여요. 실패하면 구슬이 출구의 어디에 부딪혔는지 보고, 판의 방향을 아래 기준 보와 비교해 보세요.'},
+  'parallel-pair':{icon:'∥',tip:'위쪽 구슬이 밟는 판에는 노란 손잡이가 있어요. 두 길이 가까워지면 구슬끼리 부딪힐 수 있어요. 두 구슬이 각자의 깃발에 도착하게 길을 맞춰 보세요.'},
   ledge:{icon:'↘',tip:'높은 출발대 끝을 지나면 구슬이 떨어져요. 속도를 바꾸면서 아래쪽 착지대의 가장자리까지 닿는지 살펴보세요.'},
   deck:{icon:'↗',tip:'평행을 맞추면 다리가 펴져요. 다리 너머 경사로와 착지점 사이의 거리를 보고 출발 속도를 골라 보세요.'},
   gate:{icon:'↷',tip:'직각을 맞추면 회전문이 열려요. 구슬이 아래층으로 떨어져 낮은 터널에 들어갈 수 있게 속도를 골라 보세요.'},
@@ -592,32 +594,41 @@ function drawMotionRoute(){
   }
 }
 
+function workshopSurface(x,tipY){
+  const distance=clamp((x-deckStart.x)/(dock.x-deckStart.x),0,1);
+  return deckStart.y+distance*(tipY-deckStart.y);
+}
+
 function stepWorkshop(dt){
   const pieces=Math.ceil(dt/.006),h=dt/pieces;
   for(let i=0;i<pieces&&phase==='running';i++){
-    const nextX=ball.x+ball.vx*h;
+    const nextX=Math.min(ball.x+ball.vx*h,workshopFinish.upper);
     if(ball.x<dock.x&&nextX>=dock.x){
-      // Read the actual deck height at the seam. The socket has a raised sill
-      // below and a low crossbar above, so the approach must enter its opening.
       const arrivalY=geom.tipY-R;
       if(arrivalY+R>dock.y+dockClearance){
-        fail('판 끝이 출구보다 낮아 구슬이 턱에 막혔어요. 손잡이를 올려 보세요.');
+        fail('위쪽 구슬이 출구 턱에 막혔어요. 판 끝을 조금 올려 보세요.');
         break;
       }
       if(arrivalY-R<dock.y-2*R-dockClearance){
-        fail('판 끝이 출구보다 높아 구슬이 위쪽 가로대에 닿았어요. 손잡이를 내려 보세요.');
+        fail('위쪽 구슬이 출구 가로대에 닿았어요. 판 끝을 조금 내려 보세요.');
         break;
       }
     }
+    ball.rotation+=(nextX-ball.x)/R;
     ball.x=nextX;
-    const across=clamp((ball.x-deckStart.x)/(dock.x-deckStart.x),0,1);
-    const surface=ball.x>=dock.x?dock.y:deckStart.y+across*(geom.tipY-deckStart.y);
-    ball.y=surface-R;
-    ball.rotation+=ball.vx*h/R;
-    if(ball.x>=956)win();
+    ball.y=(ball.x>=dock.x?dock.y:workshopSurface(ball.x,geom.tipY))-R;
+    const nextLowerX=Math.min(lowerBall.x+ball.vx*h,workshopFinish.lower);
+    lowerBall.rotation+=(nextLowerX-lowerBall.x)/R;
+    lowerBall.x=nextLowerX;
+    lowerBall.y=workshopSurface(lowerBall.x,dock.y)+beamOffset-R;
+    if(dist(ball,lowerBall)<=2*R){
+      fail('두 길이 가까워져 구슬끼리 부딪혔어요. 두 길이 나란히 내려가도록 위쪽 판을 움직여 보세요.');
+      break;
+    }
+    if(ball.x===workshopFinish.upper&&lowerBall.x===workshopFinish.lower)win();
   }
   if(!trail.length||dist(ball,trail.at(-1))>11)trail.push(copy(ball));
-  ui.progress.textContent=clamp(Math.round((ball.x-95)/(956-95)*100),0,100)+'%';
+  ui.progress.textContent=phase==='won'?'100%':Math.min(99,Math.floor((lowerBall.x-95)/(workshopFinish.lower-95)*100))+'%';
 }
 
 function drawWorkshop(){
@@ -636,9 +647,16 @@ function drawWorkshop(){
   const lowerLeft={x:deckStart.x,y:deckStart.y+beamOffset};
   const lowerRight={x:dock.x,y:dock.y+beamOffset};
   path([deckStart,tip,lowerRight,lowerLeft],'#233c4727','#426b70',3);
-  line(lowerLeft,lowerRight,'#375b65',12);
-  line(lowerLeft,lowerRight,'#9ac4c4',3);
-  text('기준 보',548,(lowerLeft.y+lowerRight.y)/2+27,17,'#153b46');
+  const lowerTrack=[{x:51,y:lowerLeft.y},lowerLeft,lowerRight,{x:1050,y:lowerRight.y}];
+  for(let i=1;i<lowerTrack.length;i++){
+    line(lowerTrack[i-1],lowerTrack[i],'#213f51',15);
+    line(lowerTrack[i-1],lowerTrack[i],'#79e2f1',7);
+  }
+  roundRect(51,lowerLeft.y-66,89,29,8,'#ccf4fc');
+  text('아래 출발',95,lowerLeft.y-46,16,'#234c64');
+  roundRect(workshopFinish.lower-44,lowerRight.y-67,89,29,8,'#ccf4fc');
+  text('아래 도착',workshopFinish.lower,lowerRight.y-47,16,'#234c64');
+  line({x:workshopFinish.lower,y:lowerRight.y-38},{x:workshopFinish.lower,y:lowerRight.y},'#92eaff',3);
 
   line(deckStart,tip,'#243e49',17);
   line(deckStart,tip,'#ffe7a0',8);
@@ -834,7 +852,17 @@ function stageShapes(ts){if(isConcurrent()){drawConcurrentMachines(ts);return}co
   }
 }
 function drawBall(){if(trail.length>1){cx.beginPath();trail.forEach((p,i)=>i?cx.lineTo(p.x,p.y):cx.moveTo(p.x,p.y));cx.strokeStyle='#9cf6e87a';cx.lineWidth=3;cx.setLineDash([5,7]);cx.stroke();cx.setLineDash([])}
-  cx.save();cx.translate(ball.x,ball.y);cx.rotate(ball.rotation);cx.shadowBlur=11;cx.shadowColor='#07162a';const g=cx.createRadialGradient(-6,-7,1,0,0,R);g.addColorStop(0,'#fff2dc');g.addColorStop(.5,'#ffae84');g.addColorStop(1,'#db6171');circle(0,0,R,g,'#fff0df',2);cx.shadowBlur=0;circle(2,2,4,'#b14b55');cx.restore()
+  paintMarble(ball,['#fff2dc','#ffae84','#db6171','#b14b55']);
+  if(lowerBall)paintMarble(lowerBall,['#e1fcff','#82dafa','#4283c8','#235783']);
+}
+function paintMarble(marble,colors){
+  cx.save();
+  cx.translate(marble.x,marble.y);cx.rotate(marble.rotation);
+  cx.shadowBlur=11;cx.shadowColor='#07162a';
+  const gradient=cx.createRadialGradient(-6,-7,1,0,0,R);
+  gradient.addColorStop(0,colors[0]);gradient.addColorStop(.5,colors[1]);gradient.addColorStop(1,colors[2]);
+  circle(0,0,R,gradient,colors[0],2);
+  cx.shadowBlur=0;circle(2,2,4,colors[3]);cx.restore();
 }
 function drawSparks(dt){if(!sparks.length)return;cx.save();for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=grav*.15*dt;p.t+=dt;if(p.t>p.life){sparks.splice(i,1);continue}cx.globalAlpha=Math.max(0,1-p.t/p.life);cx.fillStyle=p.color;cx.save();cx.translate(p.x,p.y);cx.rotate(p.t*4);cx.fillRect(-4,-3,8,6);cx.restore()}cx.restore()}
 function render(ts,dt){cx.clearRect(0,0,W,H);if(workshop())drawWorkshop();else{bg(ts);if(route)drawMotionRoute();else drawLegacyCourse();stageShapes(ts)}drawBall();drawSparks(dt)}
@@ -854,7 +882,7 @@ function closest(p){
 function editPoint(pos){
  if(!drag)return;
  if(workshop()){
-   const y=clamp(Math.round(pos.y),dock.y-85,dock.y+97);
+   const y=clamp(Math.round(pos.y),dock.y-85,dock.y+137);
    geom.tipY=Math.abs(y-dock.y)<=9?dock.y:y;
    if(phase==='won'||phase==='failed'){phase='edit';initBall();clearQuiz();}
    refresh();return;
@@ -920,7 +948,7 @@ function selectVertex(id){if(id===null){toast('오각형의 노란 꼭짓점 하
 cv.addEventListener('pointerdown',e=>{if(phase==='running'||!introScreen.hidden||geom.modules?.length===0)return;const p=stagePoint(e),id=closest(p);if(mode()===3){selectVertex(id);e.preventDefault();return}if(id!==null){drag=id;cv.setPointerCapture(e.pointerId);editPoint(p);e.preventDefault()}else toast('노란 꼭짓점을 직접 잡고 움직여 보세요.')});
 cv.addEventListener('pointermove',e=>{const p=stagePoint(e);if(drag){editPoint(p);e.preventDefault()}else{hover=closest(p);cv.style.cursor=hover!==null?'grab':'default'}});
 function release(e){drag=null;if(cv.hasPointerCapture(e.pointerId))cv.releasePointerCapture(e.pointerId)}cv.addEventListener('pointerup',release);cv.addEventListener('pointercancel',release);cv.addEventListener('lostpointercapture',()=>{drag=null});
-ui.reset.addEventListener('click',reset);ui.stop.addEventListener('click',stop);ui.start.addEventListener('click',begin);ui.retry.addEventListener('click',retry);ui.hint.addEventListener('click',()=>{hint=!hint;refresh({announce:false});if(hint){const routeHint={fork:'고른 길 위의 장치 모양을 아래 도형과 비교하세요.',ravine:'경사로 끝과 건너편 발판 사이의 거리를 살펴보세요.',tunnel:'구슬이 터널에 닿기 전에 낮아질 시간이 얼마나 필요한지 생각해 보세요.',shaft:'발판이 구슬을 받은 뒤 아래층과 높이를 맞춰 보세요.',relay:'아래쪽 경사로와 착지점 사이의 거리를 살펴보세요.'};const messages=['윗변과 아랫변의 방향을 비교하세요.','한 꼭짓점에서 만나는 두 변의 각도를 비교하세요.','세 변이 같은 길이가 되게 해보세요.','서로 이웃하지 않는 꼭짓점 두 개를 이으세요.','같은 사각형에서 평행과 직각 두 가지를 동시에 찾아보세요.','마름모는 네 변의 길이가 모두 같아요.','네 변의 길이와 네 각을 모두 확인하세요.'];const clue=(isReady()||motionRoute()==='fork')&&motionRoute()?routeHint[motionRoute()]:messages[mode()];const message=workshop()?'구슬이 밟는 판과 아래 기준 보가 같은 방향으로 기울어지게 손잡이를 움직여 보세요.':clue;feedback('단서를 켰어요.',message);toast(message)}else toast('힌트를 숨겼어요. 이번에는 직접 발견해 보세요.')});
+ui.reset.addEventListener('click',reset);ui.stop.addEventListener('click',stop);ui.start.addEventListener('click',begin);ui.retry.addEventListener('click',retry);ui.hint.addEventListener('click',()=>{hint=!hint;refresh({announce:false});if(hint){const routeHint={fork:'고른 길 위의 장치 모양을 아래 도형과 비교하세요.',ravine:'경사로 끝과 건너편 발판 사이의 거리를 살펴보세요.',tunnel:'구슬이 터널에 닿기 전에 낮아질 시간이 얼마나 필요한지 생각해 보세요.',shaft:'발판이 구슬을 받은 뒤 아래층과 높이를 맞춰 보세요.',relay:'아래쪽 경사로와 착지점 사이의 거리를 살펴보세요.'};const messages=['윗변과 아랫변의 방향을 비교하세요.','한 꼭짓점에서 만나는 두 변의 각도를 비교하세요.','세 변이 같은 길이가 되게 해보세요.','서로 이웃하지 않는 꼭짓점 두 개를 이으세요.','같은 사각형에서 평행과 직각 두 가지를 동시에 찾아보세요.','마름모는 네 변의 길이가 모두 같아요.','네 변의 길이와 네 각을 모두 확인하세요.'];const clue=(isReady()||motionRoute()==='fork')&&motionRoute()?routeHint[motionRoute()]:messages[mode()];const message=workshop()?'두 길 사이의 간격이 좁아지지 않도록 노란 판을 아래 길과 같은 방향으로 기울여 보세요.':clue;feedback('단서를 켰어요.',message);toast(message)}else toast('힌트를 숨겼어요. 이번에는 직접 발견해 보세요.')});
 ui.next.addEventListener('click',()=>loadStage(current<stages.length-1?current+1:0));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&phase==='running')stop();if(e.key==='r'&&phase==='running')retry()});
 // Local test interface; this runs entirely inside the browser and sends no data.
 window.__mathLabTest={state:()=>({stage:current,part,mode:mode(),parts:stages[current].modes.length,phase,ready:isReady(),geom:mode()===3?{edges:[...geom.edges]}:JSON.parse(JSON.stringify(geom)),attempt:attempts[current],completed:[...completed],ball:{...ball},elapsed,selected}),setStage:loadStage,nextModule:advanceModule,drag:(name,x,y)=>{drag=name;editPoint({x,y});drag=null},connect:(i,j)=>{selectVertex(String(i));selectVertex(String(j))},begin,stop,retry,advance:(seconds)=>{const n=Math.ceil(seconds/.012);for(let i=0;i<n&&phase==='running';i++)physicsStep(.012)},check:inspect};
