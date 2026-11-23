@@ -36,7 +36,7 @@ function frameStep(load){const m=model,n=m.nodes;
   // The four edge rods and optional brace act as real fixed-distance constraints.
   // Wind pushes the unbraced training frame; cargo adds more strain on reused frames.
   const sideForce=load+m.wind;
-  if(load>.05)m.frameTouched=true;
+  if(load>.001)m.frameTouched=true;
   for(let i=0;i<2;i++){let p=n[i],x=p.x,y=p.y;
     p.x+=(x-p.px)*.986-sideForce*190*dt*dt;
     p.y+=(y-p.py)*.986+(3+load*90)*dt*dt;
