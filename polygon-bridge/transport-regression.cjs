@@ -68,3 +68,43 @@ assert.equal(sameWorker('setup();model.wind'),0,'06 uses the same mechanism with
 assert.equal(sameWorker('design.cargo=false;begin();for(let i=0;i<1500&&phase!=="tested";i++)tick();phase'),'tested','the light worker can still cross');
 assert.ok(!fs.readFileSync(path.join(__dirname,'transport.html'),'utf8').includes('모터가 멈췄어요'),'child-facing failure text contains no technical motor stop');
 console.log('PASS: stage 05 crosswind and measured shear, stable diagonal, stage 06 worker weight, canvas visual checks');
+
+const stages = {
+  2: [['design.rail=railRise','won'],['design.rail=0','fall'],['design.rail=54','fall']],
+  3: [['design.gate=90','won'],['design.gate=45','blocked'],['design.gate=103','strain']],
+  4: [['design.rail=railRise;design.gate=90','won'],['design.rail=0;design.gate=90','fall'],['design.rail=railRise','blocked']],
+  7: [['design.arm=100','won'],['design.arm=65','fall'],['design.arm=120','blocked']],
+  8: [['design.arm=100;design.rail=railRise;design.gate=90;design.brace=[1,3]','won'],['design.arm=100;design.rail=railRise;design.gate=90','fall'],['design.arm=100;design.rail=railRise;design.brace=[1,3]','blocked']],
+  9: [['design.rail=railRise;design.railB=-44','won'],['design.rail=railRise','fall'],['design.railB=-44','fall']],
+  10: [['design.gate=90','won'],['design.gate=60','blocked'],['design.gate=98','strain']],
+  11: [['design.braces=[{side:0,ends:[0,2]},{side:1,ends:[1,3]}]','won'],['design.braces=[{side:1,ends:[1,3]}]','fall'],['design.braces=[{side:0,ends:[0,2]},{side:0,ends:[1,3]}]','fall']],
+  12: [['design.arm=100;design.stopAngle=113','won'],['design.arm=65;design.stopAngle=113','fall'],['design.arm=100;design.stopAngle=125','blocked']]
+};
+for(const [id,trials] of Object.entries(stages)){
+ for(const [designInput,expected] of trials){
+  const run=game(+id);
+  const actual=run('setup();'+designInput+';begin();for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();draw();phase');
+  console.log(id,designInput,actual);assert.equal(actual,expected);
+ }
+}
+for(const value of [432,518]){
+ assert.equal(first("demo=0;held=false;adjust("+value+");rewind('extend');for(let i=0;i<1200;i++)step(1/120);state"),'jam');
+}
+for(const gap of [8,10,12]){
+ const run=game(7);
+ assert.equal(run('!!connector(pt(0,0),pt('+gap+',8))'),gap<=10);
+}
+for(const hz of [30,60,120]){
+ const run=game(9);
+ assert.equal(run('setup();design.rail=railRise;design.railB=-44;begin();for(let frame=0;frame<18*'+hz+';frame++)for(let i=0;i<120/'+hz+';i++)tick();phase'),'won');
+}
+for(const [value,held,expected] of [[3.9,false,true],[4.2,false,false],[5.5,true,true],[6.1,true,false]]){
+ const run=game(2);
+ assert.equal(run('setup();lock.rail='+held+';setPart("rail",Math.tan(Math.atan2(railRise*.65,187)+'+value+'*rad)*187/.65);lock.rail'),expected);
+}
+for(const [cargo,minimum,maximum] of [[false,0,15],[true,15,100]]){
+ const run=game(6);
+ const shear=run('setup();design.cargo='+cargo+';begin();for(let i=0;i<2200&&["machine","move"].includes(phase);i++)tick();model.peakShear');
+ assert.ok(shear>=minimum&&shear<maximum,'peak shear '+shear);
+}
+console.log('PASS: opposed rail errors, angled snap hysteresis, docking boundaries, three frame rates and load displacement');
