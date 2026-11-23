@@ -29,11 +29,13 @@ names.forEach((name,i)=>$('level').add(new Option((get(i?'pb2-clear-'+(i+1):'tel
 const dt=1/120,rad=Math.PI/180,clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),pt=(x,y)=>({x,y});
 const rigStart=200,rigEnd=390,frameEnd=570, deck=258, railRise=stage===2?-44:18;
 let design,model,phase,hints,selected,preview=false,lesson=false,braceOrigin=null,bracePreview=null,braceActive=false;
-let lock={};function setup(){lock={};design={rail:stage===6?railRise:0,gate:42,arm:76,brace:[],railB:0,stopAngle:85,braces:[],activeSlot:0,cargo:stage===8||stage===11};selected=null;braceOrigin=null;bracePreview=null;braceActive=false;hints=0;preview=false;restart();controls()}
+let lastProblem=null,lock={};function setup(){lastProblem=null;lock={};design={rail:stage===6?railRise:0,gate:42,arm:76,brace:[],railB:0,stopAngle:85,braces:[],activeSlot:0,cargo:stage===8||stage===11};selected=null;braceOrigin=null;bracePreview=null;braceActive=false;hints=0;preview=false;restart();controls()}
 function pose(a,length=design.arm){const base=pt(735,300),anchor=pt(835,300),left=pt(base.x+100*Math.cos(a),base.y-100*Math.sin(a)),dx=anchor.x-left.x,dy=anchor.y-left.y,D=Math.hypot(dx,dy),len=length;
 if(D>100+len||D<Math.abs(100-len))return null;
 const along=(100**2-len**2+D**2)/(2*D),perp=Math.sqrt(Math.max(0,100**2-along**2));return [left,pt(left.x+(along*dx+perp*dy)/D,left.y+(along*dy-perp*dx)/D)]}
-const baseAngle=155*rad,targetAngle=(stage===12?113:85)*rad,initialLeft=735+100*Math.cos(baseAngle),exitX=843+100*Math.cos(targetAngle),exitY=300-100*Math.sin(targetAngle);
+const baseAngle=155*rad,targetAngle=(stage===12?113:85)*rad,initialLeft=735+100*Math.cos(baseAngle);
+let exitX=843+100*Math.cos(targetAngle);
+const exitY=300-100*Math.sin(targetAngle);
 function limitAngle(){return stage===12?design.stopAngle*rad:targetAngle}
 function restart(){braceOrigin=null;bracePreview=null;braceActive=false;const nodes=[pt(rigEnd,deck),pt(frameEnd,deck),pt(frameEnd,deck+85),pt(rigEnd,deck+85)];
 const pairs=[[0,1],[1,2],[2,3],[3,0]];if(stage===11){for(const bar of design.braces.filter(b=>b?.side===0))pairs.push(bar.ends)}else if(design.brace.length===2)pairs.push(design.brace.slice());
@@ -46,7 +48,7 @@ model.pB=0;model.jamB=false;
 phase='edit';sync('조작할 부품을 선택하고 시험 운행을 누르세요.')}
 function sync(msg){$('status').textContent=msg;$('run').textContent=phase==='edit'?'▶ 시험 운행':'중단 · 수정';$('retry').hidden=phase==='edit';$('next').hidden=phase!=='won'||stage===12;$('hint').hidden=phase!=='edit';$('toolsPanel').querySelectorAll('fieldset').forEach(f=>f.disabled=phase!=='edit'&&!(stage===6&&phase==='tested'&&f.lastElementChild?.textContent==='화물 보내기'));$('reflection').hidden=phase!=='won'||![8,12].includes(stage)}
 function begin(){restart();phase='machine';sync('장치가 움직입니다. 운송로가 어디까지 연결될까요?')}
-function stop(reason){phase='blocked';sync(reason)}
+function stop(reason){lastProblem=model.aboard?'l':'g';phase='blocked';sync(reason)}
 function frameStep(load,m=model){const n=m.nodes;
  // The built bars (and any added brace) preserve their original lengths.
  // Stage 05 has lateral wind; the same worker has the same load on 05/06/08.
@@ -82,18 +84,22 @@ function gateBlocks(){let tip=gateTip(model.gate);return tip.y-gateHalfWidth < l
 function tick(){let m=model;if(phase==='fall'){m.fallTime+=dt;m.y+=Math.min(125,35+140*m.fallTime)*dt;if(m.fallTime>(has('f')?1.25:.6)){const sheared=has('f')&&m.peakShear>18;restart();sync(sheared?'다리 뼈대가 흔들려 옆으로 밀렸어요. 보강 막대의 연결을 살펴보세요.':'발판이 끊어져 있어요. 연결된 곳을 살펴보세요.')}return}if(phase==='strain'){m.strain+=dt;if(m.strain>=1){phase='edit';sync('앗! 문을 너무 많이 접었어요. 조금 펼쳐 보세요.')}return}if(!['machine','move'].includes(phase))return;m.time+=dt;
 if(phase==='machine'){if(has('r')&&!m.jam){const next=advanceRail(m.p,railRise,design.rail);m.p=next.position;m.jam=next.jammed}
 if(stage===9&&(m.p===1||m.jam)&&!m.jamB){const next=advanceRail(m.pB,-44,design.railB);m.pB=next.position;m.jamB=next.jammed}
-if(has('g')&&!m.wall){let a=Math.min(design.gate*rad,m.gate+dt*1.5);if(gateTip(a).y+gateHalfWidth>wallOffset){m.gate=Math.acos(-(wallOffset-gateHalfWidth)/gateLength);m.wall=true;m.strain=0;phase='strain';sync('드르륵! 문 끝이 수납실 벽에 닿았어요.');return}else m.gate=a}
+if(has('g')&&!m.wall){let a=Math.min(design.gate*rad,m.gate+dt*1.5);if(gateTip(a).y+gateHalfWidth>wallOffset){m.gate=Math.acos(-(wallOffset-gateHalfWidth)/gateLength);m.wall=true;lastProblem='g';m.strain=0;phase='strain';sync('드르륵! 문 끝이 수납실 벽에 닿았어요.');return}else m.gate=a}
 if((stage!==9||m.jamB||m.pB===1)&&(!has('r')||m.jam||m.p===1)&&(!has('g')||m.wall||m.gate>=design.gate*rad)){if(m.wall){stop('문 끝이 벽에 걸렸어요. 조금 펼쳐 보세요.');return}phase='move';sync((m.jam||m.jamB)?'덜컹! 다리가 멈췄어요. 작업자가 갈 수 있는 곳을 살펴보세요.':'운송을 시작합니다.')}return}
 if(stage===11){frameStep(m.right.load,m.right);m.right.load=0}if(has('f'))frameStep(m.load);m.load=0;
 if(has('l')&&m.aboard&&m.angle>limitAngle()){let angle=Math.max(limitAngle(),m.angle-dt*.63),p=pose(angle);if(!p){stop('연결 막대가 너무 팽팽해 움직이지 못해요. 길이를 바꿔 보세요.');return}let old=m.platform;m.platform=p;m.angle=angle;let u=(m.x-old[0].x)/(old[1].x-old[0].x);m.x=(1-u)*p[0].x+u*p[1].x;m.y+=(p[0].y-old[0].y)*(1-u)+(p[1].y-old[1].y)*u}
 if(has('l')&&m.aboard&&m.angle===limitAngle()&&m.platform&&!connector(m.platform[1],pt(exitX,exitY))&&m.x>=m.platform[1].x-2){stop('발판과 강둑이 이어지지 않았어요. 두 끝의 높이와 틈을 살펴보세요.');return}
 let oldY=m.y;m.vy+=540*dt;m.y+=m.vy*dt;m.x+=m.vx*dt;let radius=design.cargo?13:8;
-for(let [a,b] of tracks()){if(b.x-a.x<.1||m.x<a.x||m.x>b.x)continue;let slope=(b.y-a.y)/(b.x-a.x),floor=a.y+(m.x-a.x)*slope;if(oldY>floor+1.8||m.y<floor-1)continue;m.y=floor;m.vy=0;
+for(let [a,b] of tracks()){if(b.x-a.x<.1)continue;
+const supports=design.cargo?[m.x-8,m.x+8]:[m.x];
+const contacts=supports.filter(x=>x>=a.x&&x<=b.x);
+if(!contacts.length)continue;
+let slope=(b.y-a.y)/(b.x-a.x),floor=Math.min(...contacts.map(x=>a.y+(x-a.x)*slope));if(oldY>floor+1.8||m.y<floor-1)continue;m.y=floor;m.vy=0;
 if(stage===11&&a===m.right.nodes[0])m.right.load=9;
 if(has('f')&&a===m.nodes[0])m.load=design.cargo?9:.04;
 if(has('l')&&m.platform&&a===m.platform[0]){if(!m.aboard&&m.x>a.x+34){m.aboard=true;m.vx=0}if(m.aboard&&m.angle>limitAngle())m.vx=Math.abs(slope)<.34?0:Math.sign(slope)*90;else m.vx=Math.max(72,m.vx)}break}
 if(has('g')&&m.x+radius>=605&&m.x<630&&gateBlocks()&&m.y<deck+10){stop('문이 통로에 남아 있어요. 조금 더 접어 보세요.');return}
-if(m.y>deck+28){phase='fall';m.fallTime=0;sync(has('f')&&m.peakShear>18?'다리가 흔들려 발판이 어긋났어요.':'운송로가 끊어진 곳에서 떨어졌어요. 그곳을 지지하는 부품을 살펴보세요.');return}
+if(m.y>deck+28){lastProblem=(m.jam||m.jamB)?'r':has('l')&&m.x>initialLeft?'l':'f';phase='fall';m.fallTime=0;sync(has('f')&&m.peakShear>18?'다리가 흔들려 발판이 어긋났어요.':'운송로가 끊어진 곳에서 떨어졌어요. 그곳을 지지하는 부품을 살펴보세요.');return}
 if(m.x>=950&&Math.abs(m.y-(has('l')?exitY:deck))<2){if(stage===6&&!design.cargo){phase='tested';sync('작업자가 건넜어요. 같은 다리에 화물을 보내 보세요.')}else{phase='won';put('pb2-clear-'+stage,'1');sync(stage===5?'보강 막대 덕분에 다리가 흔들리지 않았어요. 작업자 도착!':stage===6?'화물차가 무사히 건넜어요. 다리 보강 성공!':'운송 완료! 목적지에 도착했어요.')}return}
 if(m.time>24||m.x<0){stop('운송물이 경로를 벗어났어요. 발판의 기울기와 연결 높이를 살펴보세요.')}}
 const canvas=$('view'),c=canvas.getContext('2d');
@@ -130,7 +136,7 @@ if(has('f')){
    let a=n[design.brace[0]],b=n[design.brace[1]],other=[0,1,2,3].filter(i=>!design.brace.includes(i));
    for(let j of other){c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(n[j].x,n[j].y);c.closePath();c.fillStyle='#7bdab728';c.fill()}
  }
- m.rods.forEach(({a,b},i)=>rod(n[a],n[b],i===4?'#efb84e':'#91aca0'));
+ m.rods.forEach(({a,b},i)=>rod(n[a],n[b],i>=4?'#efb84e':'#91aca0'));
  if(selected!==null||braceActive){
    const i=braceActive?braceOrigin:selected;
    n=stage===11?n.concat(m.right.nodes):n;
@@ -141,7 +147,7 @@ if(has('f')){
    }
  }
  n.forEach((p,i)=>{dot(p,8,selected===i||braceOrigin===i?'#ffefb2':'#ffce60');text('ABCDEFGH'[i],p.x+10,p.y+(i<2?-12:20))});
- text(design.brace.length?'보강 막대 설치됨':'노란 경첩을 이어 보강 막대를 설치',has('r')?350:370,218,'#346c5c',13);
+ text((stage===11?design.braces.some(Boolean):design.brace.length)?'보강 막대 설치됨':'노란 경첩을 이어 보강 막대를 설치',has('r')?350:370,218,'#346c5c',13);
 }
 if(has('l')){let p=m.platform;rod(pt(735,300),pt(835,300));if(p){rod(pt(735,300),p[0]);rod(pt(835,300),p[1],'#efb84e');p.forEach(q=>dot(q,7,'#d3e6db'))}dot(pt(735,300),13,'#365c54');line(pt(735,300),pt(735+9*Math.cos(m.angle),300-9*Math.sin(m.angle)),'#ebd28c',3)}
 for(let [a,b] of tracks()){if(b.x-a.x>.5){c.lineCap='butt';c.strokeStyle='#344f49';c.lineWidth=6;c.beginPath();c.moveTo(a.x,a.y+3);c.lineTo(b.x,b.y+3);c.stroke();c.strokeStyle=has('l')&&m.platform&&a===m.platform[1]?'#ffd369':'#d4bf83';c.lineWidth=2;c.stroke()}}
@@ -150,7 +156,7 @@ function railInset(offset,rise,value,progress,jammed,snapped,name){c.save();c.tr
 if(has('r'))railInset(0,railRise,design.rail,m.p,m.jam,lock.rail,stage===9?'첫째 발사대':'발사 장치 내부');if(stage===9)railInset(425,-44,design.railB,m.pB,m.jamB,lock.railB,'둘째 발사대');
 if(has('g')){rect(471,18,220,158,'#214744');text('차단문 · 위에서 보기',483,41,'#e0ece3');rect(481,60,200,65,'#6a887b');rect(580,127+laneOffset,gateLength+7,wallOffset-laneOffset,'#adc2b2');rect(580,127+wallOffset,gateLength+8,5,'#dfad71');let pivot=pt(580,127),tip=gateTip(m.gate);if(phase==='edit'){let target=gateTip(design.gate*rad);c.setLineDash([4,5]);line(pivot,pt(pivot.x+target.x,pivot.y+target.y),'#ffda80',3);c.setLineDash([]);dot(pt(pivot.x+target.x,pivot.y+target.y),6,'#ffda80')}line(pivot,pt(pivot.x+tip.x,pivot.y+tip.y),'#eebe62',2*gateHalfWidth);dot(pivot,7,m.wall?'#e58443':'#d7e6d8');if(phase==='strain'&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){let t=m.strain;dot(pt(pivot.x+2*Math.sin(t*58),pivot.y),5,'#efaa4a');if(t>.3){for(let i=0;i<3;i++){let k=(t*2+i/3)%1;line(pt(580+i*3,121),pt(576+i*5,121-8*k),'#ffa848',2);dot(pt(578+i*4,116-14*k),2+2*k,'#b9c5bc')}}}if(hints>=2)line(pivot,pt(648,127),'#ade4c2',2);line(pt(604,177),pt(605,deck-24),'#658279',2);if(gateBlocks())rect(604,deck-23,6,23,'#c36d42');else rect(604,deck-4,12,4,'#427d66')}
 if(has('l')&&lock.arm)text('✓',840,322,'#215f47');if(has('l')&&hints>=2&&m.platform)line(m.platform[0],pt(m.platform[0].x+110,m.platform[0].y),'#55a07c',2);
-if(stage===6&&!design.cargo){rect(13,deck-18,24,11,'#bc7f5e');for(const x of [18,32])dot(pt(x,deck-4),4,'#374943')}if(design.cargo){rect(m.x-13,m.y-20,26,14,'#ba673f');dot(pt(m.x-8,m.y-4),4,'#34463d');dot(pt(m.x+8,m.y-4),4,'#34463d')}else worker(c,m.x,m.y,phase==='move'&&m.vx?'walk':phase,m.time)
+if(stage===6&&!design.cargo){rect(13,deck-18,24,11,'#bc7f5e');for(const x of [18,32])dot(pt(x,deck-4),4,'#374943')}if(stage===8&&['blocked','strain','fall'].includes(phase)){c.save();c.setLineDash([4,4]);c.lineWidth=3;c.strokeStyle='#cb8735';c.beginPath();c.arc(phase==='strain'?580:m.x,phase==='strain'?127:m.y-8,22,0,2*Math.PI);c.stroke();c.restore()}if(design.cargo){rect(m.x-13,m.y-20,26,14,'#ba673f');dot(pt(m.x-8,m.y-4),4,'#34463d');dot(pt(m.x+8,m.y-4),4,'#34463d')}else worker(c,m.x,m.y,phase==='move'&&m.vx?'walk':phase,m.time)
 }
 const panel=$('toolsPanel');
 function group(title){let f=document.createElement('fieldset'),l=document.createElement('legend');l.textContent=title;f.append(l);panel.append(f);return f}
@@ -209,6 +215,7 @@ canvas.onlostpointercapture=()=>{adjusting=null;braceActive=false;braceOrigin=nu
 $('run').onclick=()=>{lesson=false;if(phase==='edit')begin();else restart()};$('retry').onclick=()=>{lesson=false;begin()};$('reset').onclick=()=>{lesson=false;setup()};$('next').onclick=()=>goto(stage+1);
 const clues={r:['바퀴가 멈추는 곳에서 두 홈은 어떻게 달라지나요?','양 끝의 레일 간격을 비교하세요.','두 홈이 같은 방향으로 뻗게 해 보세요.'],g:['문 끝이 통로 안에 얼마나 남았나요?','문 끝과 수납 홈의 방향을 비교하세요.','닫힌 위치에서 직각만큼 돌면 어느 곳에 닿을까요?'],f:['화물이 올라가면 어느 경첩이 움직이나요?','위쪽 경첩과 반대편 아래쪽 경첩을 살펴보세요.','막대 하나로 사각형을 삼각형 두 개로 나누어 보세요.'],l:['올라가는 동안 작업자의 발밑이 어느 쪽으로 기우나요?','발판과 수평 기준선의 방향을 비교하세요.','양옆 막대의 길이를 맞추면 발판의 방향은 어떻게 될까요?']};
 function hintDevices(){
+ if(lastProblem)return lastProblem;
  if(stage===9)return model.jamB?'r':'r';
  if(model.wall||phase==='blocked'&&gateBlocks()&&model.x>580&&model.x<630)return 'g';
  if(model.jam)return 'r';
