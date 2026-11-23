@@ -22,3 +22,40 @@ for(let stage=2;stage<=8;stage++){
  if(stage===7){for(const gap of [8,10,12])assert.equal(run('!!connector(pt(0,0),pt('+gap+',1))'),gap<=10)}
 }
 console.log('PASS: rail capture/release, eight journeys, gate contact/reset/obstruction and landing gaps');
+
+function frameJourney(stage,brace,cargo){
+ const run=game(stage);
+ // Reset to the same starting shape. Only the physical bar graph and load differ.
+ const expr='setup();design.rail=railRise;design.gate=90;design.arm=100;'+
+   'design.brace='+JSON.stringify(brace)+';design.cargo='+cargo+';begin();'+
+   'let sawFall=false,peak=0,maxRodError=0;'+
+   'for(let i=0;i<3000;i++){tick();peak=Math.max(peak,model.peakShear);'+
+   'for(const r of model.rods){const a=model.nodes[r.a],b=model.nodes[r.b];'+
+   'maxRodError=Math.max(maxRodError,Math.abs(Math.hypot(a.x-b.x,a.y-b.y)-r.len))}'+
+   'if(phase==="fall")sawFall=true;'+
+   'if(phase==="won"||phase==="tested"||phase==="blocked")break}'+
+   '({phase,sawFall,peak,maxRodError})';
+ return run(expr);
+}
+const noBrace=frameJourney(5,[],false);
+const duplicateBar=frameJourney(5,[0,1],false);
+const diagonalAC=frameJourney(5,[0,2],false);
+const diagonalBD=frameJourney(5,[1,3],false);
+assert.ok(noBrace.sawFall&&noBrace.peak>30,'no brace must let frame shear and worker fall');
+assert.ok(duplicateBar.sawFall&&duplicateBar.peak>30,'duplicate edge does not brace a hinged quadrilateral');
+for(const r of [diagonalAC,diagonalBD]){
+ assert.equal(r.phase,'won','either genuine diagonal must hold the walkway');
+ assert.ok(r.peak<2,'diagonal constrains actual frame shear');
+ assert.ok(r.maxRodError<1,'all rods maintain their built lengths');
+}
+assert.equal(frameJourney(6,[],false).phase,'tested','light worker crosses before adding cargo');
+assert.ok(frameJourney(6,[],true).sawFall,'heavy cargo distorts unbraced bridge');
+assert.ok(frameJourney(6,[0,1],true).sawFall,'duplicate side bar cannot carry heavy cargo');
+assert.equal(frameJourney(6,[0,2],true).phase,'won','physical diagonal braces heavy cargo');
+assert.equal(frameJourney(8,[1,3],true).phase,'won','same bracing engine works in composite stage');
+const tap=game(5);
+assert.equal(tap("setup();brace(0);brace(2);design.brace.join('-')"),'0-2','two hinge taps build the rod');
+assert.equal(tap("selected"),null,'selection resets after placement');
+assert.equal(tap("model.rods.length"),5,'the new brace is a fifth rigid distance constraint');
+assert.equal(tap("brace(1);brace(1);selected"),null,'same hinge tap cancels selection');
+console.log('PASS: hinged frame shear, redundant edges, two true braces, worker/cargo difference and stage 8 reuse');
