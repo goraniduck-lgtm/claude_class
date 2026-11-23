@@ -285,7 +285,7 @@ function inspect(){const ready=isReady();let s='';if(current===0)s=ready?'윗변
 }
 function stop(){if(phase!=='running')return;phase='edit';initBall();clearQuiz();feedback('실험을 즉시 중단했어요.','구슬이 움직이거나 공중에 있어도 바로 멈춥니다. 만든 도형은 유지되므로 수정하거나 즉시 재도전할 수 있습니다.');toast('중단 완료 · 도형 수정 또는 즉시 재도전');refresh({announce:false})}
 function reset(){if(phase==='running')stop();part=0;geom=newGeometry();machinePulse=[];lastMachineReady=[];phase='edit';selected=null;hint=false;sparks=[];initBall();clearQuiz();readyLast=null;refresh({announce:false});feedback('처음 도형으로 되돌렸어요.','조건을 다시 찾아 보세요. 기존의 도전 횟수와 완료 기록은 유지됩니다.');toast('도형 초기화 · 처음부터 다시 설계해 보세요.')}
-function begin(){if(!introScreen.hidden||(!isConcurrent()&&!isFinalPart()))return;geom=geom||newGeometry();phase='running';sparks=[];initBall();clearQuiz();ball.vx=255;attempts[current]++;if(route){route.devices.forEach((d,i)=>{d.powered=machineReady(geom.modules[i])});refresh({announce:false});return}const ready=completeModule();feedback('구슬 실험 시작!',ready?'장치가 모두 켜져 다리를 고정했습니다. 구슬의 움직임을 살펴보세요.':'수학 조건을 만족하지 않아 장치가 다리를 붙잡지 못합니다. 움직이는 중에도 중단·재도전을 할 수 있어요.');toast(ready?'연결 성공! 구슬이 다리를 건너고 있어요.':'장치가 열려 있어요. 다리는 구슬을 지탱하지 못합니다.');refresh({announce:false})}
+function begin(){if(!introScreen.hidden||(!isConcurrent()&&!isFinalPart()))return;geom=geom||newGeometry();phase='running';sparks=[];initBall();clearQuiz();ball.vx=255;attempts[current]++;if(route){toast('');ui.feedback.parentElement.classList.remove('visible');route.devices.forEach((d,i)=>{d.powered=machineReady(geom.modules[i])});refresh({announce:false});return}const ready=completeModule();feedback('구슬 실험 시작!',ready?'장치가 모두 켜져 다리를 고정했습니다. 구슬의 움직임을 살펴보세요.':'수학 조건을 만족하지 않아 장치가 다리를 붙잡지 못합니다. 움직이는 중에도 중단·재도전을 할 수 있어요.');toast(ready?'연결 성공! 구슬이 다리를 건너고 있어요.':'장치가 열려 있어요. 다리는 구슬을 지탱하지 못합니다.');refresh({announce:false})}
 function retry(){begin()}
 function fail(reason){if(phase!=='running')return;phase='failed';feedback('구슬 이동 실패:',reason+' [중단·수정]을 기다릴 필요 없이 도형을 수정한 뒤 다시 출발하거나 [즉시 재도전]을 누르세요.');toast('실패 · 공이 멈추기를 기다리지 않고 다시 시도하세요.');refresh({announce:false})}
 
@@ -368,6 +368,7 @@ function buildRoute(){
   const devices=slots.map((type,i)=>{
     const x=boundaries[i],end=boundaries[i+1];
     const device={type,x,end,y,center:geom.modules[i].center,powered:false,lowering:0};
+    if(type==='deck'){device.hinge=(x+end-112)/2;device.landing=device.hinge+112;}
     if(type==='lift')y+=LIFT_DROP;
     return device;
   });
@@ -376,8 +377,8 @@ function buildRoute(){
 
 function deckEnd(d){
   const angle=1.12*(1-(d.powered?clamp(elapsed/.55,0,1):0));
-  const length=d.end-d.x;
-  return {x:d.x+length*Math.cos(angle),y:d.y+length*Math.sin(angle)};
+  const length=d.landing-d.hinge;
+  return {x:d.hinge+length*Math.cos(angle),y:d.y+length*Math.sin(angle)};
 }
 
 function gateArm(d){
@@ -392,8 +393,9 @@ function routeFloor(x){
   const d=route.devices.find(device=>x<device.end);
   if(d.type==='gate')return d.y;
   if(d.type==='lift')return d.y+d.lowering;
+  if(x<=d.hinge||x>=d.landing)return d.y;
   const tip=deckEnd(d);
-  return x<=tip.x?d.y+(tip.y-d.y)*(x-d.x)/(tip.x-d.x):null;
+  return x<=tip.x?d.y+(tip.y-d.y)*(x-d.hinge)/(tip.x-d.hinge):null;
 }
 
 function touchesGate(d){
@@ -455,9 +457,12 @@ function drawMotionRoute(){
     text((i+1)+' · '+structureNames[d.type],d.center,87,19,color);
     if(d.type==='deck'){
       const tip=deckEnd(d);
-      line({x:d.x,y:d.y},{x:d.end,y:d.y},'#b3d6e688',2,[6,8]);
-      line({x:d.x,y:d.y},tip,color,9);
-      circle(d.x,d.y,6,'#233c53',color);
+      const hinge={x:d.hinge,y:d.y},landing={x:d.landing,y:d.y};
+      line({x:d.x,y:d.y},hinge,'#9ebcc7',8);
+      line(landing,{x:d.end,y:d.y},'#9ebcc7',8);
+      line(hinge,landing,'#b3d6e688',2,[6,8]);
+      line(hinge,tip,color,9);
+      circle(hinge.x,hinge.y,6,'#233c53',color);
     }else if(d.type==='gate'){
       line({x:d.x,y:d.y},{x:d.end,y:d.y},'#9ebcc7',8);
       const [pivot,tip]=gateArm(d);
