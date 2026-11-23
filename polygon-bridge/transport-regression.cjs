@@ -1,9 +1,9 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
-function element(){let captured=false;return {style:{},append(){},add(){},replaceChildren(){},setAttribute(){},querySelectorAll(){return []},getContext(){return {}},getBoundingClientRect(){return {left:0,top:0,width:1000,height:410}},setPointerCapture(){captured=true},hasPointerCapture(){return captured},releasePointerCapture(){captured=false}}}
+function element(){let captured=false;return {style:{},append(){},add(){},replaceChildren(){},setAttribute(){},querySelectorAll(){return []},getContext(){return new Proxy({},{get(o,k){return k in o?o[k]:()=>{}},set(o,k,v){o[k]=v;return true}})},getBoundingClientRect(){return {left:0,top:0,width:1000,height:410}},setPointerCapture(){captured=true},hasPointerCapture(){return captured},releasePointerCapture(){captured=false}}}
 function game(stage){
  const filename=stage===1?'telescopic-bridge.html':'transport.html';
  const source=fs.readFileSync(path.join(__dirname,filename),'utf8').split('<script>')[1].split('</script>')[0];
- const elements={},env={document:{getElementById:id=>elements[id]??=element(),createElement:element},Option:function(){},location:{hash:'#'+stage},requestAnimationFrame(){}};
+ const elements={},env={document:{getElementById:id=>elements[id]??=element(),createElement:element},Option:function(){},location:{hash:'#'+stage},requestAnimationFrame(){},window:{matchMedia(){return {matches:false}}}};
  for(const id of ['go','reset','view','retry','roll','hint','msg'])env[id]=element();
  const context=vm.createContext(env);vm.runInContext(source,context);return script=>vm.runInContext(script,context)
 }
@@ -15,6 +15,7 @@ assert.equal(first("demo=0;d=472;rewind('extend');for(let i=0;i<2000;i++)step(1/
 for(let stage=2;stage<=8;stage++){
  const run=game(stage);
  assert.equal(run("setup();design.rail=railRise;design.gate=90;design.arm=100;design.brace=[0,2];design.cargo=stage===6||stage===8;begin();for(let i=0;i<2500;i++)tick();phase"),'won');
+ if(stage>=5)assert.equal(run('draw();true'),true,'frame drawing must execute without canvas errors');
  if(stage===3){for(const value of [97,103,110]){
  run('design.gate='+value+';begin();while(phase==="machine")tick()');assert.equal(run('phase'),'strain');assert.ok(Math.abs(run('gateTip(model.gate).y')-2)<1e-8);
  run('restart()');assert.equal(run('model.wall'),false)}
@@ -54,3 +55,16 @@ assert.equal(failed('model.nodes[0].x<390'),true,'Failure must visibly deform th
 assert.equal(failed("for(let i=0;i<180;i++)tick();phase"),'edit','Failure must return to edit mode');
 assert.equal(failed("document.getElementById('status').textContent.includes('흔들려')"),true,'Failure message must describe visible distortion');
 console.log('PASS: frame bracing via drag and tap, cancellation, real rod constraints and cargo tests');
+
+const measured=game(5);
+assert.equal(measured("setup();begin();for(let i=0;i<2500&&phase!=='fall';i++)tick();model.wind"),2,'05 shaking must come from visible crosswind');
+assert.ok(measured('model.peakShear')>35,'failed unbraced frame must actually shift');
+const supported=game(5);
+assert.equal(supported("setup();design.brace=[1,3];begin();for(let i=0;i<1300&&phase!=='won';i++)tick();phase"),'won');
+assert.ok(supported('model.peakShear')<2,'rigid diagonal prevents measured shear even under wind');
+assert.equal(supported('draw();true'),true,'brace rendering and displacement overlay work');
+const sameWorker=game(6);
+assert.equal(sameWorker('setup();model.wind'),0,'06 uses the same mechanism without 05 crosswind');
+assert.equal(sameWorker('design.cargo=false;begin();for(let i=0;i<1500&&phase!=="tested";i++)tick();phase'),'tested','the light worker can still cross');
+assert.ok(!fs.readFileSync(path.join(__dirname,'transport.html'),'utf8').includes('모터가 멈췄어요'),'child-facing failure text contains no technical motor stop');
+console.log('PASS: stage 05 crosswind and measured shear, stable diagonal, stage 06 worker weight, canvas visual checks');
