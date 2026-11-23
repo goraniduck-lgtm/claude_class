@@ -13,46 +13,63 @@ function worker(ctx,x,y,state,time){
 
 const $=id=>document.getElementById(id), names=['늘어나는 다리','기울어진 발사대','접혀 있는 차단문','첫 번째 복합 운송','흔들리는 다리','무거운 화물','수평을 지키는 승강교','마지막 운송 작전'];
 const config=[null,null,'r','g','rg','f','rf','l','rfgl'];
-const goals=['','','기울어진 발사대에서 다리를 펼쳐 작업자를 보내세요.','차단문을 옆으로 접어 작업자가 지날 길을 여세요.','계곡을 건너 차단문 너머로 작업자를 보내세요.','막대 하나로 흔들리는 다리를 보강하세요.','가벼운 구슬로 시험한 뒤 화물차를 건너편까지 보내세요.','작업자를 발판에 싣고 높은 강둑으로 올리세요.','네 장치를 연결해 화물차를 높은 강둑까지 보내세요.'];
+const goals=['','','기울어진 발사대에서 다리를 펼쳐 작업자를 보내세요.','차단문을 옆으로 접어 작업자가 지날 길을 여세요.','계곡을 건너 차단문 너머로 작업자를 보내세요.','옆바람에 흔들리는 다리를 막대 하나로 튼튼하게 만드세요.','작업자로 먼저 시험하고, 더 무거운 화물차를 건너편까지 보내세요.','작업자를 발판에 싣고 높은 강둑으로 올리세요.','네 장치를 연결해 화물차를 높은 강둑까지 보내세요.'];
 const stage=Math.max(2,Math.min(8,parseInt(location.hash.slice(1))||2)),has=k=>config[stage].includes(k);
 const get=k=>{try{return localStorage.getItem(k)}catch{return null}},put=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
 function goto(n){if(n===1)location.href='telescopic-bridge.html';else{location.hash=n;location.reload()}}
 names.forEach((name,i)=>$('level').add(new Option((get(i?'pb2-clear-'+(i+1):'telescopic-clear')?'✓ ':'')+String(i+1).padStart(2,'0')+' · '+name,i+1)));$('level').value=stage;$('level').onchange=e=>goto(+e.target.value);$('title').textContent=names[stage-1];$('goal').textContent=goals[stage];
 const dt=1/120,rad=Math.PI/180,clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),pt=(x,y)=>({x,y});
 const rigStart=200,rigEnd=390,frameEnd=570, deck=258, railRise=stage===2?-44:18;
-let design,model,phase,hints,selected,preview=false,lesson=false;
-let lock={};function setup(){lock={};design={rail:0,gate:42,arm:76,brace:[],cargo:stage===8};selected=null;hints=0;preview=false;restart();controls()}
+let design,model,phase,hints,selected,braceHover=null,preview=false,lesson=false;
+let lock={};function setup(){lock={};design={rail:0,gate:42,arm:76,brace:[],cargo:stage===8};selected=null;braceHover=null;hints=0;preview=false;restart();controls()}
 function pose(a,length=design.arm){const base=pt(735,300),anchor=pt(835,300),left=pt(base.x+100*Math.cos(a),base.y-100*Math.sin(a)),dx=anchor.x-left.x,dy=anchor.y-left.y,D=Math.hypot(dx,dy),len=length;
 if(D>100+len||D<Math.abs(100-len))return null;
 const along=(100**2-len**2+D**2)/(2*D),perp=Math.sqrt(Math.max(0,100**2-along**2));return [left,pt(left.x+(along*dx+perp*dy)/D,left.y+(along*dy-perp*dx)/D)]}
 const baseAngle=155*rad,endAngle=85*rad,initialLeft=735+100*Math.cos(baseAngle),exitX=843+100*Math.cos(endAngle),exitY=300-100*Math.sin(endAngle);
 function restart(){const nodes=[pt(rigEnd,deck),pt(frameEnd,deck),pt(frameEnd,deck+85),pt(rigEnd,deck+85)];
 const pairs=[[0,1],[1,2],[2,3],[3,0]];if(design.brace.length===2)pairs.push(design.brace.slice());
-model={p:0,gate:0,jam:false,wall:false,angle:baseAngle,platform:pose(baseAngle),aboard:false,nodes:nodes.map(p=>({...p,px:p.x,py:p.y})),rods:pairs.map(([a,b])=>({a,b,len:dist(nodes[a],nodes[b])})),x:35,y:deck,vx:100,vy:0,load:0,time:0};phase='edit';sync('조작할 부품을 선택하고 시험 운행을 누르세요.')}
+model={p:0,gate:0,jam:false,wall:false,angle:baseAngle,platform:pose(baseAngle),aboard:false,nodes:nodes.map(p=>({...p,px:p.x,py:p.y})),rods:pairs.map(([a,b])=>({a,b,len:dist(nodes[a],nodes[b])})),x:35,y:deck,vx:100,vy:0,load:0,frameShear:0,peakShear:0,frameTouched:false,wind:stage===5?2.0:0,time:0};phase='edit';sync('조작할 부품을 선택하고 시험 운행을 누르세요.')}
 function sync(msg){$('status').textContent=msg;$('run').textContent=phase==='edit'?'▶ 시험 운행':'중단 · 수정';$('retry').hidden=phase==='edit';$('next').hidden=phase!=='won'||stage===8;$('hint').hidden=phase!=='edit';$('toolsPanel').querySelectorAll('fieldset').forEach(f=>f.disabled=phase!=='edit');$('reflection').hidden=phase!=='won'||stage!==8}
 function begin(){restart();phase='machine';sync('장치가 움직입니다. 운송로가 어디까지 연결될까요?')}
 function stop(reason){phase='blocked';sync(reason)}
-function frameStep(load){let n=model.nodes;
-for(let i=0;i<2;i++){let p=n[i],x=p.x,y=p.y;p.x+=(x-p.px)*.986-load*190*dt*dt;p.y+=(y-p.py)*.986+(3+load*90)*dt*dt;p.px=x;p.py=y}
-for(let iter=0;iter<22;iter++)for(let {a,b,len} of model.rods){let A=n[a],B=n[b],dx=B.x-A.x,dy=B.y-A.y,D=Math.hypot(dx,dy),w=(a<2)+(b<2);if(!w||!D)continue;let f=(D-len)/(D*w);if(a<2){A.x+=dx*f;A.y+=dy*f}if(b<2){B.x-=dx*f;B.y-=dy*f}}}
+function frameStep(load){const m=model,n=m.nodes;
+  // The four edge rods and optional brace act as real fixed-distance constraints.
+  // Wind pushes the unbraced training frame; cargo adds more strain on reused frames.
+  const sideForce=load+m.wind;
+  if(load>.05)m.frameTouched=true;
+  for(let i=0;i<2;i++){let p=n[i],x=p.x,y=p.y;
+    p.x+=(x-p.px)*.986-sideForce*190*dt*dt;
+    p.y+=(y-p.py)*.986+(3+load*90)*dt*dt;
+    p.px=x;p.py=y;
+  }
+  for(let iter=0;iter<22;iter++)for(let {a,b,len} of m.rods){
+    let A=n[a],B=n[b],dx=B.x-A.x,dy=B.y-A.y,D=Math.hypot(dx,dy),w=(a<2)+(b<2);
+    if(!w||!D)continue;
+    let f=(D-len)/(D*w);
+    if(a<2){A.x+=dx*f;A.y+=dy*f}
+    if(b<2){B.x-=dx*f;B.y-=dy*f}
+  }
+  m.frameShear=Math.abs(n[0].x-n[3].x);
+  m.peakShear=Math.max(m.peakShear,m.frameShear);
+}
 function connector(tip,bank){const gap=bank.x-tip.x;return gap>=0&&gap<=10&&Math.abs(tip.y-bank.y)<=8?[tip,bank]:null}
 function tracks(){let m=model,n=m.nodes,segs=[[pt(0,deck),pt(rigStart,deck)],[pt(rigStart,deck),pt(has('r')?rigStart+190*m.p:rigEnd,deck)],has('f')?[n[0],n[1]]:[pt(rigEnd,deck),pt(frameEnd,deck)],[pt(frameEnd,deck),pt(has('l')?initialLeft:1000,deck)]];
 if(has('l')){if(m.platform){segs.push(m.platform);if(m.angle===endAngle){let plate=connector(m.platform[1],pt(exitX,exitY));if(plate)segs.push(plate)}}segs.push([pt(exitX,exitY),pt(1000,exitY)])}return segs}
 function gateTip(a){return pt(0+68*Math.sin(a),-68*Math.cos(a))}
 function gateBlocks(){let tip=gateTip(model.gate);return tip.y < -3}
-function tick(){let m=model;if(phase==='fall'){if((m.fallTime+=dt)>.6){restart();sync('발판이 끊어져 있어요. 연결된 곳을 살펴보세요.')}return}if(phase==='strain'){m.strain+=dt;if(m.strain>=1){phase='edit';sync('앗! 문을 너무 많이 접었어요. 조금 펼쳐 보세요.')}return}if(!['machine','move'].includes(phase))return;m.time+=dt;
+function tick(){let m=model;if(phase==='fall'){m.fallTime+=dt;m.y+=Math.min(130,35+140*m.fallTime)*dt;if(m.fallTime>(has('f')?1.35:.6)){const sheared=has('f')&&m.peakShear>18;restart();sync(sheared?'다리 뼈대가 옆으로 밀렸어요. 막대 연결을 바꾸어 보세요.':'발판이 끊어져 있어요. 연결된 곳을 살펴보세요.')}return}if(phase==='strain'){m.strain+=dt;if(m.strain>=1){phase='edit';sync('앗! 문을 너무 많이 접었어요. 조금 펼쳐 보세요.')}return}if(!['machine','move'].includes(phase))return;m.time+=dt;
 if(phase==='machine'){if(has('r')&&!m.jam){let p=Math.min(1,m.p+dt*.47),err=Math.abs(design.rail-railRise)*p;if(err>4){m.p=4/Math.abs(design.rail-railRise);m.jam=true}else m.p=p}
 if(has('g')&&!m.wall){let a=Math.min(design.gate*rad,m.gate+dt*1.5);if(gateTip(a).y>2){m.gate=Math.acos(-2/68);m.wall=true;m.strain=0;phase='strain';sync('드르륵! 문 끝이 수납실 벽에 닿았어요.');return}else m.gate=a}
-if((!has('r')||m.jam||m.p===1)&&(!has('g')||m.wall||m.gate>=design.gate*rad)){if(m.wall){stop('문 끝이 수납 벽에 닿아 모터가 멈췄어요.');return}phase='move';sync(m.jam?'덜컹! 다리가 멈췄어요. 작업자가 갈 수 있는 곳을 살펴보세요.':'운송을 시작합니다.')}return}
+if((!has('r')||m.jam||m.p===1)&&(!has('g')||m.wall||m.gate>=design.gate*rad)){if(m.wall){stop('문 끝이 벽에 걸렸어요. 조금 펼쳐 보세요.');return}phase='move';sync(m.jam?'덜컹! 다리가 멈췄어요. 작업자가 갈 수 있는 곳을 살펴보세요.':'운송을 시작합니다.')}return}
 if(has('f'))frameStep(m.load);m.load=0;
-if(has('l')&&m.aboard&&m.angle>endAngle){let angle=Math.max(endAngle,m.angle-dt*.63),p=pose(angle);if(!p){stop('막대가 팽팽해져 모터가 더 돌지 못해요.');return}let old=m.platform;m.platform=p;m.angle=angle;let u=(m.x-old[0].x)/(old[1].x-old[0].x);m.x=(1-u)*p[0].x+u*p[1].x;m.y+=(p[0].y-old[0].y)*(1-u)+(p[1].y-old[1].y)*u}
+if(has('l')&&m.aboard&&m.angle>endAngle){let angle=Math.max(endAngle,m.angle-dt*.63),p=pose(angle);if(!p){stop('연결 막대가 너무 팽팽해 움직이지 못해요. 길이를 바꿔 보세요.');return}let old=m.platform;m.platform=p;m.angle=angle;let u=(m.x-old[0].x)/(old[1].x-old[0].x);m.x=(1-u)*p[0].x+u*p[1].x;m.y+=(p[0].y-old[0].y)*(1-u)+(p[1].y-old[1].y)*u}
 if(has('l')&&m.aboard&&m.angle===endAngle&&m.platform&&!connector(m.platform[1],pt(exitX,exitY))&&m.x>=m.platform[1].x-2){stop('발판과 강둑이 이어지지 않았어요. 두 끝의 높이와 틈을 살펴보세요.');return}
 let oldY=m.y;m.vy+=540*dt;m.y+=m.vy*dt;m.x+=m.vx*dt;let radius=design.cargo?13:8;
 for(let [a,b] of tracks()){if(b.x-a.x<.1||m.x<a.x||m.x>b.x)continue;let slope=(b.y-a.y)/(b.x-a.x),floor=a.y+(m.x-a.x)*slope;if(oldY>floor+1.8||m.y<floor-1)continue;m.y=floor;m.vy=0;
-if(has('f')&&a===m.nodes[0])m.load=design.cargo?9:stage===5?3:.002;
+if(has('f')&&a===m.nodes[0])m.load=design.cargo?9:.35;
 if(has('l')&&m.platform&&a===m.platform[0]){if(!m.aboard&&m.x>a.x+34){m.aboard=true;m.vx=0}if(m.aboard&&m.angle>endAngle)m.vx=Math.abs(slope)<.34?0:Math.sign(slope)*90;else m.vx=Math.max(72,m.vx)}break}
 if(has('g')&&m.x+radius>=605&&m.x<630&&gateBlocks()&&m.y<deck+10){stop('문이 통로에 남아 있어요. 조금 더 접어 보세요.');return}
-if(m.y>deck+28){phase='fall';m.fallTime=0;sync('운송로가 끊어진 곳에서 떨어졌어요. 그곳을 지지하는 부품을 살펴보세요.');return}
+if(m.y>deck+28){phase='fall';m.fallTime=0;sync(has('f')&&m.peakShear>18?'다리 뼈대가 휘청여 발판이 어긋났어요.':'운송로가 끊어진 곳에서 떨어졌어요. 그곳을 지지하는 부품을 살펴보세요.');return}
 if(m.x>=950&&Math.abs(m.y-(has('l')?exitY:deck))<2){if(stage===6&&!design.cargo){phase='tested';sync('작업자가 건넜어요. 수정 화면에서 화물차로 바꾸어 운행하세요.')}else{phase='won';put('pb2-clear-'+stage,'1');sync('운송 완료! 목적지에 도착했어요.')}return}
 if(m.time>24||m.x<0){stop('운송물이 경로를 벗어났어요. 발판의 기울기와 연결 높이를 살펴보세요.')}}
 const canvas=$('view'),c=canvas.getContext('2d');
