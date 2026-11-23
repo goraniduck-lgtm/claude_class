@@ -4,6 +4,7 @@ import { makeShape, regular, irregularPolygon } from '../core/shapes.js';
 import { diagonals } from '../core/geometry.js';
 import { polygonSvg, nonPolygonSvg, lifeSvg } from './figures.js';
 import { PIECES, TARGETS, rotate, svgPoly, fitMap, pieceSvg, areaUnits } from './pattern.js';
+import { EXTRA_QUESTIONS, EXTRA_TYPE_INFO } from './extra_questions.js';
 
 export const NAMES = { 3: '삼각형', 4: '사각형', 5: '오각형', 6: '육각형', 7: '칠각형', 8: '팔각형', 9: '구각형', 10: '십각형', 11: '십일각형', 12: '십이각형' };
 export const regName = (n) => '정' + NAMES[n];
@@ -374,6 +375,29 @@ const GEN = {
     };
   },
 };
+
+// 추가 문제은행 P19~P32 (선생님이 교과서와 대조해 만든 168문항)
+// - 차시에 맞는 문항만, 한 판(같은 rng) 안에서는 유형마다 다 나올 때까지 같은 문항을 다시 내지 않는다
+// - 보기 순서는 섞는다 (보기가 가·나·다이면 가나다 순으로 둔다)
+Object.assign(TYPE_INFO, EXTRA_TYPE_INFO);
+const extraBags = new WeakMap();
+for (const [type, items] of Object.entries(EXTRA_QUESTIONS)) {
+  GEN[type] = (rng, lesson = 8) => {
+    let bags = extraBags.get(rng);
+    if (!bags) { bags = {}; extraBags.set(rng, bags); }
+    const pool = items.filter((q) => (q.lesson || 0) <= lesson);
+    const key = `${type}:${lesson}`;
+    if (!bags[key] || !bags[key].length) bags[key] = rng.shuffle(pool.map((_, i) => i));
+    const q = pool[bags[key].pop()];
+    let choices = q.choices && q.choices.map((c) => ({ ...c }));
+    if (choices) {
+      if (choices.every((c) => /^[가-하]$/.test(c.label))) choices.sort((a, b) => a.label.localeCompare(b.label));
+      else choices = rng.shuffle(choices);
+    }
+    const { lesson: _l, id, ...rest } = q;
+    return choices ? { ...rest, qid: id, type, choices } : { ...rest, qid: id, type };
+  };
+}
 
 export const TYPES = Object.keys(GEN);
 
