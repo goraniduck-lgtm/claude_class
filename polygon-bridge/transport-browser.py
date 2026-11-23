@@ -44,5 +44,33 @@ with sync_playwright() as pw:
   advance();result=page.evaluate('state' if stage==1 else 'phase');assert result=='won',(stage,result)
   page.locator('canvas').screenshot(path=f'evidence/{stage:02}-arrival.png')
   print(stage,result,flush=True);page.close()
+
+ # Check that finger-friendly near targets alter the same physical geometry used by the renderer.
+ for stage,inputs,field,corrected in [
+   (7,[(0,103)],'arm',100),
+   (10,[(0,93)],'gate',90),
+   (12,[(1,103),(0,115)],'stopAngle',113)
+ ]:
+  page=ctx.new_page();page.on('pageerror',lambda err: errors.append(str(err)))
+  page.goto(f'http://127.0.0.1:8765/transport.html#{stage}')
+  for idx,value in inputs:
+   page.locator('input[type=range]').nth(idx).evaluate('(r,v)=>{r.value=v;r.dispatchEvent(new Event("input"))}',value)
+  assert page.evaluate('(f)=>design[f]',field)==corrected,(stage,field,'visual snap did not edit geometry')
+  page.evaluate('draw()')
+  page.locator('canvas').screenshot(path=f'evidence/{stage:02}-near-snap.png')
+  page.locator('#run').click()
+  page.evaluate('for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();draw()')
+  assert page.evaluate('phase')=='won',(stage,'near physical snap must cross')
+  page.close()
+ # The visually larger gap is not an invisible bridge.
+ page=ctx.new_page();page.on('pageerror',lambda err: errors.append(str(err)))
+ page.goto('http://127.0.0.1:8765/transport.html#12')
+ page.locator('input[type=range]').nth(1).evaluate('(r)=>{r.value=100;r.dispatchEvent(new Event("input"))}')
+ page.locator('input[type=range]').nth(0).evaluate('(r)=>{r.value=118;r.dispatchEvent(new Event("input"))}')
+ assert page.evaluate('design.stopAngle')==118
+ page.locator('#run').click()
+ page.evaluate('for(let i=0;i<4000&&["machine","move"].includes(phase);i++)tick();draw()')
+ assert page.evaluate('phase')=='blocked','large dock gap must remain impassable'
+ page.close()
  assert not errors,errors
  b.close()
