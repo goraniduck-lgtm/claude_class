@@ -68,7 +68,12 @@ function frameStep(load,m=model){const n=m.nodes;
  m.frameShear=Math.abs(n[0].x-n[3].x);
  m.peakShear=Math.max(m.peakShear,m.frameShear);
 }
-function connector(tip,bank){const gap=bank.x-tip.x;return gap>=0&&gap<=10&&Math.abs(tip.y-bank.y)<=8?[tip,bank]:null}
+function connector(tip,bank){
+ const gap=bank.x-tip.x;
+ if(gap<0||gap>10||Math.abs(tip.y-bank.y)>8)return null;
+ // This exact segment is rendered as a visible joining plate AND used as a foot collider.
+ const plate=[tip,bank];plate.docking=true;return plate;
+}
 function tracks(){let m=model,n=m.nodes,segs=[[pt(0,deck),pt(rigStart,deck)],[pt(rigStart,deck),pt(has('r')?rigStart+190*m.p:rigEnd,deck)],has('f')?[n[0],n[1]]:[pt(rigEnd,deck),pt(frameEnd,deck)],[pt(frameEnd,deck),pt(has('l')?initialLeft:1000,deck)]];
 if(stage===9)segs.splice(3,1,[pt(570,deck),pt(610,deck)],[pt(610,deck),pt(610+190*m.pB,deck)],[pt(800,deck),pt(1000,deck)]);
 if(stage===11)segs.splice(3,1,[pt(570,deck),pt(606,deck)],m.right.nodes.slice(0,2),[pt(786,deck),pt(1000,deck)]);
@@ -90,11 +95,16 @@ if(stage===11){frameStep(m.right.load,m.right);m.right.load=0}if(has('f'))frameS
 if(has('l')&&m.aboard&&m.angle>limitAngle()){let angle=Math.max(limitAngle(),m.angle-dt*.63),p=pose(angle);if(!p){stop('연결 막대가 너무 팽팽해 움직이지 못해요. 길이를 바꿔 보세요.');return}let old=m.platform;m.platform=p;m.angle=angle;let u=(m.x-old[0].x)/(old[1].x-old[0].x);m.x=(1-u)*p[0].x+u*p[1].x;m.y+=(p[0].y-old[0].y)*(1-u)+(p[1].y-old[1].y)*u}
 if(has('l')&&m.aboard&&m.angle===limitAngle()&&m.platform&&!connector(m.platform[1],pt(exitX,exitY))&&m.x>=m.platform[1].x-2){stop('발판과 강둑이 이어지지 않았어요. 두 끝의 높이와 틈을 살펴보세요.');return}
 let oldY=m.y;m.vy+=540*dt;m.y+=m.vy*dt;m.x+=m.vx*dt;let radius=design.cargo?13:8;
-for(let [a,b] of tracks()){if(b.x-a.x<.1)continue;
+for(const segment of tracks()){const [a,b]=segment;if(b.x-a.x<.1)continue;
 const supports=design.cargo?[m.x-8,m.x+8]:[m.x];
 const contacts=supports.filter(x=>x>=a.x&&x<=b.x);
 if(!contacts.length)continue;
-let slope=(b.y-a.y)/(b.x-a.x),floor=Math.min(...contacts.map(x=>a.y+(x-a.x)*slope));if(oldY>floor+1.8||m.y<floor-1)continue;m.y=floor;m.vy=0;
+const slope=(b.y-a.y)/(b.x-a.x),floor=Math.min(...contacts.map(x=>a.y+(x-a.x)*slope));
+ // A visible docking plate can bridge an <=8-unit height mismatch: step onto its
+ // actual sloped surface rather than falling through at a raised endpoint.
+ const allowableStep=segment.docking?8:1.8;
+ if(oldY>floor+allowableStep||m.y<floor-1)continue;
+ m.y=floor;m.vy=0;
 if(stage===11&&a===m.right.nodes[0])m.right.load=9;
 if(has('f')&&a===m.nodes[0])m.load=design.cargo?9:.04;
 if(has('l')&&m.platform&&a===m.platform[0]){if(!m.aboard&&m.x>a.x+34){m.aboard=true;m.vx=0}if(m.aboard&&m.angle>limitAngle())m.vx=Math.abs(slope)<.34?0:Math.sign(slope)*90;else m.vx=Math.max(72,m.vx)}break}
@@ -149,12 +159,12 @@ if(has('f')){
  n.forEach((p,i)=>{dot(p,8,selected===i||braceOrigin===i?'#ffefb2':'#ffce60');text('ABCDEFGH'[i],p.x+10,p.y+(i<2?-12:20))});
  text((stage===11?design.braces.some(Boolean):design.brace.length)?'보강 막대 설치됨':'노란 경첩을 이어 보강 막대를 설치',has('r')?350:370,218,'#346c5c',13);
 }
-if(has('l')){let p=m.platform;rod(pt(735,300),pt(835,300));if(p){rod(pt(735,300),p[0]);rod(pt(835,300),p[1],'#efb84e');p.forEach(q=>dot(q,7,'#d3e6db'))}dot(pt(735,300),13,'#365c54');line(pt(735,300),pt(735+9*Math.cos(m.angle),300-9*Math.sin(m.angle)),'#ebd28c',3)}
+if(has('l')){let p=m.platform;rod(pt(735,300),pt(835,300));if(p){rod(pt(735,300),p[0]);rod(pt(835,300),p[1],'#efb84e');p.forEach(q=>dot(q,7,'#d3e6db'))}dot(pt(735,300),13,'#365c54');line(pt(735,300),pt(735+9*Math.cos(m.angle),300-9*Math.sin(m.angle)),'#ebd28c',3);if(lock.arm||lock.stopAngle)text('✓ 발판이 맞물렸어요',707,195,'#256d54',12)}
 for(let [a,b] of tracks()){if(b.x-a.x>.5){c.lineCap='butt';c.strokeStyle='#344f49';c.lineWidth=6;c.beginPath();c.moveTo(a.x,a.y+3);c.lineTo(b.x,b.y+3);c.stroke();c.strokeStyle=has('l')&&m.platform&&a===m.platform[1]?'#ffd369':'#d4bf83';c.lineWidth=2;c.stroke()}}
 line(pt(950,has('l')?exitY:deck),pt(950,(has('l')?exitY:deck)-40),'#294841',3);rect(951,(has('l')?exitY:deck)-40,22,12,'#ce6140');
 function railInset(offset,rise,value,progress,jammed,snapped,name){c.save();c.translate(offset,0);rect(16,20,308,144,'#214744');text(name,30,44,'#e0ece3');let a=pt(65,85),b=pt(252,85+rise*.65),cc=pt(65,119),dd=pt(252,119+value*.65);for(const [p,q] of [[a,b],[cc,dd]]){line(p,q,'#94aca2',10);line(p,q,'#314f4b',4)}let x=65+187*progress,y=85+rise*.65*progress;line(pt(42,105),pt(x,y+17),'#8bada2',6);dot(pt(42,105),12,'#577c70');line(pt(42,105),pt(42+8*Math.cos(progress*30),105+8*Math.sin(progress*30)),'#d5e4d4',3);rod(pt(x,y),pt(x,y+34));for(let yy of [y,y+34]){dot(pt(x,yy),8,'#c8d9ce');dot(pt(x,yy),3,'#436759')}dot(dd,9,'#ffd05f');text(snapped?'D ✓':'D',dd.x+13,dd.y+5,'#ffe5a2');if(hints>=2){for(let [p,q] of [[a,cc],[b,dd]])line(p,q,'#eecb74',2)}if(jammed)text('덜컹!',x+12,y+20,'#ffb26b');line(pt(166,164),pt(offset?610-offset:200,deck-6),'#658279',2);c.restore()}
 if(has('r'))railInset(0,railRise,design.rail,m.p,m.jam,lock.rail,stage===9?'첫째 발사대':'발사 장치 내부');if(stage===9)railInset(425,-44,design.railB,m.pB,m.jamB,lock.railB,'둘째 발사대');
-if(has('g')){rect(471,18,220,158,'#214744');text('차단문 · 위에서 보기',483,41,'#e0ece3');rect(481,60,200,65,'#6a887b');rect(580,127+laneOffset,gateLength+7,wallOffset-laneOffset,'#adc2b2');rect(580,127+wallOffset,gateLength+8,5,'#dfad71');let pivot=pt(580,127),tip=gateTip(m.gate);if(phase==='edit'){let target=gateTip(design.gate*rad);c.setLineDash([4,5]);line(pivot,pt(pivot.x+target.x,pivot.y+target.y),'#ffda80',3);c.setLineDash([]);dot(pt(pivot.x+target.x,pivot.y+target.y),6,'#ffda80')}line(pivot,pt(pivot.x+tip.x,pivot.y+tip.y),'#eebe62',2*gateHalfWidth);dot(pivot,7,m.wall?'#e58443':'#d7e6d8');if(phase==='strain'&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){let t=m.strain;dot(pt(pivot.x+2*Math.sin(t*58),pivot.y),5,'#efaa4a');if(t>.3){for(let i=0;i<3;i++){let k=(t*2+i/3)%1;line(pt(580+i*3,121),pt(576+i*5,121-8*k),'#ffa848',2);dot(pt(578+i*4,116-14*k),2+2*k,'#b9c5bc')}}}if(hints>=2)line(pivot,pt(648,127),'#ade4c2',2);line(pt(604,177),pt(605,deck-24),'#658279',2);if(gateBlocks())rect(604,deck-23,6,23,'#c36d42');else rect(604,deck-4,12,4,'#427d66')}
+if(has('g')){rect(471,18,220,158,'#214744');text('차단문 · 위에서 보기',483,41,'#e0ece3');rect(481,60,200,65,'#6a887b');rect(580,127+laneOffset,gateLength+7,wallOffset-laneOffset,'#adc2b2');rect(580,127+wallOffset,gateLength+8,5,'#dfad71');let pivot=pt(580,127),tip=gateTip(m.gate);if(phase==='edit'){let target=gateTip(design.gate*rad);c.setLineDash([4,5]);line(pivot,pt(pivot.x+target.x,pivot.y+target.y),lock.gate?'#77e5ad':'#ffda80',3);c.setLineDash([]);dot(pt(pivot.x+target.x,pivot.y+target.y),6,lock.gate?'#77e5ad':'#ffda80');if(lock.gate)text('90° ✓',609,53,'#a9ffcf',13)}line(pivot,pt(pivot.x+tip.x,pivot.y+tip.y),'#eebe62',2*gateHalfWidth);dot(pivot,7,m.wall?'#e58443':'#d7e6d8');if(phase==='strain'&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){let t=m.strain;dot(pt(pivot.x+2*Math.sin(t*58),pivot.y),5,'#efaa4a');if(t>.3){for(let i=0;i<3;i++){let k=(t*2+i/3)%1;line(pt(580+i*3,121),pt(576+i*5,121-8*k),'#ffa848',2);dot(pt(578+i*4,116-14*k),2+2*k,'#b9c5bc')}}}if(hints>=2)line(pivot,pt(648,127),'#ade4c2',2);line(pt(604,177),pt(605,deck-24),'#658279',2);if(gateBlocks())rect(604,deck-23,6,23,'#c36d42');else rect(604,deck-4,12,4,'#427d66')}
 if(has('l')&&lock.arm)text('✓',840,322,'#215f47');if(has('l')&&hints>=2&&m.platform)line(m.platform[0],pt(m.platform[0].x+110,m.platform[0].y),'#55a07c',2);
 if(stage===6&&!design.cargo){rect(13,deck-18,24,11,'#bc7f5e');for(const x of [18,32])dot(pt(x,deck-4),4,'#374943')}if(stage===8&&['blocked','strain','fall'].includes(phase)){c.save();c.setLineDash([4,4]);c.lineWidth=3;c.strokeStyle='#cb8735';c.beginPath();c.arc(phase==='strain'?580:m.x,phase==='strain'?127:m.y-8,22,0,2*Math.PI);c.stroke();c.restore()}if(design.cargo){rect(m.x-13,m.y-20,26,14,'#ba673f');dot(pt(m.x-8,m.y-4),4,'#34463d');dot(pt(m.x+8,m.y-4),4,'#34463d')}else worker(c,m.x,m.y,phase==='move'&&m.vx?'walk':phase,m.time)
 }
@@ -162,10 +172,25 @@ const panel=$('toolsPanel');
 function group(title){let f=document.createElement('fieldset'),l=document.createElement('legend');l.textContent=title;f.append(l);panel.append(f);return f}
 function setPart(key,v){
  if(key==='rail'||key==='railB'){const reference=key==='railB'?-44:railRise;const delta=(Math.atan2(v*.65,187)-Math.atan2(reference*.65,187))/rad;lock[key]=aligned(delta,lock[key]);design[key]=lock[key]?reference:v}
- else if(key==='arm'){const p=pose(baseAngle,v);const delta=p?(Math.atan2(300-p[1].y,p[1].x-835)/rad-155):180;lock.arm=Math.abs(v-100)<=4&&aligned(delta,lock.arm);design.arm=lock.arm?100:v}
+ else if(key==='arm'){
+   const p=pose(baseAngle,v);
+   // Compare the actual carriage-platform orientation, not a different linkage arm.
+   const deckAngle=p?Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x)/rad:180;
+   lock.arm=!!p&&Math.abs(v-100)<=6&&aligned(deckAngle,lock.arm);
+   design.arm=lock.arm?100:v;
+ }
+ else if(key==='stopAngle'&&stage===12){
+   lock.stopAngle=aligned(v-113,lock.stopAngle);
+   design.stopAngle=lock.stopAngle?113:v;
+ }
+ else if(key==='gate'&&stage===10){
+   // Small finger inaccuracies become a physically exact 90-degree door position.
+   lock.gate=aligned(v-90,lock.gate);
+   design.gate=lock.gate?90:v;
+ }
  else design[key]=v
 }
-function slider(label,key,min,max){let f=group(label),r=document.createElement('input');r.type='range';r.min=min;r.max=max;r.value=design[key];r.setAttribute('aria-label',label);r.oninput=()=>{setPart(key,+r.value);restart()};f.append(r)}
+function slider(label,key,min,max){let f=group(label),r=document.createElement('input');r.type='range';r.min=min;r.max=max;r.value=design[key];r.setAttribute('aria-label',label);r.oninput=()=>{setPart(key,+r.value);restart()};r.onchange=()=>{r.value=String(design[key])};f.append(r)}
 function brace(i){if(selected===null){selected=i;sync('경첩 '+('ABCDEFGH'[i])+' 선택! 다른 경첩을 이어 보세요.')}else if(i!==selected){finishBrace(selected,i);return}else{selected=null;sync('선택을 취소했어요.')}controls()}
 function controls(){panel.replaceChildren();if(has('r'))slider('아래 레일 D · 높이 조절','rail',-63,54);if(stage===9)slider('둘째 레일 D · 높이 조절','railB',-63,54);if(stage===12)slider('승강교 · 멈출 위치','stopAngle',78,134);if(has('g'))slider('차단문 · 회전 멈춤 위치','gate',0,110);
 if(stage===11){let f=group('설치할 보강 막대');[0,1].forEach(slot=>{let btn=document.createElement('button');btn.textContent='막대 '+(slot+1);btn.setAttribute('aria-pressed',slot===design.activeSlot);btn.onclick=()=>{design.activeSlot=slot;selected=null;controls()};f.append(btn)})}
