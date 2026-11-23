@@ -12,20 +12,21 @@ with sync_playwright() as pw:
   def slider(idx,value):
    page.locator('input[type=range]').nth(idx).evaluate('(r,v)=>{r.value=v;r.dispatchEvent(new Event("input"))}',value)
   def btn(name):
-   page.get_by_role('button',name=name,exact=True).tap()
+   page.get_by_role('button',name=name,exact=True).click()
   def advance():
    if stage==1:page.evaluate("for(let i=0;i<2000&&!['won','jam'].includes(state);i++)step(1/120);draw()")
    else:page.evaluate("for(let i=0;i<3000&&['machine','move'].includes(phase);i++)tick();draw()")
   if stage==6:btn('화물 보내기')
-  else:page.locator('#go' if stage==1 else '#run').tap()
+  else:page.locator('#go' if stage==1 else '#run').click()
   advance();page.locator('canvas').screenshot(path=f'evidence/{stage:02}-failure.png')
-  page.locator('#reset').tap()
+  page.locator('#reset').click()
   if stage==1:
    box=page.locator('canvas').bounding_box()
    def pos(x,y):return (box['x']+x*box['width']/1000,box['y']+y*box['height']/510)
    client=ctx.new_cdp_session(page)
    for typ,coords in [('touchStart',pos(290,428)),('touchMove',pos(290,412)),('touchEnd',None)]:
     client.send('Input.dispatchTouchEvent',{'type':typ,'touchPoints':[dict(zip(['x','y'],coords))] if coords else []})
+   assert page.evaluate('held && d===472'),page.evaluate('[state,d,raw,held]')
   if stage in [2,4,6,8,9]:slider(0,-44 if stage==2 else 18)
   if stage==9:slider(1,-44)
   if stage in [3,4,8,10]:slider(1 if stage in [4,8] else 0,90)
@@ -36,7 +37,8 @@ with sync_playwright() as pw:
   if stage==12:slider(0,113)
   if stage==6:
    btn('가벼운 시험');advance();assert page.evaluate('phase')=='tested';btn('화물 보내기')
-  else:page.locator('#go' if stage==1 else '#run').tap()
+  else:page.locator('#go' if stage==1 else '#run').click()
+  print('start',stage,page.evaluate('[state,d,demo]' if stage==1 else '[phase,design]'),flush=True)
   advance();result=page.evaluate('state' if stage==1 else 'phase');assert result=='won',(stage,result)
   page.locator('canvas').screenshot(path=f'evidence/{stage:02}-arrival.png')
   print(stage,result,flush=True)
