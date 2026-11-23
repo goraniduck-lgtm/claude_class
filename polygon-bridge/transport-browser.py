@@ -4,11 +4,12 @@ Path('evidence').mkdir(exist_ok=True)
 with sync_playwright() as pw:
  b=pw.chromium.launch(args=['--no-sandbox'])
  ctx=b.new_context(viewport={'width':1024,'height':768},has_touch=True,device_scale_factor=2)
- page=ctx.new_page(); errors=[];page.on('pageerror',lambda err: errors.append(str(err)))
+ errors=[]
+ ctx.add_init_script("localStorage.setItem('telescopic-seen','1');for(const k of ['g','l','f'])localStorage.setItem('pb2-intro-'+k,'1')")
  for stage in range(1,13):
+  page=ctx.new_page();page.on('pageerror',lambda err: errors.append(str(err)))
   url='http://127.0.0.1:8765/'+('telescopic-bridge.html' if stage==1 else f'transport.html#{stage}')
-  page.goto(url);page.reload();page.evaluate("localStorage.setItem('telescopic-seen','1');for(const k of ['g','l','f'])localStorage.setItem('pb2-intro-'+k,'1')")
-  page.reload()
+  page.goto(url)
   def slider(idx,value):
    page.locator('input[type=range]').nth(idx).evaluate('(r,v)=>{r.value=v;r.dispatchEvent(new Event("input"))}',value)
   def btn(name):
@@ -18,7 +19,8 @@ with sync_playwright() as pw:
    else:page.evaluate("for(let i=0;i<3000&&['machine','move'].includes(phase);i++)tick();draw()")
   if stage==6:btn('화물 보내기')
   else:page.locator('#go' if stage==1 else '#run').click()
-  advance();page.locator('canvas').screenshot(path=f'evidence/{stage:02}-failure.png')
+  advance();assert page.evaluate("['jam','blocked','fall','strain'].includes("+('state' if stage==1 else 'phase')+")"),stage
+  page.locator('canvas').screenshot(path=f'evidence/{stage:02}-failure.png')
   page.locator('#reset').click()
   if stage==1:
    box=page.locator('canvas').bounding_box()
@@ -41,6 +43,6 @@ with sync_playwright() as pw:
   print('start',stage,page.evaluate('[state,d,demo]' if stage==1 else '[phase,design]'),flush=True)
   advance();result=page.evaluate('state' if stage==1 else 'phase');assert result=='won',(stage,result)
   page.locator('canvas').screenshot(path=f'evidence/{stage:02}-arrival.png')
-  print(stage,result,flush=True)
+  print(stage,result,flush=True);page.close()
  assert not errors,errors
  b.close()
