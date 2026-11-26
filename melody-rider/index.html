@@ -32,6 +32,22 @@ html,body{overscroll-behavior-x:none;overscroll-behavior-y:contain}
  -webkit-tap-highlight-color:transparent;
 }
 .stage canvas,.mini-map canvas,.art-board canvas{-webkit-user-drag:none}
+
+/* 감상 모드: 브라우저 전체화면을 지원하지 않는 태블릿에서도 앱 내부 화면을 최대화합니다. */
+body.cinema-active{overflow:hidden}
+.stage-card.is-cinema{position:fixed!important;inset:0!important;z-index:9999;width:100vw!important;height:100dvh!important;max-height:none!important;max-width:none!important;border:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column;background:#fff}
+.stage-card.is-cinema .canvas-toolbar{display:none!important}
+.stage-card.is-cinema .stage{flex:1 1 auto;height:auto!important;min-height:0!important;max-height:none!important}
+.stage-card.is-cinema .stage>canvas{pointer-events:none;cursor:default}
+.stage-card.is-cinema .stage-overlay{display:none}
+.stage-card.is-cinema .playbar{flex:0 0 auto;z-index:6;min-height:56px;padding-bottom:max(9px,env(safe-area-inset-bottom));box-shadow:0 -4px 15px #142b401a}
+.cinema-actions{display:none;position:absolute;left:max(10px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));z-index:6;gap:6px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 185px);padding:5px;background:#ffffffec;border:1px solid #dce6f0;border-radius:12px;box-shadow:0 5px 18px #344e7022}
+.stage-card.is-cinema .cinema-actions{display:flex}
+.cinema-actions button{border:0;border-radius:9px;min-width:44px;min-height:44px;padding:0 10px;background:#eef5f8;color:#3b5b74;font-size:14px;font-weight:850;touch-action:manipulation}
+.cinema-actions .cinema-close{background:#263b52;color:#fff}
+.cinema-actions .cinema-zoom{font-size:12px;font-weight:850;min-width:38px;text-align:center}
+@media(max-width:750px){.cinema-actions{max-width:calc(100% - 176px)}.cinema-actions button{padding:0 8px;font-size:12px}}
+@media(max-width:450px){.cinema-actions{max-width:calc(100% - 147px);gap:3px;padding:3px}.cinema-actions button{min-width:38px;min-height:40px;padding:0 6px;font-size:11px}.cinema-actions .cinema-zoom{min-width:30px}}
 </style>
 </head>
 <body>
@@ -55,9 +71,9 @@ html,body{overscroll-behavior-x:none;overscroll-behavior-y:contain}
       <button type="button" class="tool" id="toolErase" aria-pressed="false"><span class="ic">⌫</span> 지우기</button>
       <button type="button" class="tool" id="toolPan" aria-pressed="false"><span class="ic">✋</span> 화면 이동</button>
       <span class="toolbar-spacer"></span>
-      <button type="button" class="tool" id="zoomOut" aria-label="화면 축소">−</button><span class="zoom-lbl" id="zoomLabel">100%</span><button type="button" class="tool" id="zoomIn" aria-label="화면 확대">＋</button>
+      <button type="button" class="tool" id="zoomOut" aria-label="화면 축소">−</button><span class="zoom-lbl" id="zoomLabel">100%</span><button type="button" class="tool" id="zoomIn" aria-label="화면 확대">＋</button><button type="button" class="tool" id="cinemaModeBtn" aria-label="전체화면 감상 모드 열기"><span class="ic">⛶</span> 전체화면 감상</button>
     </div>
-    <div class="stage" id="stage"><canvas id="canvas" aria-label="터치 또는 마우스로 선을 그리는 공간"></canvas><span class="stage-overlay" id="stageStatus">✎ 선을 그려 길을 이어 보세요</span><div class="mini-map" aria-label="전체 코스 미니맵"><div class="mini-head"><span>◈ 미니맵</span><small>눌러서 화면 이동</small></div><canvas id="miniCanvas" aria-label="미니맵에서 이동할 곳을 선택하세요" tabindex="0" role="button"></canvas><button type="button" id="followRiderBtn" class="mini-follow is-following" aria-pressed="true">◎ 라이더 따라가는 중</button></div><div class="message" id="message" aria-live="polite"></div></div>
+    <div class="stage" id="stage"><canvas id="canvas" aria-label="터치 또는 마우스로 선을 그리는 공간"></canvas><span class="stage-overlay" id="stageStatus">✎ 선을 그려 길을 이어 보세요</span><div class="cinema-actions" aria-label="전체화면 감상 조작"><button type="button" id="cinemaZoomOut" aria-label="감상 화면 축소">−</button><span id="cinemaZoomLabel" class="cinema-zoom">100%</span><button type="button" id="cinemaZoomIn" aria-label="감상 화면 확대">＋</button><button type="button" class="cinema-close" id="cinemaExitBtn">⛶ 종료</button></div><div class="mini-map" aria-label="전체 코스 미니맵"><div class="mini-head"><span>◈ 미니맵</span><small>눌러서 화면 이동</small></div><canvas id="miniCanvas" aria-label="미니맵에서 이동할 곳을 선택하세요" tabindex="0" role="button"></canvas><button type="button" id="followRiderBtn" class="mini-follow is-following" aria-pressed="true">◎ 라이더 따라가는 중</button></div><div class="message" id="message" aria-live="polite"></div></div>
     <div class="playbar">
       <button type="button" class="play" id="playBtn">▶ 함께 재생</button>
       <button type="button" class="restart" id="listenBtn">♫ 음악만 듣기</button>
@@ -184,13 +200,74 @@ function resetMusic(){musicTime=0;beatPlayed=-1;if(musicMode==='url'||musicMode=
 function refreshButtons(){$('playBtn').textContent=playing&&rideEnabled?'Ⅱ 함께 멈춤':'▶ 함께 재생';$('listenBtn').textContent=playing&&!rideEnabled?'Ⅱ 음악 멈춤':'♫ 음악만 듣기';}
 function stop(playbackReset=false){playing=false;audio.pause();refreshButtons();if(playbackReset){resetRider();resetMusic();}updateStatus();}
 function restart(){stop(true);camera.x=0;camera.y=-56;showMessage('출발 준비 완료!');}
+const stageCard=document.querySelector('.stage-card');
+let cinemaMode=false;
+// 요청 시 화면을 최대화한 뒤, 지원되는 브라우저에서는 시스템 전체화면도 시도합니다.
+function resizeCinemaStage(){
+ sizeCanvas();
+ requestAnimationFrame(sizeCanvas);
+}
+function enterCinema(){
+ if(cinemaMode||pointer||artPointer)return;
+ cinemaMode=true;
+ stageCard.classList.add('is-cinema');
+ document.body.classList.add('cinema-active');
+ resizeCinemaStage();
+ // Android Chrome 등에서는 실제 전체화면, 제한된 환경에서는 CSS 전체화면 대체.
+ try{
+  if(stageCard.requestFullscreen&&!document.fullscreenElement){
+   const request=stageCard.requestFullscreen({navigationUI:'hide'});
+   if(request&&typeof request.catch==='function')request.catch(()=>{});
+  }
+ }catch(error){/* 브라우저 제한 시 화면 내부 최대화 유지 */}
+}
+function exitCinema(){
+ if(!cinemaMode)return;
+ cinemaMode=false;
+ stageCard.classList.remove('is-cinema');
+ document.body.classList.remove('cinema-active');
+ if(document.fullscreenElement===stageCard&&document.exitFullscreen){
+  try{const request=document.exitFullscreen();if(request?.catch)request.catch(()=>{});}catch(error){}
+ }
+ resizeCinemaStage();
+}
+document.addEventListener('fullscreenchange',()=>{
+ if(cinemaMode&&document.fullscreenElement!==stageCard)exitCinema();
+ else resizeCinemaStage();
+});
+window.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&cinemaMode){e.preventDefault();exitCinema();}
+});
+function tabletButton(id,action){
+ const btn=$(id);let lastTouch=-1e6;
+ btn.addEventListener('pointerup',e=>{
+  if(e.pointerType!=='touch'&&e.pointerType!=='pen')return;
+  if(e.cancelable)e.preventDefault();
+  lastTouch=performance.now();action();
+ });
+ btn.addEventListener('click',()=>{
+  if(performance.now()-lastTouch<700)return;
+  action();
+ });
+}
 function setMode(m){if(pointer)return;mode=m;['Draw','Erase','Pan'].forEach(n=>{const b=$('tool'+n);const on=m===n.toLowerCase();b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);});stage.classList.toggle('is-pan',m==='pan');stage.classList.toggle('is-erase',m==='erase');updateStatus();}
 function updateStatus(){const text=death?'↻ 처음부터를 누르면 다시 탈 수 있어요':playing?(rideEnabled?'♪ 음악과 함께 달리는 중!':'♫ 음악을 들으며 자유롭게 그려 보세요'):mode==='draw'?'✎ 손가락으로 선을 이어 보세요':mode==='erase'?'⌫ 지우고 싶은 선을 쓸어 보세요':'✋ 화면을 드래그해 이동하세요';$('stageStatus').textContent=text;}
 function sizeCanvas(){minimapDirty=true;const r=stage.getBoundingClientRect();width=Math.max(100,r.width);height=Math.max(100,r.height);scale=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);}
 function w2s(x,y){return{x:(x-camera.x)*camera.zoom,y:(y-camera.y)*camera.zoom};}
 function s2w(x,y){return{x:x/camera.zoom+camera.x,y:y/camera.zoom+camera.y};}
 function eventPoint(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
-function setZoom(z){if(pointer)return;minimapDirty=true;z=clamp(z,.45,2.1);const mid=s2w(width/2,height/2);camera.zoom=z;camera.x=mid.x-width/(2*z);camera.y=mid.y-height/(2*z);$('zoomLabel').textContent=Math.round(100*z)+'%';}
+const MIN_ZOOM=.18,MAX_ZOOM=2.1;
+function setZoom(z){
+ if(pointer)return;
+ minimapDirty=true;
+ z=clamp(z,MIN_ZOOM,MAX_ZOOM);
+ const mid=s2w(width/2,height/2);
+ camera.zoom=z;
+ camera.x=mid.x-width/(2*z);camera.y=mid.y-height/(2*z);
+ const label=Math.round(100*z)+'%';
+ $('zoomLabel').textContent=label;
+ $('cinemaZoomLabel').textContent=label;
+}
 function nearest(line,x,y){let best=Infinity;for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i],dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;if(len2<.01)continue;const t=clamp(((x-a.x)*dx+(y-a.y)*dy)/len2,0,1);const d=Math.hypot(x-a.x-dx*t,y-a.y-dy*t);if(d<best)best=d;}return best;}
 function eraseAt(x,y){const idx=tracks.findIndex(line=>nearest(line,x,y)<19/camera.zoom);if(idx>=0){tracks.splice(idx,1);persist();return true;}return false;}
 // Only one pointer may create a stroke. Extra fingers must never change the active line.
@@ -616,7 +693,11 @@ function paint(){ctx.setTransform(scale,0,0,scale,0,0);drawBackground();ctx.save
 function frame(t){if(!lastTime)lastTime=t;const dt=clamp((t-lastTime)/1000,0,.04);lastTime=t;now=t;autoPanDrawing(dt);if(playing){if(rideEnabled&&!death){const n=Math.ceil(dt/(1/120));for(let i=0;i<n;i++)simulate(dt/n);}handleMusic(dt);if(rideEnabled&&follow&&!pointer&&!death){const targetX=rider.x-width*.37/camera.zoom;const targetY=rider.y-height*.57/camera.zoom;camera.x+=(targetX-camera.x)*.075;camera.y+=(targetY-camera.y)*.075;}}
  if(shownMessage&&t>shownMessage){$('message').classList.remove('show');shownMessage=0;}paint();requestAnimationFrame(frame);}
 $('toolDraw').onclick=()=>setMode('draw');$('toolErase').onclick=()=>setMode('erase');$('toolPan').onclick=()=>setMode('pan');
-$('zoomIn').onclick=()=>setZoom(camera.zoom*1.2);$('zoomOut').onclick=()=>setZoom(camera.zoom/1.2);
+$('zoomIn').onclick=()=>setZoom(camera.zoom*1.28);$('zoomOut').onclick=()=>setZoom(camera.zoom/1.28);
+tabletButton('cinemaModeBtn',enterCinema);
+tabletButton('cinemaExitBtn',exitCinema);
+tabletButton('cinemaZoomOut',()=>setZoom(camera.zoom/1.28));
+tabletButton('cinemaZoomIn',()=>setZoom(camera.zoom*1.28));
 $('playBtn').onclick=()=>toggle(true);$('listenBtn').onclick=()=>toggle(false);$('retryBtn').onclick=restart;
 $('undoBtn').onclick=()=>{if(history.length){tracks=history.pop();persist();showMessage('마지막 작업을 되돌렸어요');}else showMessage('되돌릴 작업이 없어요');};
 $('sampleBtn').onclick=()=>{checkpoint();tracks=sample();persist();restart();showMessage('예시 코스를 불러왔어요');};
